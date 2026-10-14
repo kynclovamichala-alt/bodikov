@@ -346,7 +346,7 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-14.3';
+const APP_VERSION='2026-10-14.4';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -734,13 +734,21 @@ function taskCard(t){
   else body=`<span class="state">✅ Splněno. Zítra znovu!</span>`;
   return `<article class="task ${t.status}" id="t-${t.id}"><div class="head"><button class="ic" data-act="speak" data-t="${esc(t.title)}" aria-label="Přečíst úkol">${esc(t.icon)}</button><h3>${esc(t.title)}</h3><span class="pill">+${t.points} ⭐</span></div>${body}</article>`;
 }
+const ITEM_GO={mirror4:['mirror',{mode:'4'}],kaleido:['mirror',{mode:'12'}],rainbow:['mirror',{rainbow:true}],glitter:['mirror',{glitter:true}],
+  mandala6:['mandala',{mode:'m6'}],mandala8:['mandala',{mode:'m8'}],pack_space:['color',{pic:'rocket'}],pack_animals:['color',{pic:'cat'}],
+  tetris_neon:['tetris'],cars_night:['cars'],build_gold:['build']};
+function openItem(id){const t=ITEM_GO[id];if(!t)return;const[view,o={}]=t;
+  if(view==='mirror'||view==='mandala')M={...(M||{mode:'2',color:'#FF5C93',w:12,rainbow:false,glitter:false}),...(o.mode?{mode:o.mode}:{}),...(o.rainbow?{rainbow:true}:{}),...(o.glitter?{glitter:true}:{})};
+  if(view==='color')go('color',{pic:o.pic});else go(view)}
+function unlockedCards(){const id=V.kid,own=itemsFor(id).filter(i=>has(id,i.id));if(!own.length)return '';
+  return `<h2 style="font-size:1.4rem">🎁 Tvoje odemčené</h2>${own.map(i=>`<button class="gcard" data-act="openItem" data-item="${i.id}"><span class="ic" style="background:var(--sun-soft)">${i.icon}</span><span class="t"><h2>${esc(i.name)}</h2><span class="muted sub">${esc(i.desc)}</span><span class="pill">Hrát ▶</span></span></button>`).join('')}`}
 function vGames(){
   if(kidOf(V.kid).adult)return `${topbar('Hry')}
   <button class="gcard" data-act="go" data-to="tetris"><span class="ic" style="background:var(--bea-soft)">🧱</span><span class="t"><h2>Tetris</h2><span class="muted">Skládej řady, ať nic nepřeteče.</span><span class="pill">+2 ⭐ od 3 řad</span></span></button>
   <button class="gcard" data-act="go" data-to="cars"><span class="ic" style="background:var(--jirka-soft)">🏎️</span><span class="t"><h2>Autíčka</h2><span class="muted">Uhýbej autům na silnici.</span><span class="pill">+2 ⭐ od 500 m</span></span></button>
   <button class="gcard" data-act="go" data-to="build"><span class="ic" style="background:var(--sun-soft)">🏗️</span><span class="t"><h2>Stavitel</h2><span class="muted">Postav co nejvyšší věž.</span><span class="pill">+2 ⭐ od 8 pater</span></span></button>
-  <p class="note">Za hry je denně nejvýš ${S.settings.gameCap} ⭐. Nejvíc hvězdiček je za úkoly.</p>`;
-  return `${topbar('Hry')}
+  ${unlockedCards()}<p class="note">Za hry je denně nejvýš ${S.settings.gameCap} ⭐. Nejvíc hvězdiček je za úkoly.</p>`;
+  return `${topbar('Hry')}${unlockedCards()}
   <button class="gcard" data-act="go" data-to="mirror"><span class="ic" style="background:var(--bea-soft)">🦋</span><span class="t"><h2>Zrcadlové malování</h2><span class="muted sub">Kresli a obrázek se zrcadlí.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
   <button class="gcard" data-act="go" data-to="mandala"><span class="ic" style="background:var(--mint-soft)">🌸</span><span class="t"><h2>Mandala</h2><span class="muted sub">Kreslíš a kreslí se to do 4 stran.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
   <button class="gcard" data-act="go" data-to="colorPick"><span class="ic" style="background:var(--lea-soft)">🖍️</span><span class="t"><h2>Vybarvovánky</h2><span class="muted sub">Ťukni na místo a vybarví se.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
@@ -749,7 +757,7 @@ function vGames(){
 }
 function vMirror(){
   const k=V.kid,mand=V.name==='mandala';
-  const modes=mand?[['m4','4 strany',null],['m6','6 stran','mandala6'],['m8','8 stran','mandala8']]:[['2','2 strany',null],['4','4 strany','mirror4'],['12','Vločka','kaleido']];
+  const modes=mand?[['m4','4 strany',null],['m6','6 stran','mandala6'],['m8','8 stran','mandala8']]:[['2','2 strany',null],['4','4 strany','mirror4'],['12','Kaleidoskop','kaleido']];
   return `${topbar(mand?'Mandala':'Zrcadlové malování')}
   <div class="canvaswrap ${mand?'circ':''}" id="cvwrap"><canvas id="cv" aria-label="Plocha na malování"></canvas><svg id="guides" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
   <div class="tools">
@@ -775,7 +783,7 @@ function vShop(){
   const id=V.kid,pts=pointsOf(id);
   return `${topbar('Odemknout')}<p class="muted sub">${kidOf(id).adult?'Za hvězdičky si odemkneš nové vzhledy her.':'Za hvězdičky si odemkneš lepší malování a nové obrázky.'}</p>${itemsFor(id).map(i=>{
     const own=has(id,i.id),price=S.settings.prices[id][i.id],blocked=i.needs&&!has(id,i.needs);let act;
-    if(own)act=`<span class="state">✅ Máš odemčeno</span>`;
+    if(own)act=`<button class="btn mint" data-act="openItem" data-item="${i.id}">Hrát ▶</button>`;
     else if(blocked)act=`<span class="state">🔒 Nejdřív odemkni: ${esc(itemById(i.needs).name)}</span>`;
     else if(pts>=price)act=`<button class="btn" data-act="buy" data-item="${i.id}">Odemknout za ${price} ⭐</button>`;
     else act=`<div class="bar"><i style="width:${pts/price*100}%"></i></div><span class="muted">Chybí ještě ${price-pts} ⭐</span>`;
@@ -1121,7 +1129,8 @@ const handlers={
     document.body.appendChild(o);
     o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-no]')){o.remove();return}
       if(e.target.closest('[data-yes]')){o.remove();if(pointsOf(id)<price||has(id,it.id))return;addLog(id,-price,'unlock',it.name,true);put(`kids/${id}/unlocked/${it.id}`,true);render();
-        celebrate({title:'Odemčeno!',sub:it.name,speak:'Odemčeno! Jdi to vyzkoušet.',btn:'Vyzkoušet'})}})},
+        celebrate({title:'Odemčeno!',sub:it.name,speak:'Odemčeno! Jdi to vyzkoušet.',btn:'Vyzkoušet',onClose:()=>openItem(it.id)})}})},
+  openItem:b=>openItem(b.dataset.item),
   // drawing
   mode:b=>{M.mode=b.dataset.m;syncMirrorUI();drawGuides()},
   col:b=>{M.color=b.dataset.c;M.rainbow=false;syncMirrorUI()},
