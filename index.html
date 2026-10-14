@@ -308,13 +308,31 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 .sync i{width:10px;height:10px;border-radius:50%;background:var(--line)}
 .sync.online i{background:var(--mint)} .sync.offline i{background:var(--flame)} .sync.error i{background:#E0413A}
 .codebox{font-family:var(--display);font-size:1.1rem;font-weight:800;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;word-break:break-all;user-select:all}
+
+/* Jirka */
+:root{--jirka:#2F7DF6;--jirka-soft:#DCE9FF}
+.k-jirka{background:var(--jirka)}
+.kidtag.jirka{background:var(--jirka)}
+.kids.three{grid-template-columns:repeat(3,1fr);gap:10px}
+.kids.three .kidcard{padding:14px 4px 12px}
+.kids.three .ava{width:72px;height:72px;font-size:2.8rem}
+.kids.three .nm{font-size:1.5rem}
+.gamewrap{position:relative;align-self:center;border-radius:var(--r-md);overflow:hidden;box-shadow:0 6px 0 rgba(43,35,80,.18);touch-action:none;max-width:100%}
+.gamewrap canvas{display:block;touch-action:none}
+.gover{position:absolute;inset:0;background:rgba(20,18,45,.78);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:16px}
+.gover h2{font-size:2rem}
+.ctrls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ctrls.two{grid-template-columns:1fr 1fr}
+.ctl{background:var(--card);border-radius:18px;height:64px;font-size:1.8rem;box-shadow:var(--shadow);font-weight:900}
+.ctl:active{transform:translateY(3px);box-shadow:none}
+.gover[hidden]{display:none}
 </style>
 </head><body><div id="app"></div>
 <script>
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-14.1';
+const APP_VERSION='2026-10-14.2';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -332,7 +350,7 @@ const pick=a=>a[Math.random()*a.length|0];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-const KIDS=['lea','bea'];
+const KIDS=['lea','bea','jirka'];
 
 /* ================= device (this phone only) ================= */
 const LKEY='bodikov-v2',V1KEY='bodikov-v1',DKEY='bodikov-device';
@@ -342,20 +360,23 @@ const hm=/rodina=([a-z0-9]{12,40})/i.exec(location.hash||'');
 if(hm){DEV.family=hm[1].toLowerCase();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
 const saveDev=()=>ls.set(DKEY,JSON.stringify(DEV));saveDev();
 const role=()=>SYNC?(DEV.family&&DEV.role)||null:'shared';
+const isKidRole=r=>['lea','bea','jirka'].includes(r);
 
 /* ================= shared state ================= */
 function defaults(){const d=today(),t=Date.now();return{
   v:2,
   settings:{pin:'1234',gameCap:20,learnCap:15,
     prices:{lea:{mirror4:20,rainbow:15,glitter:25,kaleido:40,mandala6:20,mandala8:35,pack_space:25,pack_animals:25},
-            bea:{mirror4:40,rainbow:30,glitter:50,kaleido:80,mandala6:40,mandala8:70,pack_space:50,pack_animals:50}},
-    morning:{enabled:true,start:'06:30',end:'08:09',bonus:5,auto:false,items:[
+            bea:{mirror4:40,rainbow:30,glitter:50,kaleido:80,mandala6:40,mandala8:70,pack_space:50,pack_animals:50},
+            jirka:{tetris_neon:30,cars_night:30,build_gold:30}},
+    morning:{enabled:true,start:'06:30',end:'08:09',bonus:5,auto:false,kids:{lea:true,bea:true,jirka:false},items:[
       {id:'eat',title:'Najíst se',icon:'🥣',points:5},{id:'dress',title:'Obléct se',icon:'👕',points:5},
       {id:'teeth',title:'Vyčistit zuby',icon:'🪥',points:5},{id:'hair',title:'Učesat se',icon:'💇‍♀️',points:5}]},
     team:{name:'Rodinný filmový večer',icon:'🍿',target:150,since:d}},
   kids:{
     lea:{name:'Lea',voc:'Leo',avatar:'🦄',little:true,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:40},
-    bea:{name:'Bea',voc:'Beo',avatar:'🦊',little:false,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:80}},
+    bea:{name:'Bea',voc:'Beo',avatar:'🦊',little:false,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:80},
+    jirka:{name:'Jirka',voc:'Jirko',avatar:'🐻',little:false,adult:true,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:60}},
   tasks:{
     't-socks':{id:'t-socks',kid:'lea',title:'Uklidit ponožky',icon:'🧦',points:10,repeat:'once',status:'open',minutes:5,steps:[],ts:t},
     't-bed':{id:'t-bed',kid:'bea',title:'Ustlat postel',icon:'🛏️',points:5,repeat:'daily',status:'open',minutes:5,steps:[],ts:t+1},
@@ -369,7 +390,7 @@ function normalize(o){
   const D=defaults();if(!o||typeof o!=='object')o=D;
   o.v=2;o.settings=Object.assign({},D.settings,o.settings||{});const st=o.settings;
   st.prices=st.prices||{};KIDS.forEach(k=>st.prices[k]=Object.assign({},D.settings.prices[k],st.prices[k]||{}));
-  st.morning=Object.assign({},D.settings.morning,st.morning||{});
+  st.morning=Object.assign({},D.settings.morning,st.morning||{});st.morning.kids=Object.assign({},D.settings.morning.kids,st.morning.kids||{});
   if(!Array.isArray(st.morning.items))st.morning.items=Object.values(st.morning.items||{});
   if(!st.morning.items.length)st.morning.items=D.settings.morning.items;
   st.team=Object.assign({},D.settings.team,st.team||{});
@@ -437,7 +458,7 @@ function maintenance(){
     put(`tasks/${t.id}`,{...t,status:'open',fast:false,timerEnd:null,steps:(t.steps||[]).map(s=>({...s,d:false}))})});
   const m=S.settings.morning;
   KIDS.forEach(kid=>m.items.forEach((it,i)=>{const id=`m-${it.id}-${kid}`,t=S.tasks[id];
-    if(!m.enabled){if(t&&t.status!=='pending')put(`tasks/${id}`,null);return}
+    if(!m.enabled||m.kids[kid]===false){if(t&&t.status!=='pending')put(`tasks/${id}`,null);return}
     if(!t)put(`tasks/${id}`,{id,kid,morning:true,mo:i,repeat:'daily',status:'open',minutes:0,steps:[],title:it.title,icon:it.icon,points:it.points,ts:0});
     else if(t.title!==it.title||t.icon!==it.icon||t.points!==it.points||t.mo!==i)put(`tasks/${id}`,{...t,title:it.title,icon:it.icon,points:it.points,mo:i});
   }));
@@ -483,8 +504,12 @@ const ITEMS=[
   {id:'mandala6',icon:'🌸',name:'Mandala na 6 stran',desc:'Mandala jako květina se šesti lístky.'},
   {id:'mandala8',icon:'🌼',name:'Mandala na 8 stran',desc:'Nejbohatší mandala s osmi stranami.',needs:'mandala6'},
   {id:'pack_space',icon:'🚀',name:'Vybarvovánky: Vesmír',desc:'Raketa a planeta s prstýnkem.'},
-  {id:'pack_animals',icon:'🐱',name:'Vybarvovánky: Zvířátka',desc:'Kočička a motýlek.'}
+  {id:'pack_animals',icon:'🐱',name:'Vybarvovánky: Zvířátka',desc:'Kočička a motýlek.'},
+  {id:'tetris_neon',aud:'adult',icon:'🟪',name:'Tetris: neonové kostky',desc:'Svítící kostky na tmavém pozadí.'},
+  {id:'cars_night',aud:'adult',icon:'🌃',name:'Autíčka: noční jízda',desc:'Závodíš v noci se světly.'},
+  {id:'build_gold',aud:'adult',icon:'🏆',name:'Stavitel: zlaté bloky',desc:'Stavíš ze zlata.'}
 ];
+const itemsFor=kid=>ITEMS.filter(i=>(i.aud==='adult')===!!kidOf(kid).adult);
 const itemById=id=>ITEMS.find(i=>i.id===id);
 const TASK_ICONS=['🧦','🧸','🪥','🛏️','🧹','🍽️','📚','✏️','🎒','👕','🗑️','🌱','🐶','🛁','🧺','🥦','🎹','🚲','💤','🦷','🧥','👟','🥛','⭐'];
 
@@ -604,7 +629,7 @@ function celebrate({title,stars,sub,speak,mood='happy',btn='Jupí!',onClose}){
 function refreshJar(){const j=$('.jar span');if(j&&V.kid){j.textContent=pointsOf(V.kid);const p=j.parentElement;p.classList.remove('bump');void p.offsetWidth;p.classList.add('bump')}}
 
 /* ================= navigation ================= */
-function rootView(){const r=role();if(!r)return{name:'setup'};if(r==='lea'||r==='bea')return{name:'home',kid:r};if(r==='parent')return{name:'parent'};return{name:'picker'}}
+function rootView(){const r=role();if(!r)return{name:'setup'};if(isKidRole(r))return{name:'home',kid:r};if(r==='parent')return{name:'parent'};return{name:'picker'}}
 let V=rootView();const stack=[];let tick=null;
 function go(name,extra={}){stack.push(V);V={...V,...extra,name};render();scrollTo(0,0)}
 function back(){V=stack.pop()||rootView();render();maybeReload()}
@@ -622,16 +647,17 @@ function vSetup(){
     <div class="rolegrid">
       <button class="rolebtn" data-act="setRole" data-r="lea"><span class="ic">${kidOf('lea').avatar}</span>${esc(kidOf('lea').name)}</button>
       <button class="rolebtn" data-act="setRole" data-r="bea"><span class="ic">${kidOf('bea').avatar}</span>${esc(kidOf('bea').name)}</button>
+      <button class="rolebtn" data-act="setRole" data-r="jirka"><span class="ic">${kidOf('jirka').avatar}</span>${esc(kidOf('jirka').name)}</button>
       <button class="rolebtn" data-act="setRole" data-r="parent"><span class="ic">🔒</span>Rodiče</button>
       <button class="rolebtn" data-act="setRole" data-r="shared"><span class="ic">👨‍👩‍👧‍👧</span>Společný</button>
-    </div><p class="note center">Telefon holky otevře rovnou její hvězdičky a úkoly. Dá se to později změnit v rodičovské části.</p>`;
+    </div><p class="note center">Osobní telefon otevře rovnou vlastní hvězdičky a úkoly. Dá se to později změnit v rodičovské části.</p>`;
 }
 
 /* ================= screens: kids ================= */
 function vPicker(){
   const pend=pendingCount(),tp=teamPts(),pct=Math.min(100,Math.round(tp/S.settings.team.target*100));
   return `<div class="hello">${bodik(140)}<p class="bubble">Ahoj! Kdo si jde hrát?</p></div>
-  <div class="kids">${KIDS.map(id=>{const k=kidOf(id);return `<button class="kidcard k-${id}" data-act="pick" data-id="${id}"><span class="ava">${k.avatar}</span><span class="nm">${esc(k.name)}</span><span class="pts">⭐ ${pointsOf(id)}</span></button>`}).join('')}</div>
+  <div class="kids three">${KIDS.map(id=>{const k=kidOf(id);return `<button class="kidcard k-${id}" data-act="pick" data-id="${id}"><span class="ava">${k.avatar}</span><span class="nm">${esc(k.name)}</span><span class="pts">⭐ ${pointsOf(id)}</span></button>`}).join('')}</div>
   <div class="card teammini"><span class="ic">${esc(S.settings.team.icon)}</span><div class="t"><b>Společně na: ${esc(S.settings.team.name)}</b><div class="bar"><i style="width:${pct}%"></i></div><span class="muted">${tp} z ${S.settings.team.target} ⭐</span></div></div>
   <button class="parentbtn" data-act="parentLogin">${role()==='parent'?'Pro rodiče':'🔒 Pro rodiče'} ${pend?`<span class="badge">${pend}</span>`:''}</button>
   ${SYNC?`<div class="center">${syncBadge()}</div>`:''}`;
@@ -642,7 +668,7 @@ function vHome(){
   const open=all.filter(t=>t.status==='open'&&(!t.morning||w==='in')),next=open[0];
   const ms=all.filter(t=>t.morning),mOpen=ms.filter(t=>t.status==='open');
   const pend=pendingPts(id),s=streakOf(k),pts=pointsOf(id);
-  const locked=ITEMS.filter(i=>!has(id,i.id)&&(!i.needs||has(id,i.needs))).sort((a,b)=>S.settings.prices[id][a.id]-S.settings.prices[id][b.id]);
+  const locked=itemsFor(id).filter(i=>!has(id,i.id)&&(!i.needs||has(id,i.needs))).sort((a,b)=>S.settings.prices[id][a.id]-S.settings.prices[id][b.id]);
   const goal=locked[0],gp=goal?S.settings.prices[id][goal.id]:0;
   const wk=weekPts(id),wpct=Math.min(100,Math.round(wk/k.weekTarget*100));
   const lp=sumLog(l=>l.kid===id&&l.type==='learn'&&l.d===today());
@@ -658,7 +684,7 @@ function vHome(){
   <div class="tiles">
     <button class="tile" data-act="goTasks"><span class="ic">✅</span><span class="nm">Úkoly</span>${open.length?`<span class="badge">${open.length}</span>`:''}</button>
     <button class="tile" data-act="go" data-to="games"><span class="ic">🎨</span><span class="nm">Hry</span></button>
-    <button class="tile wide" data-act="go" data-to="learn"><span class="ic">${k.little?'🍎':'📐'}</span><span><span class="nm">Učení</span><br><span class="sub">${k.little?'Počítání do 5':'Body a čáry'}${lp?` · dnes +${lp} ⭐`:''}</span></span></button>
+    <button class="tile wide" data-act="go" data-to="learn"><span class="ic">${k.little?'🍎':k.adult?'🧘':'📐'}</span><span><span class="nm">Učení</span><br><span class="sub">${k.little?'Počítání do 5':k.adult?'Emoce a klid':'Body a čáry'}${lp?` · dnes +${lp} ⭐`:''}</span></span></button>
     <button class="tile" data-act="go" data-to="race"><span class="ic">🏁</span><span class="nm">Závod</span><span class="sub muted">${wpct} %</span></button>
     <button class="tile" data-act="go" data-to="shop"><span class="ic">🎁</span><span class="nm">Odemknout</span></button>
   </div>
@@ -695,6 +721,11 @@ function taskCard(t){
   return `<article class="task ${t.status}" id="t-${t.id}"><div class="head"><button class="ic" data-act="speak" data-t="${esc(t.title)}" aria-label="Přečíst úkol">${esc(t.icon)}</button><h3>${esc(t.title)}</h3><span class="pill">+${t.points} ⭐</span></div>${body}</article>`;
 }
 function vGames(){
+  if(kidOf(V.kid).adult)return `${topbar('Hry')}
+  <button class="gcard" data-act="go" data-to="tetris"><span class="ic" style="background:var(--bea-soft)">🧱</span><span class="t"><h2>Tetris</h2><span class="muted">Skládej řady, ať nic nepřeteče.</span><span class="pill">+2 ⭐ od 3 řad</span></span></button>
+  <button class="gcard" data-act="go" data-to="cars"><span class="ic" style="background:var(--jirka-soft)">🏎️</span><span class="t"><h2>Autíčka</h2><span class="muted">Uhýbej autům na silnici.</span><span class="pill">+2 ⭐ od 500 m</span></span></button>
+  <button class="gcard" data-act="go" data-to="build"><span class="ic" style="background:var(--sun-soft)">🏗️</span><span class="t"><h2>Stavitel</h2><span class="muted">Postav co nejvyšší věž.</span><span class="pill">+2 ⭐ od 8 pater</span></span></button>
+  <p class="note">Za hry je denně nejvýš ${S.settings.gameCap} ⭐. Nejvíc hvězdiček je za úkoly.</p>`;
   return `${topbar('Hry')}
   <button class="gcard" data-act="go" data-to="mirror"><span class="ic" style="background:var(--bea-soft)">🦋</span><span class="t"><h2>Zrcadlové malování</h2><span class="muted sub">Kresli a obrázek se zrcadlí.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
   <button class="gcard" data-act="go" data-to="mandala"><span class="ic" style="background:var(--mint-soft)">🌸</span><span class="t"><h2>Mandala</h2><span class="muted sub">Kreslíš a kreslí se to do 4 stran.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
@@ -728,7 +759,7 @@ function vColor(){
 }
 function vShop(){
   const id=V.kid,pts=pointsOf(id);
-  return `${topbar('Odemknout')}<p class="muted sub">Za hvězdičky si odemkneš lepší malování a nové obrázky.</p>${ITEMS.map(i=>{
+  return `${topbar('Odemknout')}<p class="muted sub">${kidOf(id).adult?'Za hvězdičky si odemkneš nové vzhledy her.':'Za hvězdičky si odemkneš lepší malování a nové obrázky.'}</p>${itemsFor(id).map(i=>{
     const own=has(id,i.id),price=S.settings.prices[id][i.id],blocked=i.needs&&!has(id,i.needs);let act;
     if(own)act=`<span class="state">✅ Máš odemčeno</span>`;
     else if(blocked)act=`<span class="state">🔒 Nejdřív odemkni: ${esc(itemById(i.needs).name)}</span>`;
@@ -743,8 +774,8 @@ function vRace(){
       <span class="muted">${p} z ${k.weekTarget} ⭐ za úkoly tento týden</span></div>`}).join('');
   const T=S.settings.team,tp=teamPts(),pct=Math.min(100,Math.round(tp/T.target*100)),d=daysLeftInWeek();
   return `${topbar('Hvězdný závod')}
-  <div class="card sec">${lanes}<p class="note">Každá má svůj vlastní cíl, aby to bylo fér. Kdo bude v cíli první? Závod končí ${d===0?'dnes večer':`za ${d} ${plural(d,'den','dny','dní')}`}.</p></div>
-  <div class="card teambig"><span class="ic">${esc(T.icon)}</span><h2>Společně na: ${esc(T.name)}</h2><div class="bar"><i style="width:${pct}%"></i></div><b>${tp} z ${T.target} ⭐</b><p class="muted">Každá hvězdička za úkol od Ley i Bey se počítá do společné odměny.</p></div>`;
+  <div class="card sec">${lanes}<p class="note">Každý má svůj vlastní cíl, aby to bylo fér. Kdo bude v cíli první? Závod končí ${d===0?'dnes večer':`za ${d} ${plural(d,'den','dny','dní')}`}.</p></div>
+  <div class="card teambig"><span class="ic">${esc(T.icon)}</span><h2>Společně na: ${esc(T.name)}</h2><div class="bar"><i style="width:${pct}%"></i></div><b>${tp} z ${T.target} ⭐</b><p class="muted">Každá hvězdička za úkol od kohokoli z vás se počítá do společné odměny.</p></div>`;
 }
 
 /* ================= learning ================= */
@@ -765,6 +796,10 @@ function vLearn(){
   if(k.little)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="learnCount"><span class="ic">🍎</span><span class="t"><h2>Kolik je tu?</h2><span class="muted sub">Spočítej ovoce.</span><span class="pill">+3 ⭐ za kolo</span></span></button>
     <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
+  if(k.adult)return `${topbar('Učení')}
+    <button class="lcard" data-act="startLearn" data-g="emoQuiz"><span class="ic" style="background:var(--lea-soft)">🎭</span><span class="t"><h2>Poznej emoci</h2><span class="muted">8 situací ze života</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
+    <button class="lcard" data-act="go" data-to="calm"><span class="ic" style="background:var(--jirka-soft)">🌬️</span><span class="t"><h2>Jak se uklidnit</h2><span class="muted">Dýchání, uzemnění, STOP</span><span class="pill">+3 ⭐ za cvičení</span></span></button>
+    <button class="lcard" data-act="startLearn" data-g="selfTest"><span class="ic" style="background:var(--sun-soft)">📝</span><span class="t"><h2>Test: jak zvládám emoce</h2><span class="muted">8 otázek o tobě</span><span class="pill">+3 ⭐</span></span></button>${capNote}`;
   return `${topbar('Učení')}
     <button class="lcard" data-act="go" data-to="geoLesson"><span class="ic" style="background:var(--bea-soft)">📒</span><span class="t"><h2>Tahák: body a čáry</h2><span class="muted">Bod, úsečka, polopřímka, přímka</span></span></button>
     <button class="lcard" data-act="startLearn" data-g="geoQuiz"><span class="ic">📐</span><span class="t"><h2>Kvíz z geometrie</h2><span class="muted">8 otázek, 4. třída</span><span class="pill">+3 ⭐, za bezchybné kolo +4 ⭐</span></span></button>${capNote}`;
@@ -773,6 +808,8 @@ function startLearn(g){
   if(g==='learnCount'){L={g,i:0,total:ROUND_LEA,first:0};L.q=newCountQ()}
   if(g==='learnFind'){L={g,i:0,total:ROUND_LEA,first:0};L.q=newFindQ()}
   if(g==='geoQuiz'){L={g,i:0,total:ROUND_BEA,first:0,qs:makeGeoRound()};L.q=L.qs[0];L.q.tried=[]}
+  if(g==='emoQuiz'){L={g,i:0,total:8,first:0,qs:makeEmoRound()};L.q=L.qs[0];L.q.tried=[]}
+  if(g==='selfTest'){L={g,i:0,total:SELF_TEST.length,first:0,ans:[]}}
   go(g);speakQ();
 }
 function speakQ(){if(!L||!L.q)return;if(L.g==='learnCount')sayKid(`Kolik je tu ${L.q.fr.f[2]}?`);if(L.g==='learnFind')sayKid(findQ(L.q))}
@@ -797,13 +834,13 @@ function learnNext(){
   if(L.i>=L.total){finishLearn();return}
   if(L.g==='learnCount')L.q=newCountQ();
   if(L.g==='learnFind')L.q=newFindQ();
-  if(L.g==='geoQuiz'){L.q=L.qs[L.i];L.q.tried=[]}
+  if(L.g==='geoQuiz'||L.g==='emoQuiz'){L.q=L.qs[L.i];L.q.tried=[]}
   render();speakQ();
 }
 function finishLearn(){
   const perfect=L.first===L.total;
-  const pts=L.g==='geoQuiz'?(perfect?4:3):3;
-  const text=L.g==='geoQuiz'?'Učení: geometrie':'Učení: počítání';
+  const quiz=L.g==='geoQuiz'||L.g==='emoQuiz',pts=quiz?(perfect?4:3):3;
+  const text=L.g==='geoQuiz'?'Učení: geometrie':L.g==='emoQuiz'?'Učení: emoce':'Učení: počítání';
   const title=perfect?'Bez jediné chyby!':'Kolo dokončeno!';
   const g=L.g;L=null;
   capAward('learn',S.settings.learnCap,pts,text,title,'Výborně! Jsi šikulka!',()=>{back()});
@@ -879,7 +916,7 @@ const GQ={
 };
 function makeGeoRound(){const order=shuffle(['what','what','rayStart','onLine','notation','countSeg','threePts','longer','concept','cross']).slice(0,ROUND_BEA);return order.map(k=>GQ[k]())}
 function vGeoQuiz(){const q=L.q,solved=q.tried.includes(q.ans);
-  return `${topbar('Kvíz z geometrie')}${progressDots()}
+  return `${topbar(L.g==='emoQuiz'?'Poznej emoci':'Kvíz z geometrie')}${progressDots()}
   ${q.svg?`<div class="geo">${geoSvg(q.svg)}</div>`:''}
   <p class="qtext">${esc(q.q)}</p>
   <div class="opts">${q.opts.map(o=>`<button class="opt ${q.tried.includes(o)?(o===q.ans?'ok':'bad'):''}" data-act="geoAns" data-o="${esc(o)}" ${solved?'disabled':''}>${esc(o)}</button>`).join('')}</div>
@@ -914,13 +951,14 @@ function vParent(){
     body=`<div class="card sec"><h2>☀️ Ranní mise</h2>
       <p class="note">Objeví se holkám každý den automaticky. Splnit ji jde jen v nastaveném čase.</p>
       <label class="prow"><span class="t">Ranní mise zapnutá</span><input type="checkbox" id="m-en" ${mo.enabled?'checked':''} data-set="settings/morning/enabled"></label>
+      <div class="prow"><span class="t">Pro koho</span>${KIDS.map(k=>`<label class="row" style="gap:6px"><input type="checkbox" id="m-k-${k}" ${mo.kids[k]!==false?'checked':''} data-set="settings/morning/kids/${k}">${esc(kidOf(k).name)}</label>`).join('')}</div>
       <label class="prow"><span class="t">Od</span><input type="time" id="m-start" value="${esc(mo.start)}" data-set="settings/morning/start"></label>
       <label class="prow"><span class="t">Do</span><input type="time" id="m-end" value="${esc(mo.end)}" data-set="settings/morning/end"></label>
       ${mo.items.map((it,i)=>`<label class="prow"><span class="ic">${esc(it.icon)}</span><span class="t">${esc(it.title)}</span><input type="number" id="m-p${i}" min="0" value="${it.points}" data-set="settings/morning/items/${i}/points"> ⭐</label>`).join('')}
       <label class="prow"><span class="t">Bonus za celou misi včas</span><input type="number" id="m-bonus" min="0" value="${mo.bonus}" data-set="settings/morning/bonus"> ⭐</label>
       <label class="prow"><span class="t">Potvrzovat automaticky<br><span class="muted">Hvězdičky hned, bez vašeho schválení</span></span><input type="checkbox" id="m-auto" ${mo.auto?'checked':''} data-set="settings/morning/auto"></label></div>
     <form class="card sec" id="taskform"><h2>Nový úkol</h2>
-      <div class="field"><span>Pro koho</span><div class="chips" data-group="kid">${[['lea','Lea'],['bea','Bea'],['both','Obě']].map(([v,l],i)=>`<button type="button" class="chip ${i===0?'on':''}" data-v="${v}">${l}</button>`).join('')}</div></div>
+      <div class="field"><span>Pro koho</span><div class="chips" data-group="kid">${[['lea','Lea'],['bea','Bea'],['jirka','Jirka'],['both','Všichni']].map(([v,l],i)=>`<button type="button" class="chip ${i===0?'on':''}" data-v="${v}">${l}</button>`).join('')}</div></div>
       <label class="field"><span>Co má udělat</span><input id="f-title" maxlength="40" placeholder="Např. Uklidit si ponožky" required></label>
       <div class="field"><span>Obrázek (pro Leu, která ještě nečte)</span><div class="icons" data-group="icon">${TASK_ICONS.map((ic,i)=>`<button type="button" class="${i===0?'on':''}" data-v="${ic}">${ic}</button>`).join('')}</div></div>
       <div class="field"><span>Hvězdičky</span><div class="chips" data-group="pts">${[5,10,15,20,30].map(n=>`<button type="button" class="chip ${n===10?'on':''}" data-v="${n}">${n} ⭐</button>`).join('')}</div></div>
@@ -934,10 +972,10 @@ function vParent(){
     body=KIDS.map(id=>{const k=kidOf(id);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(k.name)}</span> má ${pointsOf(id)} ⭐</h2>
       <div class="row"><input type="number" id="bonus-${id}" min="1" value="5" style="width:90px"><button class="mini ok" data-act="bonus" data-id="${id}" data-sign="1">+ Přidat</button><button class="mini no" data-act="bonus" data-id="${id}" data-sign="-1">− Odebrat</button></div>
       <label class="prow"><span class="t">Týdenní cíl v závodě</span><input type="number" id="wt-${id}" min="5" value="${k.weekTarget}" data-set="kids/${id}/weekTarget"></label>
-      ${ITEMS.map(i=>`<label class="prow"><span class="ic">${i.icon}</span><span class="t">${esc(i.name)}${has(id,i.id)?' ✅':''}</span><input type="number" id="pr-${id}-${i.id}" min="0" value="${st.prices[id][i.id]}" data-set="settings/prices/${id}/${i.id}"></label>`).join('')}</div>`}).join('');
+      ${itemsFor(id).map(i=>`<label class="prow"><span class="ic">${i.icon}</span><span class="t">${esc(i.name)}${has(id,i.id)?' ✅':''}</span><input type="number" id="pr-${id}-${i.id}" min="0" value="${st.prices[id][i.id]}" data-set="settings/prices/${id}/${i.id}"></label>`).join('')}</div>`}).join('');
     const tp=teamPts();
     body+=`<div class="card sec"><h2>Společná odměna</h2>
-      <label class="field"><span>Na co holky společně šetří</span><input id="tm-name" value="${esc(st.team.name)}" maxlength="40" data-set="settings/team/name"></label>
+      <label class="field"><span>Na co všichni společně šetří</span><input id="tm-name" value="${esc(st.team.name)}" maxlength="40" data-set="settings/team/name"></label>
       <label class="field"><span>Obrázek</span><input id="tm-icon" value="${esc(st.team.icon)}" maxlength="4" data-set="settings/team/icon" style="width:90px"></label>
       <label class="prow"><span class="t">Cíl (hvězdičky z úkolů dohromady)</span><input type="number" id="tm-target" min="10" value="${st.team.target}" data-set="settings/team/target"></label>
       <p class="muted">Zatím mají ${tp} z ${st.team.target} ⭐.</p>
@@ -949,9 +987,9 @@ function vParent(){
   if(tab==='settings'){
     const link=`${location.origin}${location.pathname}#rodina=${DEV.family||''}`;
     body=(SYNC?`<div class="card sec"><h2>Propojení telefonů</h2>${syncBadge()}
-      <p class="note">Pošlete tenhle odkaz do telefonu Ley a Bey (třeba přes WhatsApp). Otevřou ho jednou, vyberou svoje jméno a od té doby se všechno přenáší samo. Odkaz nikomu jinému neposílejte.</p>
+      <p class="note">Pošlete tenhle odkaz do telefonů Ley, Bey a Jirky (třeba přes WhatsApp). Každý ho otevře jednou, vybere svoje jméno a od té doby se všechno přenáší samo. Odkaz nikomu jinému neposílejte.</p>
       <div class="codebox" id="famlink">${esc(link)}</div><button class="btn" data-act="copyLink">Kopírovat odkaz</button>
-      <p class="muted">Tento telefon: <b>${esc({lea:'Lea',bea:'Bea',parent:'Rodiče',shared:'Společný'}[role()]||'')}</b></p><button class="btn ghost" data-act="changeRole">Změnit, komu telefon patří</button>
+      <p class="muted">Tento telefon: <b>${esc({lea:'Lea',bea:'Bea',jirka:'Jirka',parent:'Rodiče',shared:'Společný'}[role()]||'')}</b></p><button class="btn ghost" data-act="changeRole">Změnit, komu telefon patří</button>
       <p class="note">Verze aplikace: ${esc(APP_VERSION)}. Nové verze se stahují samy.</p></div>`
       :`<div class="card sec"><h2>Kde jsou data</h2><p class="note">Tohle je náhled. Hvězdičky a úkoly jsou uložené jen v tomto zařízení. Verze pro tři propojené telefony běží na vaší vlastní adrese.</p></div>`)+
       `<div class="card sec"><h2>PIN pro rodiče</h2><p class="muted">Výchozí PIN je 1234. Změňte ho, ať se sem holky nedostanou.</p>
@@ -979,14 +1017,15 @@ function pinPad(onOk){
 const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirror:vMirror,mandala:vMirror,colorPick:vColorPick,color:vColor,shop:vShop,race:vRace,parent:vParent,
   learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
 function render(){
-  clearInterval(tick);tick=null;
-  if(['learnCount','learnFind','geoQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  clearInterval(tick);tick=null;stopGame();
+  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground'].includes(V.name)&&!L)V=stack.pop()||rootView();
   const app=$('#app'),k=V.kid&&kidOf(V.kid);
   app.classList.toggle('little',!!(k&&k.little));
   setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
   app.innerHTML=(MAP[V.name]||vPicker)();
   if(V.name==='mirror'||V.name==='mandala')setupMirror();
   if(V.name==='color')setupColor();
+  if(V.name==='tetris')setupTetris();if(V.name==='cars')setupCars();if(V.name==='build')setupBuild();
   const win=mWin();
   if(V.name==='tasks'||V.name==='home')tick=setInterval(()=>{if(mWin()!==win){render();return}document.querySelectorAll('[data-mleft]').forEach(e=>e.textContent=minsLeft());updTimers()},1000);
   if(V.name==='tasks'){updTimers();if(V.focus){const el=$('#t-'+V.focus);V.focus=null;if(el)el.scrollIntoView({block:'center'})}}
@@ -995,7 +1034,7 @@ function render(){
 }
 function softRender(){
   const ft=$('#f-title'),fs=$('#f-steps');
-  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
   if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
   render();
 }
@@ -1172,6 +1211,215 @@ function syncMirrorUI(){
 let CF={color:'#FF5C93',awarded:false};
 function setupColor(){CF.awarded=false;syncColorUI();$('#colorpic').addEventListener('click',e=>{const r=e.target.closest('[data-r]');if(!r)return;r.style.fill=CF.color;chime('pop')})}
 function syncColorUI(){document.querySelectorAll('[data-act="fillcol"]').forEach(b=>b.classList.toggle('on',b.dataset.c===CF.color))}
+
+/* ================= Jirka: emotions & calm ================= */
+const EMOS=['vztek','úzkost','zklamání','smutek','strach','stud','vina','frustrace','úleva','žárlivost','vděčnost','osamělost','radost'];
+const EMO_POOL=[
+  {q:'Kolega si vzal zásluhy za tvou práci. Cítíš horko v obličeji a zatínáš pěsti.',ans:'vztek',exp:'Vztek hlásí, že někdo překročil tvou hranici nebo se děje nespravedlnost. Pomáhá ho pojmenovat a pak klidně říct, co potřebuješ.'},
+  {q:'Zítra tě čeká důležitá schůzka. V noci nemůžeš usnout a v hlavě ti běží samé „co když“.',ans:'úzkost',exp:'Úzkost se týká budoucnosti a nejistoty. Tělo se chystá na nebezpečí, které zatím nenastalo. Pomáhá pomalé dýchání a vrátit pozornost do přítomnosti.'},
+  {q:'Celý týden ses těšil na výlet a na poslední chvíli se zrušil.',ans:'zklamání',exp:'Zklamání přichází, když se nesplní naše očekávání. Je v pořádku ho přiznat a pak hledat náhradní plán.'},
+  {q:'Dozvěděl ses, že zemřel tvůj kamarád z dětství. Nemáš chuť nic dělat.',ans:'smutek',exp:'Smutek patří ke ztrátě. Zpomaluje nás, abychom ji zpracovali. Pomáhá o tom mluvit a dopřát si čas.'},
+  {q:'Těsně před autem ti vběhne na silnici srnka. Buší ti srdce a ruce se třesou.',ans:'strach',exp:'Strach reaguje na skutečné nebezpečí tady a teď. Tělo se v mžiku připraví utéct nebo bojovat.'},
+  {q:'Před ostatními jsi řekl něco hloupého a nejradši by ses propadl.',ans:'stud',exp:'Stud se bojí, že nás ostatní odmítnou. Pomáhá si připomenout, že chybu udělá každý, a nebrat ji jako soud nad sebou.'},
+  {q:'Nechtěně jsi někomu ublížil a pořád se ti to vrací.',ans:'vina',exp:'Vina nás vede k nápravě. Nejlíp ji uleví omluva a snaha to napravit.'},
+  {q:'Skládáš skříň potřetí a díly pořád nesedí.',ans:'frustrace',exp:'Frustrace přichází, když nám něco opakovaně brání v cíli. Pomůže krátká pauza a zkusit to jinak.'},
+  {q:'Výsledky vyšetření dopadly dobře a ty konečně vydechneš.',ans:'úleva',exp:'Úleva přichází po napětí, když hrozba pomine. Tělo se uvolní a dech se zpomalí.'},
+  {q:'Partnerka se dlouho a vesele baví s někým jiným a tobě je to nepříjemné.',ans:'žárlivost',exp:'Žárlivost se bojí, že o někoho blízkého přijdeme. Pomáhá mluvit o svých pocitech klidně a bez obviňování.'},
+  {q:'Kamarád ti nečekaně pomohl se stěhováním a nic za to nechtěl.',ans:'vděčnost',exp:'Vděčnost posiluje vztahy. Stojí za to ji dát najevo, třeba jen poděkováním.'},
+  {q:'Celý víkend jsi doma sám a chybí ti lidi kolem.',ans:'osamělost',exp:'Osamělost říká, že potřebujeme blízkost. Pomůže ozvat se někomu, i krátkou zprávou.'},
+  {q:'Dokončil jsi projekt, na kterém jsi dlouho dřel, a všechno funguje.',ans:'radost',exp:'Radost nás odměňuje za to, co se povedlo. Stojí za to se u ní na chvilku zastavit a užít si ji.'},
+  {q:'Zatínáš čelist a ramena máš skoro u uší. Co to nejspíš znamená?',opts:['stres','nuda','radost','únava'],ans:'stres',exp:'Stres se často usadí v čelisti, ramenou a žaludku. Když si toho všimneš včas, můžeš vědomě povolit svaly a zpomalit dech.'},
+  {q:'Co nejvíc pomůže v první vlně vzteku?',opts:['Zastavit se a pár pomalých nádechů','Hned to dotyčnému vyčíst','Bouchnout do stolu','Dělat, že nic není'],ans:'Zastavit se a pár pomalých nádechů',exp:'Vztek vrcholí rychle a pak opadá. Pár pomalých nádechů dá mozku čas, aby se zapojilo přemýšlení.'},
+  {q:'Proč pomáhá emoci nahlas pojmenovat, třeba „jsem naštvaný“?',opts:['Emoce tím ztratí část síly','Je to jen zvyk','Nepomáhá to','Aby to slyšeli ostatní'],ans:'Emoce tím ztratí část síly',exp:'Když emoci pojmenuješ, zapojí se část mozku, která ji tlumí. Pojmenovaná emoce je slabší.'},
+  {q:'Hádka se stupňuje a oba už křičíte. Co je nejlepší udělat?',opts:['Domluvit si pauzu a vrátit se k tomu později','Dotáhnout to hned do konce','Odejít a už to neřešit','Přidat na hlasitosti'],ans:'Domluvit si pauzu a vrátit se k tomu později',exp:'V silných emocích se špatně domlouvá. Pauza na 20–30 minut pomůže oběma zklidnit tělo. Důležité je se k tomu pak opravdu vrátit.'},
+  {q:'Co znamená technika STOP?',opts:['Zastav se, nadechni, všimni si, pokračuj','Stůj, toč se, odejdi, padej','Spi, trénuj, odpočívej, plav','Nic, je to jen slovo'],ans:'Zastav se, nadechni, všimni si, pokračuj',exp:'STOP: zastav se, pomalu se nadechni, všimni si, co se v tobě děje, a pak pokračuj vědomě, ne automaticky.'}
+];
+function makeEmoRound(){return shuffle([...EMO_POOL]).slice(0,8).map(it=>({svg:'',q:it.q,ans:it.ans,exp:it.exp,
+  opts:it.opts?shuffle([...it.opts]):shuffle([it.ans,...shuffle(EMOS.filter(e=>e!==it.ans)).slice(0,3)])}))}
+
+const SELF_TEST=[
+  'Když se naštvu, dokážu se zastavit dřív, než něco řeknu.',
+  'Umím pojmenovat, co přesně cítím.',
+  'Když mám špatný den, vím, co mi pomůže.',
+  'Silné emoce u mě docela rychle odezní.',
+  'Dokážu říct, co potřebuju, bez křiku.',
+  'Všimnu si, kde v těle cítím stres.',
+  'Po hádce se dokážu vrátit a usmířit.',
+  'Když něco nevyjde, nevzdám to hned.'];
+const LIKERT=['Skoro nikdy','Spíš ne','Někdy','Často','Skoro vždy'];
+function vSelfTest(){
+  if(L.i>=SELF_TEST.length){const sc=L.ans.reduce((a,b)=>a+b,0),max=SELF_TEST.length*5;
+    const band=sc<20?{t:'Emoce tě často převálcují',d:'Silné pocity tě umí rychle strhnout. To se dá trénovat. Začni technikou STOP a krabicovým dýcháním, ideálně každý den chvilku, i když jsi v klidu.'}
+      :sc<31?{t:'Většinou to zvládáš',d:'Emoce máš docela pod kontrolou, ale v náročných chvílích ujedeš. Zkus si všímat prvních signálů v těle, třeba sevřené čelisti, a zastavit se včas.'}
+      :{t:'Emoce máš v hrsti',d:'Umíš své pocity poznat i zvládnout. Pokračuj a ukaž to ostatním svým příkladem.'};
+    const weak=L.ans.map((v,i)=>[v,i]).filter(x=>x[0]<=2).map(x=>SELF_TEST[x[1]]);
+    return `${topbar('Výsledek testu')}<div class="card sec center"><div class="bignum">${sc}<span style="font-size:1.6rem"> / ${max}</span></div><h2>${band.t}</h2><p>${band.d}</p></div>
+      ${weak.length?`<div class="card sec"><h3>Na čem můžeš zapracovat</h3>${weak.map(w=>`<p>• ${esc(w)}</p>`).join('')}</div>`:''}
+      <p class="note">Tohle je jen orientační test pro radost a sebepoznání, ne odborné vyšetření.</p>
+      <button class="btn big" data-act="selfDone" style="align-self:center">Hotovo ⭐</button>`;}
+  return `${topbar('Test: jak zvládám emoce')}${progressDots()}<p class="qtext">${esc(SELF_TEST[L.i])}</p>
+    <div class="steps">${LIKERT.map((l,i)=>`<button class="step" data-act="likert" data-v="${i+1}"><span class="box">${i+1}</span><span>${l}</span></button>`).join('')}</div>`;
+}
+function vCalm(){
+  return `${topbar('Jak se uklidnit')}
+  <button class="lcard" data-act="startBreath"><span class="ic" style="background:var(--jirka-soft)">🌬️</span><span class="t"><h2>Krabicové dýchání</h2><span class="muted">Nádech 4 · zádrž 4 · výdech 4 · zádrž 4. Asi 1,5 minuty.</span></span></button>
+  <button class="lcard" data-act="startGround"><span class="ic" style="background:var(--mint-soft)">🖐️</span><span class="t"><h2>Uzemnění 5-4-3-2-1</h2><span class="muted">Když tě zaplaví úzkost nebo vztek.</span></span></button>
+  <article class="card lesson"><h3>Technika STOP</h3>
+    <p><b>S</b>top: zastav se, nic neříkej a nic nedělej.</p><p><b>T</b>: nadechni se pomalu nosem, vydechni pusou.</p><p><b>O</b>: všimni si, co cítíš v těle a jak se ta emoce jmenuje.</p><p><b>P</b>: pokračuj, ale vědomě. Co teď opravdu potřebuješ?</p></article>
+  <article class="card lesson"><h3>Rychlá první pomoc</h3>
+    <p>• Opláchni si obličej studenou vodou.</p><p>• Vyjdi na pět minut ven a projdi se.</p><p>• Řekni nahlas, co cítíš: „Jsem naštvaný, protože…“</p><p>• Pevně zatni pěsti na 5 vteřin a pak je povol. Dvakrát zopakuj.</p></article>`;
+}
+const BREATH=[['Nádech',1.25],['Zádrž',1.25],['Výdech',.75],['Zádrž',.75]],BREATH_CYCLES=6;
+function vBreath(){
+  return `${topbar('Krabicové dýchání')}${progressDots()}
+  <div style="height:260px;display:grid;place-items:center"><div id="breathball" style="width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--kid));transition:transform 4s linear;transform:scale(.75);box-shadow:0 10px 40px rgba(47,125,246,.35)"></div></div>
+  <p class="qtext" id="breathtxt">Připrav se…</p><p class="muted center" id="breathsub">Sedni si pohodlně a sleduj kouli.</p>`;
+}
+let breathT=null;
+function runBreath(){
+  clearInterval(breathT);let tick=0;const total=BREATH_CYCLES*16;
+  const step=()=>{if(V.name!=='breath'||!L){clearInterval(breathT);return}
+    const ph=Math.floor(tick/4)%4,sec=tick%4+1,cyc=Math.floor(tick/16);
+    if(tick>=total){clearInterval(breathT);L.i=L.total;capAward('learn',S.settings.learnCap,3,'Klid: krabicové dýchání','Skvěle zklidněno!','',()=>{L=null;back()});return}
+    if(L.i!==cyc){L.i=cyc;const p=$('.progress');if(p)p.outerHTML=progressDots()}
+    const ball=$('#breathball'),txt=$('#breathtxt'),sub=$('#breathsub');
+    if(sec===1&&ball)ball.style.transform=`scale(${BREATH[ph][1]})`;
+    if(txt)txt.textContent=`${BREATH[ph][0]} ${sec}`;if(sub)sub.textContent=`Kolo ${cyc+1} ze ${BREATH_CYCLES}`;
+    tick++;};
+  setTimeout(()=>{step();breathT=setInterval(step,1000)},1200);
+}
+const GROUND=[['👀',5,'věcí, které vidíš'],['✋',4,'věci, kterých se můžeš dotknout'],['👂',3,'zvuky, které slyšíš'],['👃',2,'vůně, které cítíš'],['👅',1,'chuť, kterou máš v puse']];
+function vGround(){
+  const g=GROUND[L.i];if(!g)return '';
+  return `${topbar('Uzemnění 5-4-3-2-1')}${progressDots()}
+  <div class="card sec center"><div style="font-size:4rem">${g[0]}</div><div class="bignum">${g[1]}</div><h2>Najdi ${g[1]} ${g[2]}</h2><p class="muted">V duchu nebo nahlas je pojmenuj. Nespěchej.</p>
+  <div class="row" style="justify-content:center">${Array.from({length:g[1]},(_,i)=>`<button class="numbtn ${L.c>i?'ok':''}" data-act="groundTap" style="width:56px">${i+1}</button>`).join('')}</div></div>`;
+}
+
+/* ================= Jirka: games ================= */
+let GM=null;
+function stopGame(){if(GM){GM.alive=false;cancelAnimationFrame(GM.raf);GM=null}}
+function gameShell(title,ctrls){return `${topbar(title)}<div class="row" style="justify-content:space-between"><span class="pill" id="gscore">0</span><span class="muted" id="ghint"></span></div>
+  <div class="gamewrap" id="gwrap"><canvas id="gcv"></canvas><div class="gover" id="gover" hidden></div></div>${ctrls}`}
+function setupCanvas(w,h){const cv=$('#gcv'),dpr=Math.min(2,devicePixelRatio||1);cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';$('#gwrap').style.width=w+'px';const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return{cv,x}}
+function gameOver(kind,score,label,pts){
+  const o=$('#gover');if(!o)return;
+  o.innerHTML=`<h2>Konec hry</h2><p class="cstars" style="font-size:2.2rem">${label}</p><div class="row" style="justify-content:center"><button class="btn" data-act="gameAgain">Znovu</button></div>`;o.hidden=false;
+  if(pts>0)capAward('game',S.settings.gameCap,pts,{tetris:'Tetris',cars:'Autíčka',build:'Stavitel'}[kind],'Dobrá hra!','');
+  else toast({tetris:'Hvězdičky jsou od 3 řad. Zkus to znovu!',cars:'Hvězdičky jsou od 500 m. Zkus to znovu!',build:'Hvězdičky jsou od 8 pater. Zkus to znovu!'}[kind]);
+}
+const gameW=()=>Math.min($('#app').clientWidth-32,420);
+
+/* --- Tetris --- */
+const TET={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
+const TCOL={I:'#4FB6FF',O:'#FFC22E',T:'#8E6BFF',S:'#1FBF92',Z:'#FF5C5C',J:'#3D6BFF',L:'#FF8A3D'};
+function vTetris(){return gameShell('Tetris',`<div class="ctrls"><button class="ctl" data-act="tet" data-k="left" aria-label="Doleva">◀</button><button class="ctl" data-act="tet" data-k="rot" aria-label="Otočit">⟳</button><button class="ctl" data-act="tet" data-k="right" aria-label="Doprava">▶</button><button class="ctl" data-act="tet" data-k="drop" aria-label="Shodit">⤓</button></div>`)}
+function setupTetris(){
+  const cell=Math.floor(Math.min(gameW()/10,(innerHeight-300)/20,30)),W=cell*10,H=cell*20,{x}=setupCanvas(W,H);
+  const neon=has(V.kid,'tetris_neon');
+  const g={alive:true,kind:'tetris',grid:Array.from({length:20},()=>Array(10).fill(null)),lines:0,last:0,acc:0};
+  const rnd=()=>{const k=pick(Object.keys(TET));return{k,m:TET[k].map(r=>[...r]),x:3,y:0}};
+  g.cur=rnd();
+  const fits=(m,px,py)=>m.every((r,i)=>r.every((v,j)=>!v||(px+j>=0&&px+j<10&&py+i<20&&(py+i<0||!g.grid[py+i][px+j]))));
+  const lock=()=>{g.cur.m.forEach((r,i)=>r.forEach((v,j)=>{if(v&&g.cur.y+i>=0)g.grid[g.cur.y+i][g.cur.x+j]=g.cur.k}));
+    let cl=0;for(let r=19;r>=0;r--){if(g.grid[r].every(Boolean)){g.grid.splice(r,1);g.grid.unshift(Array(10).fill(null));cl++;r++}}
+    if(cl){g.lines+=cl;chime('pop');$('#gscore').textContent=`${g.lines} ${plural(g.lines,'řada','řady','řad')}`}
+    g.cur=rnd();if(!fits(g.cur.m,g.cur.x,g.cur.y)){g.alive=false;gameOver('tetris',g.lines,`${g.lines} ${plural(g.lines,'řada','řady','řad')}`,g.lines>=10?3:g.lines>=3?2:0)}};
+  g.move=k=>{if(!g.alive)return;const c=g.cur;
+    if(k==='left'&&fits(c.m,c.x-1,c.y))c.x--;
+    if(k==='right'&&fits(c.m,c.x+1,c.y))c.x++;
+    if(k==='rot'){const r=c.m[0].map((_,j)=>c.m.map(row=>row[j]).reverse());for(const dx of[0,-1,1,-2,2])if(fits(r,c.x+dx,c.y)){c.m=r;c.x+=dx;break}}
+    if(k==='down'){if(fits(c.m,c.x,c.y+1))c.y++;else lock()}
+    if(k==='drop'){while(fits(c.m,c.x,c.y+1))c.y++;lock()}
+    draw()};
+  const block=(cx,cy,col)=>{if(neon){x.fillStyle=col;x.shadowColor=col;x.shadowBlur=10;x.fillRect(cx*cell+2,cy*cell+2,cell-4,cell-4);x.shadowBlur=0}
+    else{x.fillStyle=col;x.fillRect(cx*cell+1,cy*cell+1,cell-2,cell-2);x.fillStyle='rgba(255,255,255,.35)';x.fillRect(cx*cell+1,cy*cell+1,cell-2,4)}};
+  const draw=()=>{x.fillStyle=neon?'#0d0b1e':'#1d2246';x.fillRect(0,0,W,H);
+    x.strokeStyle='rgba(255,255,255,.05)';for(let i=1;i<10;i++){x.beginPath();x.moveTo(i*cell,0);x.lineTo(i*cell,H);x.stroke()}
+    g.grid.forEach((r,i)=>r.forEach((k,j)=>{if(k)block(j,i,TCOL[k])}));
+    if(g.alive){let gy=g.cur.y;while(fits(g.cur.m,g.cur.x,gy+1))gy++;x.globalAlpha=.2;g.cur.m.forEach((r,i)=>r.forEach((v,j)=>{if(v)block(g.cur.x+j,gy+i,TCOL[g.cur.k])}));x.globalAlpha=1;
+      g.cur.m.forEach((r,i)=>r.forEach((v,j)=>{if(v)block(g.cur.x+j,g.cur.y+i,TCOL[g.cur.k])}))}};
+  const loop=t=>{if(!g.alive||GM!==g)return;const dt=t-(g.last||t);g.last=t;g.acc+=dt;const sp=Math.max(120,700-g.lines*25);
+    if(g.acc>sp){g.acc=0;g.move('down')}g.raf=requestAnimationFrame(loop)};
+  GM=g;$('#gscore').textContent='0 řad';$('#ghint').textContent='Šipky na klávesnici fungují taky';draw();g.raf=requestAnimationFrame(loop);
+}
+
+/* --- Cars --- */
+function vCars(){return gameShell('Autíčka',`<div class="ctrls two"><button class="ctl" data-act="car" data-k="-1" aria-label="Doleva">◀</button><button class="ctl" data-act="car" data-k="1" aria-label="Doprava">▶</button></div>`)}
+function setupCars(){
+  const W=Math.floor(Math.min(gameW(),360)),H=Math.floor(Math.max(320,Math.min(innerHeight-300,560))),{x}=setupCanvas(W,H);
+  const night=has(V.kid,'cars_night'),lw=W/3,carW=lw*.55,carH=carW*1.7;
+  const g={alive:true,kind:'cars',lane:1,px:lw*1.5,obs:[],dist:0,speed:220,spawn:0,last:0,dash:0};
+  g.move=d=>{if(!g.alive)return;g.lane=Math.max(0,Math.min(2,g.lane+d));chime('pop')};
+  const car=(cx,cy,col,me)=>{x.fillStyle=col;const r=8;x.beginPath();x.roundRect(cx-carW/2,cy-carH/2,carW,carH,r);x.fill();
+    x.fillStyle='rgba(20,24,60,.75)';x.fillRect(cx-carW/2+5,cy-carH/2+(me?carH*.18:carH*.55),carW-10,carH*.22);
+    x.fillStyle='#222';[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>x.fillRect(cx+a*carW/2-(a>0?0:4),cy+b*carH*.28-6,4,12));
+    if(night&&me){x.fillStyle='rgba(255,240,170,.18)';x.beginPath();x.moveTo(cx-carW/2,cy-carH/2);x.lineTo(cx-carW,cy-carH*2.2);x.lineTo(cx+carW,cy-carH*2.2);x.lineTo(cx+carW/2,cy-carH/2);x.fill()}};
+  const cols=['#FF5C5C','#FFC22E','#1FBF92','#8E6BFF','#FF8A3D','#4FB6FF'];
+  const loop=t=>{if(!g.alive||GM!==g)return;const dt=Math.min(.05,(t-(g.last||t))/1000);g.last=t;
+    g.speed+=dt*6;g.dist+=g.speed*dt/10;g.dash=(g.dash+g.speed*dt)%40;g.px+=((g.lane+.5)*lw-g.px)*Math.min(1,dt*14);
+    g.spawn-=dt;if(g.spawn<=0){const lanes=shuffle([0,1,2]);const n=Math.random()<.25&&g.dist>200?2:1;lanes.slice(0,n).forEach(l=>g.obs.push({l,y:-carH,c:pick(cols)}));g.spawn=Math.max(.45,1.3-g.dist/2500)}
+    g.obs.forEach(o=>o.y+=g.speed*dt);g.obs=g.obs.filter(o=>o.y<H+carH);
+    const py=H-carH*.9;
+    for(const o of g.obs){const ox=(o.l+.5)*lw;if(Math.abs(ox-g.px)<carW*.85&&Math.abs(o.y-py)<carH*.9){g.alive=false;chime('no');const m=Math.floor(g.dist);gameOver('cars',m,`${m} m`,m>=1500?3:m>=500?2:0);break}}
+    x.fillStyle=night?'#15182b':'#5b6075';x.fillRect(0,0,W,H);
+    x.fillStyle=night?'#2a7a4b':'#6fcf7f';x.fillRect(0,0,6,H);x.fillRect(W-6,0,6,H);
+    x.fillStyle=night?'rgba(255,230,120,.7)':'rgba(255,255,255,.85)';for(let i=1;i<3;i++)for(let y=-40+g.dash;y<H;y+=40)x.fillRect(i*lw-2,y,4,20);
+    g.obs.forEach(o=>car((o.l+.5)*lw,o.y,o.c,false));car(g.px,py,'#2F7DF6',true);
+    if(night){x.fillStyle='rgba(0,0,20,.35)';x.fillRect(0,0,W,H*.35)}
+    $('#gscore').textContent=`${Math.floor(g.dist)} m`;
+    if(g.alive)g.raf=requestAnimationFrame(loop)};
+  GM=g;$('#ghint').textContent='Ťukni na levou nebo pravou půlku';
+  $('#gcv').addEventListener('pointerdown',e=>{const r=e.target.getBoundingClientRect();g.move(e.clientX-r.left<r.width/2?-1:1)});
+  g.raf=requestAnimationFrame(loop);
+}
+
+/* --- Builder (stack) --- */
+function vBuild(){return gameShell('Stavitel',`<button class="btn big" data-act="buildDrop" style="align-self:center;width:100%">Pustit blok ⬇</button>`)}
+function setupBuild(){
+  const W=Math.floor(Math.min(gameW(),380)),H=Math.floor(Math.max(340,Math.min(innerHeight-280,580))),{x}=setupCanvas(W,H);
+  const gold=has(V.kid,'build_gold'),bh=26,base={x:W*.2,w:W*.6};
+  const g={alive:true,kind:'build',stack:[base],cur:{x:0,w:base.w,dir:1},speed:140,cam:0,last:0,parts:[]};
+  const colAt=i=>gold?`hsl(${42+(i%3)*4},${85-(i%4)*5}%,${55+(i%5)*3}%)`:`hsl(${(i*24)%360},75%,62%)`;
+  g.drop=()=>{if(!g.alive)return;const top=g.stack[g.stack.length-1],c=g.cur;
+    const l=Math.max(c.x,top.x),r=Math.min(c.x+c.w,top.x+top.w),ov=r-l;
+    if(ov<=2){g.alive=false;chime('no');const n=g.stack.length-1;gameOver('build',n,`${n} ${plural(n,'patro','patra','pater')}`,n>=15?3:n>=8?2:0);return}
+    if(Math.abs(ov-top.w)<4&&Math.abs(c.x-top.x)<4){g.stack.push({x:top.x,w:top.w});chime('tick')}
+    else{g.parts.push({x:c.x<l?c.x:r,w:c.w-ov,y:g.stack.length,vy:0,i:g.stack.length});g.stack.push({x:l,w:ov});chime('pop')}
+    g.cur={x:g.stack.length%2?-g.stack.at(-1).w:W,w:g.stack.at(-1).w,dir:g.stack.length%2?1:-1};g.speed=Math.min(380,g.speed+8);
+    $('#gscore').textContent=`${g.stack.length-1} ${plural(g.stack.length-1,'patro','patra','pater')}`};
+  const yOf=i=>H-40-(i+1)*bh+g.cam;
+  const loop=t=>{if(!g.alive||GM!==g){if(GM===g)draw();return}const dt=Math.min(.05,(t-(g.last||t))/1000);g.last=t;
+    const c=g.cur;c.x+=c.dir*g.speed*dt;if(c.x+c.w>W+c.w*.2&&c.dir>0)c.dir=-1;if(c.x<-c.w*.2&&c.dir<0)c.dir=1;
+    const want=Math.max(0,(g.stack.length-8)*bh);g.cam+=(want-g.cam)*Math.min(1,dt*5);
+    g.parts.forEach(p=>{p.vy+=900*dt;p.y-=p.vy*dt/bh});g.parts=g.parts.filter(p=>yOf(p.y)<H+50);
+    draw();g.raf=requestAnimationFrame(loop)};
+  const draw=()=>{const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#8fd3ff');sky.addColorStop(1,'#e8f6ff');x.fillStyle=sky;x.fillRect(0,0,W,H);
+    x.fillStyle='#7cc576';x.fillRect(0,H-40+g.cam,W,40);
+    g.stack.forEach((b,i)=>{x.fillStyle=i?colAt(i):'#8a8fa8';x.fillRect(b.x,yOf(i),b.w,bh-2);x.fillStyle='rgba(255,255,255,.3)';x.fillRect(b.x,yOf(i),b.w,4)});
+    g.parts.forEach(p=>{x.fillStyle=colAt(p.i);x.fillRect(p.x,yOf(p.y),p.w,bh-2)});
+    if(g.alive){x.fillStyle=colAt(g.stack.length);x.fillRect(g.cur.x,yOf(g.stack.length),g.cur.w,bh-2)}};
+  GM=g;$('#gscore').textContent='0 pater';$('#ghint').textContent='Ťukni, když je blok nad věží';
+  $('#gcv').addEventListener('pointerdown',()=>g.drop());
+  g.raf=requestAnimationFrame(loop);
+}
+document.addEventListener('keydown',e=>{if(!GM||!GM.alive)return;
+  if(GM.kind==='tetris'){const k={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'rot',ArrowDown:'down',' ':'drop'}[e.key];if(k){e.preventDefault();GM.move(k)}}
+  if(GM.kind==='cars'){if(e.key==='ArrowLeft')GM.move(-1);if(e.key==='ArrowRight')GM.move(1)}
+  if(GM.kind==='build'&&(e.key===' '||e.key==='Enter')){e.preventDefault();GM.drop()}});
+
+Object.assign(MAP,{calm:vCalm,breath:vBreath,ground:vGround,selfTest:vSelfTest,emoQuiz:vGeoQuiz,tetris:vTetris,cars:vCars,build:vBuild});
+Object.assign(handlers,{
+  tet:b=>GM&&GM.move&&GM.move(b.dataset.k),
+  car:b=>GM&&GM.move&&GM.move(+b.dataset.k),
+  buildDrop:()=>GM&&GM.drop&&GM.drop(),
+  gameAgain:()=>render(),
+  likert:b=>{L.ans.push(+b.dataset.v);L.i++;chime('pop');render()},
+  selfDone:()=>{L=null;capAward('learn',S.settings.learnCap,3,'Učení: test emocí','Díky za upřímnost!','',()=>back())},
+  startBreath:()=>{L={g:'breath',i:0,total:BREATH_CYCLES,first:0};go('breath');runBreath()},
+  startGround:()=>{L={g:'ground',i:0,total:GROUND.length,first:0,c:0};go('ground')},
+  groundTap:()=>{L.c++;chime('pop');if(L.c>=GROUND[L.i][1]){L.i++;L.c=0;if(L.i>=GROUND.length){L=null;capAward('learn',S.settings.learnCap,3,'Klid: uzemnění 5-4-3-2-1','Jsi zpátky tady a teď.','',()=>back());return}}render()}
+});
 
 /* ================= start ================= */
 loadLocal();maintenance();V=rootView();render();
