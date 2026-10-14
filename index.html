@@ -1,0 +1,1185 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bodíkov</title><meta name="theme-color" content="#E4F2FF">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bodíkov">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+/* Layout: one-column phone app, one clear next action at the top of every kid screen, big touch targets, star jar always visible */
+:root{
+  --bg:#EEF3FF; --card:#FFFFFF; --ink:#2B2350; --ink-soft:#6B6491; --line:#E3E0F2;
+  --lea:#FF5C93; --lea-soft:#FFE3ED; --bea:#6F5BFF; --bea-soft:#E8E4FF;
+  --sun:#FFC22E; --sun-soft:#FFF2C9; --mint:#1FBF92; --mint-soft:#D6F6EC; --flame:#FF7A3D; --flame-soft:#FFE6D8;
+  --kid:var(--lea); --kid-soft:var(--lea-soft);
+  --display:"Baloo 2","Nunito",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --r-lg:28px; --r-md:20px; --r-sm:14px;
+  --shadow:0 4px 0 rgba(43,35,80,.12);
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background-color:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;font-weight:700;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+*{box-sizing:border-box}
+/* backdrop: morning sky fading to blush, a soft sun, two colour glows and rolling hills */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(circle at 88% 5%,rgba(255,206,64,.75) 0 54px,rgba(255,206,64,.22) 56px,transparent 150px),
+  radial-gradient(circle at -8% 34%,rgba(255,92,147,.16) 0 70px,transparent 230px),
+  radial-gradient(circle at 108% 64%,rgba(111,91,255,.15) 0 70px,transparent 250px),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 160' preserveAspectRatio='none'%3E%3Cpath d='M0 92 C200 28 420 34 620 84 S1000 140 1200 64 V160 H0Z' fill='%23D7F2E7'/%3E%3Cpath d='M0 124 C260 82 470 150 720 114 S1060 90 1200 122 V160 H0Z' fill='%23BFEBDA'/%3E%3C/svg%3E") bottom/100% 130px no-repeat,
+  linear-gradient(180deg,#E4F2FF 0%,#F1EEFF 55%,#FFF0F6 100%)}
+#app{position:relative;z-index:1}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--kid);outline-offset:3px}
+input,textarea{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;width:100%}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;text-wrap:balance}
+p{margin:0}
+#app{max-width:560px;margin:0 auto;min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 32px;display:flex;flex-direction:column;gap:16px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;padding:8px 16px;margin-inline:-16px;background:rgba(236,242,255,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:0 0 22px 22px}
+.top h1{flex:1;font-size:1.6rem;min-width:0}
+.round{width:48px;height:48px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+.round svg{width:24px;height:24px}
+.jar{display:flex;align-items:center;gap:6px;background:var(--sun);padding:8px 14px;border-radius:999px;font-family:var(--display);font-size:1.25rem;font-weight:800;box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
+.jar.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.18)}}
+
+/* generic */
+.card{background:var(--card);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow)}
+.btn{background:var(--kid);color:#fff;border-radius:999px;padding:12px 22px;font-family:var(--display);font-size:1.15rem;font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.btn.big{font-size:1.35rem;padding:14px 28px}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.btn.mint{background:var(--mint)}
+.btn.sun{background:var(--sun);color:var(--ink)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.pill{display:inline-flex;align-items:center;gap:4px;background:var(--sun-soft);border-radius:999px;padding:4px 10px;font-weight:900;white-space:nowrap;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-soft);font-weight:700}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar{height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--kid);border-radius:999px;transition:width .6s}
+
+/* mascot */
+.bodik{display:block;flex:none}
+.bodik .cloud{animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-4px)}}
+
+/* picker */
+.hello{display:flex;align-items:center;gap:8px;padding-top:12px}
+.bubble{background:var(--card);border-radius:var(--r-md);padding:14px 16px;font-family:var(--display);font-size:1.45rem;font-weight:800;box-shadow:var(--shadow);position:relative;line-height:1.15}
+.bubble::before{content:"";position:absolute;left:-10px;top:50%;margin-top:-10px;border:10px solid transparent;border-right-color:var(--card);border-left:0}
+.kids{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kidcard{border-radius:var(--r-lg);padding:20px 10px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 6px 0 rgba(43,35,80,.14);color:#fff}
+.kidcard .ava{font-size:4.2rem;line-height:1;background:rgba(255,255,255,.28);width:104px;height:104px;border-radius:50%;display:grid;place-items:center}
+.kidcard .nm{font-family:var(--display);font-size:2rem;font-weight:800;line-height:1}
+.kidcard .pts{background:rgba(255,255,255,.95);color:var(--ink);border-radius:999px;padding:4px 12px;font-weight:900}
+.k-lea{background:var(--lea)} .k-bea{background:var(--bea)}
+.parentbtn{align-self:center;background:var(--card);border-radius:999px;padding:10px 18px;color:var(--ink-soft);box-shadow:var(--shadow);display:flex;gap:8px;align-items:center}
+.badge{background:var(--flame);color:#fff;border-radius:999px;min-width:24px;height:24px;padding:0 7px;display:inline-grid;place-items:center;font-size:.85rem;font-weight:900}
+.teammini{display:flex;gap:12px;align-items:center}
+.teammini .ic{font-size:2.2rem}
+.teammini .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.teammini .bar i{background:linear-gradient(90deg,var(--lea),var(--bea))}
+
+/* kid home */
+.next{background:var(--kid);color:#fff;border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 0 rgba(43,35,80,.16);text-align:left;width:100%}
+.next .lbl{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.next .tk{display:flex;align-items:center;gap:14px}
+.next .ic{font-size:3.2rem;background:rgba(255,255,255,.25);border-radius:22px;width:76px;height:76px;display:grid;place-items:center;flex:none}
+.next h2{font-size:1.7rem}
+.next .pill{color:var(--ink)}
+.next .go{align-self:flex-start;background:#fff;color:var(--kid);border-radius:999px;padding:10px 20px;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--card);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+.stat .ic{font-size:1.9rem}
+.stat b{font-family:var(--display);font-size:1.4rem;display:block;line-height:1}
+.stat span{font-size:.85rem;color:var(--ink-soft)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border-radius:var(--r-lg);padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--shadow);position:relative}
+.tile .ic{font-size:3rem;line-height:1}
+.tile .nm{font-family:var(--display);font-size:1.3rem;font-weight:800}
+.tile .badge{position:absolute;top:10px;right:10px}
+.little .tile .ic{font-size:3.8rem}
+.little .sub{display:none}
+.goal{display:flex;flex-direction:column;gap:8px}
+
+/* tasks */
+.task{background:var(--card);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.task.pending{background:var(--sun-soft)}
+.task.done{background:var(--mint-soft)}
+.task .head{display:flex;gap:12px;align-items:center}
+.task .ic{font-size:2.6rem;width:64px;height:64px;border-radius:18px;background:var(--kid-soft);display:grid;place-items:center;flex:none}
+.task h3{font-size:1.35rem;flex:1;min-width:0}
+.little .task h3{font-size:1.5rem}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;text-align:left;width:100%}
+.step .box{width:30px;height:30px;border-radius:10px;border:3px solid var(--kid);display:grid;place-items:center;flex:none;color:#fff;font-weight:900}
+.step.on{background:var(--mint-soft)}
+.step.on .box{background:var(--mint);border-color:var(--mint)}
+.step.on span:last-child{text-decoration:line-through;opacity:.7}
+.task .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tmr{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
+.tmr svg{width:44px;height:44px;transform:rotate(-90deg)}
+.state{font-weight:900;color:var(--ink-soft)}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:24px 8px}
+
+/* morning mission */
+.morning{display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,#FFF5CF,#FFE6D4)}
+.mhead{display:flex;align-items:center;gap:12px}
+.mhead>div{flex:1;min-width:0}
+.mhead h2{font-size:1.5rem}
+.sunic{font-size:2.6rem;line-height:1}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mtile{background:var(--card);border-radius:var(--r-md);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--shadow)}
+.mtile .ic{font-size:2.8rem;line-height:1}
+.mtile .nm{font-family:var(--display);font-size:1.15rem;font-weight:800;text-align:center;line-height:1.1}
+.mtile .st{font-weight:900;font-size:.95rem}
+.mtile.pending{background:var(--sun-soft)} .mtile.done{background:var(--mint-soft)} .mtile.lock{opacity:.55}
+.little .mtile .ic{font-size:3.4rem}
+.mrow{display:flex;gap:10px;flex-wrap:wrap}
+.mi{font-size:2.1rem;width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.28);display:grid;place-items:center;position:relative}
+.mi.ok::after{content:"✓";position:absolute;right:-5px;bottom:-5px;background:var(--mint);color:#fff;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.85rem;font-weight:900}
+.next.sunny{background:linear-gradient(150deg,#FFB21E,#FF7A3D)}
+.next.sunny .go{color:#E5620F}
+.mnote{display:flex;gap:12px;align-items:center}
+.mnote .sunic{font-size:2.2rem}
+.prow input[type=checkbox]{width:28px;height:28px;accent-color:var(--mint);flex:none}
+.prow input[type=time]{width:120px}
+
+/* games */
+.gcard{background:var(--card);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center;text-align:left;width:100%}
+.gcard .ic{width:84px;height:84px;border-radius:22px;display:grid;place-items:center;font-size:3rem;flex:none}
+.gcard h2{font-size:1.45rem}
+.gcard .t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.soon{opacity:.6;box-shadow:none;border:3px dashed var(--line);background:transparent}
+
+/* mirror painting */
+.canvaswrap{position:relative;align-self:center;border-radius:var(--r-lg);overflow:hidden;box-shadow:0 6px 0 rgba(43,35,80,.14);background:#fff;touch-action:none}
+.canvaswrap.circ{border-radius:50%}
+.canvaswrap canvas{display:block;touch-action:none}
+.canvaswrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tools{display:flex;flex-direction:column;gap:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border-radius:999px;padding:8px 14px;box-shadow:var(--shadow);font-weight:900;display:flex;align-items:center;gap:6px}
+.chip.on{background:var(--kid);color:#fff}
+.chip.lock{opacity:.6}
+.sw{width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(0,0,0,.08);flex:none}
+.sw.on{outline:4px solid var(--ink);outline-offset:2px}
+.sw.rb{background:conic-gradient(#ff5c5c,#ffc22e,#5ce15d,#4fb6ff,#8e6bff,#ff5c93,#ff5c5c)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.size{width:40px;height:40px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center}
+.size i{display:block;border-radius:50%;background:var(--ink)}
+.size.on{background:var(--kid)} .size.on i{background:#fff}
+
+/* coloring */
+.pics{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.picbtn{background:var(--card);border-radius:var(--r-md);padding:8px;box-shadow:var(--shadow);position:relative;display:flex;flex-direction:column;gap:4px;align-items:center}
+.picbtn svg{width:100%;height:auto;pointer-events:none}
+.picbtn .lockov{position:absolute;inset:0;border-radius:var(--r-md);background:rgba(43,35,80,.55);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:var(--display);font-size:1.1rem}
+.picbtn .lockov b{font-size:2rem}
+.pic{max-width:100%}
+.pic [data-r]{fill:#fff;stroke:var(--ink);stroke-width:5;stroke-linejoin:round;transition:fill .15s}
+.pic .ln{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.colorpic{background:#fff;border-radius:var(--r-lg);box-shadow:0 6px 0 rgba(43,35,80,.14);overflow:hidden;align-self:center;width:100%;max-width:440px}
+.colorpic svg{display:block;width:100%;height:auto}
+.colorpic [data-r]{cursor:pointer}
+
+/* shop */
+.item{background:var(--card);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+.item .head{display:flex;gap:12px;align-items:center}
+.item .ic{font-size:2.4rem;width:60px;height:60px;border-radius:18px;background:var(--kid-soft);display:grid;place-items:center;flex:none}
+.item h3{font-size:1.25rem}
+.item .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item.owned{background:var(--mint-soft)}
+
+/* race */
+.lane{display:flex;flex-direction:column;gap:8px}
+.track{position:relative;height:64px;background:repeating-linear-gradient(90deg,var(--bg) 0 14px,var(--card) 14px 28px);border-radius:999px;box-shadow:inset 0 0 0 3px var(--line)}
+.track .runner{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:2.4rem;transition:left 1s cubic-bezier(.3,1.4,.6,1);width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.track .flag{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:1.8rem}
+.lane .nm{display:flex;justify-content:space-between;gap:8px;font-family:var(--display);font-size:1.2rem;font-weight:800}
+.trophy{background:var(--sun);border-radius:999px;padding:2px 10px;font-size:.9rem}
+.teambig{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.teambig .ic{font-size:4rem}
+.teambig .bar{width:100%;height:22px}
+.teambig .bar i{background:linear-gradient(90deg,var(--lea),var(--bea))}
+
+/* parent */
+.ptabs{display:flex;gap:6px;background:var(--card);border-radius:999px;padding:5px;box-shadow:var(--shadow);overflow-x:auto}
+.ptabs button{flex:1;border-radius:999px;padding:9px 8px;font-weight:900;white-space:nowrap;display:flex;gap:6px;align-items:center;justify-content:center;font-size:.95rem}
+.ptabs button.on{background:var(--ink);color:#fff}
+.parent{--kid:var(--ink);--kid-soft:var(--line)}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec h2{font-size:1.4rem}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>span{font-size:.9rem;color:var(--ink-soft)}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.icons button{font-size:1.6rem;height:48px;border-radius:12px;background:var(--bg)}
+.icons button.on{background:var(--sun);box-shadow:inset 0 0 0 3px var(--ink)}
+.prow{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:2px solid var(--bg)}
+.prow:first-child{border-top:0}
+.prow .t{flex:1;min-width:0}
+.prow .ic{font-size:1.8rem}
+.prow.ap{flex-wrap:wrap}
+.prow.ap .t{flex:1 1 calc(100% - 60px)}
+.prow.ap .btns{display:flex;gap:8px;margin-left:auto}
+.prow input[type=number]{width:84px;text-align:center}
+.mini{border-radius:999px;padding:8px 14px;font-weight:900;background:var(--bg)}
+.mini.ok{background:var(--mint);color:#fff}
+.mini.no{background:var(--flame-soft);color:#B23C0E}
+.kidtag{display:inline-block;border-radius:999px;padding:2px 10px;color:#fff;font-size:.85rem;font-weight:900}
+.kidtag.lea{background:var(--lea)} .kidtag.bea{background:var(--bea)}
+.log{display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.log div{display:flex;gap:8px;align-items:center}
+.log div span:nth-child(2){flex:1;min-width:0}
+.log .p{font-weight:900;font-variant-numeric:tabular-nums}
+.note{font-size:.9rem;color:var(--ink-soft);line-height:1.4}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(43,35,80,.5);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.ovbox{background:var(--card);border-radius:32px;padding:24px 20px;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:pop .35s cubic-bezier(.3,1.5,.6,1)}
+@keyframes pop{from{transform:scale(.7)}}
+.ovbox h2{font-size:2rem}
+.cstars{font-family:var(--display);font-size:3rem;font-weight:800;color:#E09A00;line-height:1}
+.dots{display:flex;gap:12px}
+.dots i{width:18px;height:18px;border-radius:50%;border:3px solid var(--ink)}
+.dots i.f{background:var(--ink)}
+.keypad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.keypad button{height:64px;border-radius:20px;background:var(--bg);font-family:var(--display);font-size:1.7rem;font-weight:800}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:12px 20px;z-index:60;font-weight:800;max-width:calc(100% - 32px);text-align:center;animation:fade .2s}
+canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* home: learning tile spans the row */
+.tile.wide{grid-column:1/-1;flex-direction:row;justify-content:center;gap:14px;background:linear-gradient(135deg,#1FBF92,#4FB6FF);color:#fff}
+.tile.wide .ic{font-size:2.6rem}
+.tile.wide .sub{color:rgba(255,255,255,.9)}
+.center{text-align:center}
+.kidfoot{align-self:center}
+
+/* learning */
+.lcard{background:var(--card);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center;text-align:left;width:100%}
+.lcard .ic{width:80px;height:80px;border-radius:22px;display:grid;place-items:center;font-size:2.8rem;flex:none;background:var(--mint-soft)}
+.lcard h2{font-size:1.4rem}
+.lcard .t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.progress{display:flex;gap:8px;justify-content:center}
+.progress i{width:16px;height:16px;border-radius:50%;background:var(--line)}
+.progress i.f{background:var(--mint)} .progress i.c{background:var(--kid);transform:scale(1.25)}
+.qtext{font-family:var(--display);font-size:1.6rem;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
+.qrow{display:flex;gap:10px;align-items:center;justify-content:center}
+.fruitbox{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;background:var(--card);border-radius:var(--r-lg);padding:22px 12px;min-height:170px;align-items:center;box-shadow:var(--shadow)}
+.fruit{font-size:3.6rem;position:relative;line-height:1;transition:transform .2s;padding:4px}
+.fruit.counted{transform:scale(1.12)}
+.fruit .n{position:absolute;top:-8px;right:-8px;background:var(--kid);color:#fff;border-radius:50%;width:30px;height:30px;font-size:1.1rem;display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.numbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.numbtn{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--display);font-size:2.3rem;font-weight:800;line-height:1}
+.numbtn .dt{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;max-width:42px;min-height:8px}
+.numbtn .dt i{width:8px;height:8px;border-radius:50%;background:var(--kid)}
+.numbtn.ok,.opt.ok,.group.ok{background:var(--mint);color:#fff}
+.numbtn.bad,.opt.bad,.group.bad{background:var(--flame-soft);opacity:.65}
+.bignum{font-family:var(--display);font-size:5.5rem;font-weight:800;line-height:1;text-align:center;color:var(--kid)}
+.groups{display:grid;gap:12px}
+.group{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:14px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:2.5rem;min-height:80px;align-items:center;line-height:1}
+.geo{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.geo svg{display:block;width:100%;height:auto}
+.geo .g-line{stroke:var(--ink);stroke-width:3.5;stroke-linecap:round;fill:none}
+.geo .g-faint{stroke:var(--ink);stroke-opacity:.18;stroke-width:2;stroke-dasharray:4 6;fill:none}
+.geo .g-pt line{stroke:var(--bea);stroke-width:3.5;stroke-linecap:round}
+.geo text{font-family:var(--display);font-weight:800;font-size:20px;fill:var(--ink)}
+.geo text.it{font-style:italic;fill:var(--bea)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:14px 10px;font-family:var(--display);font-size:1.25rem;font-weight:800;line-height:1.15}
+.explain{background:var(--sun-soft);border-radius:var(--r-md);padding:12px 14px;line-height:1.45;font-weight:700}
+.lesson{display:flex;flex-direction:column;gap:10px}
+.lesson h3{font-size:1.45rem}
+.lesson p{line-height:1.45}
+.zap{font-family:var(--display);font-weight:800;background:var(--bea-soft);border-radius:10px;padding:6px 12px;align-self:flex-start}
+
+/* setup & sync */
+.setup{display:flex;flex-direction:column;gap:14px}
+.rolegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rolebtn{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--display);font-size:1.3rem;font-weight:800}
+.rolebtn .ic{font-size:2.8rem;line-height:1}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:800;color:var(--ink-soft)}
+.sync i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.sync.online i{background:var(--mint)} .sync.offline i{background:var(--flame)} .sync.error i{background:#E0413A}
+.codebox{font-family:var(--display);font-size:1.1rem;font-weight:800;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;word-break:break-all;user-select:all}
+</style>
+</head><body><div id="app"></div>
+<script>
+(()=>{
+/* ================= configuration ================= */
+const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
+const APP_VERSION='2026-10-14.1';
+const SYNC=!!FIREBASE_CONFIG;
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dstr=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>dstr(new Date());
+const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dstr(d)};
+const weekStart=()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return dstr(d)};
+const daysLeftInWeek=()=>{const g=new Date().getDay();return g===0?0:7-g};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const plural=(n,a,b,c)=>n===1?a:(n>=2&&n<=4?b:c);
+const pick=a=>a[Math.random()*a.length|0];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const KIDS=['lea','bea'];
+
+/* ================= device (this phone only) ================= */
+const LKEY='bodikov-v2',V1KEY='bodikov-v1',DKEY='bodikov-device';
+let DEV={};try{DEV=JSON.parse(ls.get(DKEY)||'{}')}catch(e){}
+if(!DEV.id)DEV.id=uid()+uid();
+const hm=/rodina=([a-z0-9]{12,40})/i.exec(location.hash||'');
+if(hm){DEV.family=hm[1].toLowerCase();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+const saveDev=()=>ls.set(DKEY,JSON.stringify(DEV));saveDev();
+const role=()=>SYNC?(DEV.family&&DEV.role)||null:'shared';
+
+/* ================= shared state ================= */
+function defaults(){const d=today(),t=Date.now();return{
+  v:2,
+  settings:{pin:'1234',gameCap:20,learnCap:15,
+    prices:{lea:{mirror4:20,rainbow:15,glitter:25,kaleido:40,mandala6:20,mandala8:35,pack_space:25,pack_animals:25},
+            bea:{mirror4:40,rainbow:30,glitter:50,kaleido:80,mandala6:40,mandala8:70,pack_space:50,pack_animals:50}},
+    morning:{enabled:true,start:'06:30',end:'08:09',bonus:5,auto:false,items:[
+      {id:'eat',title:'Najíst se',icon:'🥣',points:5},{id:'dress',title:'Obléct se',icon:'👕',points:5},
+      {id:'teeth',title:'Vyčistit zuby',icon:'🪥',points:5},{id:'hair',title:'Učesat se',icon:'💇‍♀️',points:5}]},
+    team:{name:'Rodinný filmový večer',icon:'🍿',target:150,since:d}},
+  kids:{
+    lea:{name:'Lea',voc:'Leo',avatar:'🦄',little:true,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:40},
+    bea:{name:'Bea',voc:'Beo',avatar:'🦊',little:false,unlocked:{},streak:{count:0,last:''},mbonus:'',weekTarget:80}},
+  tasks:{
+    't-socks':{id:'t-socks',kid:'lea',title:'Uklidit ponožky',icon:'🧦',points:10,repeat:'once',status:'open',minutes:5,steps:[],ts:t},
+    't-bed':{id:'t-bed',kid:'bea',title:'Ustlat postel',icon:'🛏️',points:5,repeat:'daily',status:'open',minutes:5,steps:[],ts:t+1},
+    't-room':{id:'t-room',kid:'bea',title:'Uklidit pokoj',icon:'🧹',points:20,repeat:'once',status:'open',minutes:15,ts:t+2,
+      steps:[{t:'Hračky do krabice',d:false},{t:'Oblečení do skříně',d:false},{t:'Knížky do poličky',d:false}]}},
+  log:{
+    'w-lea':{id:'w-lea',d,ts:t,kid:'lea',pts:10,type:'bonus',text:'Uvítací dárek'},
+    'w-bea':{id:'w-bea',d,ts:t,kid:'bea',pts:10,type:'bonus',text:'Uvítací dárek'}}
+}}
+function normalize(o){
+  const D=defaults();if(!o||typeof o!=='object')o=D;
+  o.v=2;o.settings=Object.assign({},D.settings,o.settings||{});const st=o.settings;
+  st.prices=st.prices||{};KIDS.forEach(k=>st.prices[k]=Object.assign({},D.settings.prices[k],st.prices[k]||{}));
+  st.morning=Object.assign({},D.settings.morning,st.morning||{});
+  if(!Array.isArray(st.morning.items))st.morning.items=Object.values(st.morning.items||{});
+  if(!st.morning.items.length)st.morning.items=D.settings.morning.items;
+  st.team=Object.assign({},D.settings.team,st.team||{});
+  o.kids=o.kids||{};KIDS.forEach(k=>{o.kids[k]=Object.assign({},D.kids[k],o.kids[k]||{});o.kids[k].unlocked=o.kids[k].unlocked||{};o.kids[k].streak=Object.assign({count:0,last:''},o.kids[k].streak||{})});
+  o.tasks=o.tasks||{};Object.values(o.tasks).forEach(t=>{t.steps=Array.isArray(t.steps)?t.steps:Object.values(t.steps||{})});
+  o.log=o.log||{};
+  return o;
+}
+function fromV1(o){
+  const n=defaults();
+  n.settings.pin=o.pin||'1234';n.settings.gameCap=o.gameCap??20;if(o.prices)n.settings.prices=o.prices;if(o.morning)n.settings.morning=o.morning;if(o.team)n.settings.team=o.team;
+  n.tasks={};(o.tasks||[]).forEach((t,i)=>{if(!t.morning)n.tasks[t.id]={...t,ts:Date.now()+i}});
+  n.log={};(o.log||[]).slice().reverse().forEach((l,i)=>{const id='v1-'+i;n.log[id]={...l,id,ts:(Date.parse(l.d)||Date.now())+i}});
+  KIDS.forEach(k=>{const ok=o.kids&&o.kids[k];if(!ok)return;const nk=n.kids[k];
+    nk.unlocked={};(ok.unlocked||[]).forEach(x=>nk.unlocked[x]=true);nk.streak=ok.streak||nk.streak;nk.mbonus=ok.mbonus||'';nk.weekTarget=ok.weekTarget||nk.weekTarget;
+    const sum=Object.values(n.log).filter(l=>l.kid===k).reduce((a,l)=>a+l.pts,0);
+    if(typeof ok.points==='number'&&ok.points!==sum){const id='v1-adj-'+k;n.log[id]={id,d:today(),ts:Date.now(),kid:k,pts:ok.points-sum,type:'bonus',text:'Převod hvězdiček'}}});
+  return n;
+}
+let S;
+function loadLocal(){
+  let o=null;try{const r=ls.get(LKEY);if(r)o=JSON.parse(r)}catch(e){}
+  if(!o){try{const r=ls.get(V1KEY);if(r)o=fromV1(JSON.parse(r))}catch(e){}}
+  S=normalize(o);
+}
+const saveLocal=()=>ls.set(LKEY,JSON.stringify(S));
+
+/* ---- writes: local first, then the shared database ---- */
+let pending={},flushT=null;
+function setLocal(path,val){const ps=path.split('/');let o=S;for(let i=0;i<ps.length-1;i++){if(o[ps[i]]==null||typeof o[ps[i]]!=='object')o[ps[i]]={};o=o[ps[i]]}const last=ps[ps.length-1];if(val==null)delete o[last];else o[last]=clone(val)}
+const getLocal=path=>path.split('/').reduce((o,p)=>o==null?undefined:o[p],S);
+function put(path,val){
+  setLocal(path,val);
+  Object.keys(pending).forEach(p=>{if(p.startsWith(path+'/'))delete pending[p]});
+  const anc=Object.keys(pending).find(p=>path.startsWith(p+'/'));
+  if(anc)pending[anc]=clone(getLocal(anc))??null;else pending[path]=val==null?null:clone(val);
+  if(!flushT)flushT=setTimeout(flush,0);
+}
+function flush(){flushT=null;saveLocal();const u=pending;pending={};if(DB&&Object.keys(u).length)DB.update(u).catch(e=>{console.error(e);toast('Uložení se nepovedlo. Zkusím to znovu.')})}
+function addLog(kid,pts,type,text,self=false){const ts=Date.now();const id=ts.toString(36)+uid();put(`log/${id}`,{id,d:today(),ts,kid,pts,type,text,dev:DEV.id,self})}
+
+/* ---- derived values ---- */
+const kidOf=id=>S.kids[id];
+const logs=()=>Object.values(S.log).sort((a,b)=>b.ts-a.ts);
+const pointsOf=kid=>Object.values(S.log).reduce((a,l)=>l.kid===kid?a+(+l.pts||0):a,0);
+const has=(kid,item)=>!!kidOf(kid).unlocked[item];
+const taskList=()=>Object.values(S.tasks).sort((a,b)=>(b.morning?1:0)-(a.morning?1:0)||(a.mo??0)-(b.mo??0)||(a.ts||0)-(b.ts||0));
+const streakOf=k=>(k.streak.last===today()||k.streak.last===yesterday())?k.streak.count:0;
+const pendingPts=kid=>taskList().filter(t=>t.kid===kid&&t.status==='pending').reduce((a,t)=>a+t.points+(t.fast?2:0),0);
+const sumLog=f=>Object.values(S.log).filter(f).reduce((a,l)=>a+(+l.pts||0),0);
+const weekPts=kid=>{const ws=weekStart();return sumLog(l=>l.kid===kid&&l.d>=ws&&(l.type==='task'||l.type==='streak'))};
+const teamPts=()=>sumLog(l=>l.d>=S.settings.team.since&&(l.type==='task'||l.type==='streak'));
+const pendingCount=()=>taskList().filter(t=>t.status==='pending').length;
+
+/* ---- morning window ---- */
+const toMin=s=>{const[a,b]=String(s||'0:0').split(':').map(Number);return a*60+(b||0)};
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+function mWin(){const m=S.settings.morning;if(!m.enabled)return 'off';const n=nowMin();return n<toMin(m.start)?'before':n<toMin(m.end)?'in':'after'}
+const minsLeft=()=>Math.max(1,toMin(S.settings.morning.end)-nowMin());
+
+/* ---- daily upkeep, idempotent so every phone can run it ---- */
+function maintenance(){
+  const td=today();
+  Object.values(S.tasks).forEach(t=>{if(t.repeat==='daily'&&t.status==='done'&&t.doneDate!==td)
+    put(`tasks/${t.id}`,{...t,status:'open',fast:false,timerEnd:null,steps:(t.steps||[]).map(s=>({...s,d:false}))})});
+  const m=S.settings.morning;
+  KIDS.forEach(kid=>m.items.forEach((it,i)=>{const id=`m-${it.id}-${kid}`,t=S.tasks[id];
+    if(!m.enabled){if(t&&t.status!=='pending')put(`tasks/${id}`,null);return}
+    if(!t)put(`tasks/${id}`,{id,kid,morning:true,mo:i,repeat:'daily',status:'open',minutes:0,steps:[],title:it.title,icon:it.icon,points:it.points,ts:0});
+    else if(t.title!==it.title||t.icon!==it.icon||t.points!==it.points||t.mo!==i)put(`tasks/${id}`,{...t,title:it.title,icon:it.icon,points:it.points,mo:i});
+  }));
+}
+
+/* ================= sync ================= */
+let DB=null,syncState=SYNC?'connecting':'local',firstSnap=false;
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+async function startSync(){
+  if(!SYNC||!DEV.family||DB)return;
+  try{
+    const v='10.12.2',b=`https://www.gstatic.com/firebasejs/${v}/`;
+    if(!window.firebase){await loadScript(b+'firebase-app-compat.js');await loadScript(b+'firebase-auth-compat.js');await loadScript(b+'firebase-database-compat.js')}
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+    await firebase.auth().signInAnonymously();
+    firebase.database().ref('.info/connected').on('value',s=>{syncState=s.val()?'online':'offline';updSync()});
+    DB=firebase.database().ref('families/'+DEV.family+'/state');
+    DB.on('value',snap=>{
+      const val=snap.val();
+      if(!val){DB.set(clone(S));return}
+      S=normalize(val);saveLocal();firstSnap=true;maintenance();softRender();
+    },e=>{console.error(e);syncState='error';updSync()});
+  }catch(e){console.error(e);syncState='error';updSync()}
+}
+function updSync(){document.querySelectorAll('.sync').forEach(el=>{el.className='sync '+syncState;el.lastChild.textContent=syncLabel()})}
+const syncLabel=()=>({local:'Jen v tomto zařízení',connecting:'Připojuji…',online:'Propojeno',offline:'Bez internetu, uloží se později',error:'Chyba připojení'})[syncState];
+const syncBadge=()=>`<span class="sync ${syncState}"><i></i>${esc(syncLabel())}</span>`;
+
+/* ---- automatic app updates ---- */
+let updateReady=false;
+async function checkUpdate(){
+  if(!SYNC||APP_VERSION==='dev')return;
+  try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();if(j.v&&j.v!==APP_VERSION){updateReady=true;maybeReload()}}catch(e){}
+}
+function maybeReload(){if(updateReady&&['home','picker','parent','setup'].includes(V.name)&&!document.querySelector('.ov'))location.reload()}
+
+/* ================= catalog ================= */
+const ITEMS=[
+  {id:'mirror4',icon:'✳️',name:'Malování na 4 strany',desc:'Obrázek se zrcadlí do všech rohů.'},
+  {id:'rainbow',icon:'🌈',name:'Duhový štětec',desc:'Každá čára hraje všemi barvami.'},
+  {id:'glitter',icon:'✨',name:'Třpytivý štětec',desc:'Kolem čáry jiskří třpytky.'},
+  {id:'kaleido',icon:'❄️',name:'Kaleidoskop',desc:'12 zrcadel, kreslíš sněhové vločky.',needs:'mirror4'},
+  {id:'mandala6',icon:'🌸',name:'Mandala na 6 stran',desc:'Mandala jako květina se šesti lístky.'},
+  {id:'mandala8',icon:'🌼',name:'Mandala na 8 stran',desc:'Nejbohatší mandala s osmi stranami.',needs:'mandala6'},
+  {id:'pack_space',icon:'🚀',name:'Vybarvovánky: Vesmír',desc:'Raketa a planeta s prstýnkem.'},
+  {id:'pack_animals',icon:'🐱',name:'Vybarvovánky: Zvířátka',desc:'Kočička a motýlek.'}
+];
+const itemById=id=>ITEMS.find(i=>i.id===id);
+const TASK_ICONS=['🧦','🧸','🪥','🛏️','🧹','🍽️','📚','✏️','🎒','👕','🗑️','🌱','🐶','🛁','🧺','🥦','🎹','🚲','💤','🦷','🧥','👟','🥛','⭐'];
+
+/* ================= icons & mascot ================= */
+const ICON={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>'};
+function starPts(cx,cy,R,r=R*.45){const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r:R;p.push((cx+Math.cos(a)*rr).toFixed(1)+','+(cy+Math.sin(a)*rr).toFixed(1))}return p.join(' ')}
+function bodik(w=120,mood='happy'){
+  const mouth=mood==='wow'?'<ellipse cx="76" cy="86" rx="7" ry="8" fill="var(--ink)"/>':'<path d="M65 82 q11 11 22 0" fill="none" stroke="var(--ink)" stroke-width="4.5" stroke-linecap="round"/>';
+  return `<svg class="bodik" width="${w}" height="${Math.round(w*.82)}" viewBox="0 0 150 123" aria-hidden="true"><g class="cloud">
+  <path d="M35 108 a28 28 0 0 1 2 -55 a34 34 0 0 1 62 -12 a26 26 0 0 1 32 26 a22 22 0 0 1 -6 41 z" fill="#fff" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="60" cy="72" r="6.5" fill="var(--ink)"/><circle cx="92" cy="72" r="6.5" fill="var(--ink)"/>
+  <circle cx="62.5" cy="69.5" r="2.2" fill="#fff"/><circle cx="94.5" cy="69.5" r="2.2" fill="#fff"/>
+  <ellipse cx="46" cy="86" rx="8" ry="5" fill="#FF5C93" opacity=".45"/><ellipse cx="106" cy="86" rx="8" ry="5" fill="#FF5C93" opacity=".45"/>
+  ${mouth}
+  <polygon points="${starPts(118,22,16)}" fill="var(--sun)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/></g></svg>`;
+}
+
+/* ---------- coloring pictures (viewBox 300x300) ---------- */
+const st=(cx,cy,R)=>`<polygon data-r points="${starPts(cx,cy,R)}"/>`;
+const PICS={
+  house:{name:'Domeček',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <circle data-r cx="248" cy="52" r="28"/>
+    <path data-r d="M30 92 a16 16 0 0 1 22 -20 a22 22 0 0 1 40 4 a15 15 0 0 1 -2 28 h-52 a12 12 0 0 1 -8 -12z"/>
+    <rect data-r x="0" y="236" width="300" height="64"/>
+    <rect data-r x="192" y="62" width="26" height="50"/>
+    <polygon data-r points="58,132 150,56 242,132"/>
+    <rect data-r x="74" y="132" width="152" height="108"/>
+    <rect data-r x="130" y="172" width="40" height="68"/>
+    <rect data-r x="88" y="150" width="32" height="32"/><rect data-r x="180" y="150" width="32" height="32"/>
+    <circle data-r cx="150" cy="104" r="12"/>`},
+  flower:{name:'Kytička',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <rect data-r x="145" y="130" width="10" height="100"/>
+    <ellipse data-r cx="122" cy="192" rx="26" ry="12" transform="rotate(-30 122 192)"/>
+    <ellipse data-r cx="178" cy="172" rx="26" ry="12" transform="rotate(30 178 172)"/>
+    ${[0,60,120,180,240,300].map(a=>`<ellipse data-r cx="150" cy="70" rx="22" ry="34" transform="rotate(${a} 150 110)"/>`).join('')}
+    <circle data-r cx="150" cy="110" r="25"/>
+    <polygon data-r points="112,236 188,236 178,292 122,292"/>
+    <rect data-r x="104" y="222" width="92" height="18" rx="6"/>`},
+  fish:{name:'Rybička',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <rect data-r x="0" y="262" width="300" height="38"/>
+    <path data-r d="M40 262 q-10 -40 8 -70 q14 30 4 70z"/><path data-r d="M262 262 q-12 -50 10 -86 q16 40 4 86z"/>
+    <circle data-r cx="62" cy="72" r="11"/><circle data-r cx="84" cy="44" r="8"/><circle data-r cx="58" cy="26" r="5"/>
+    <polygon data-r points="198,150 262,104 262,196"/>
+    <polygon data-r points="112,104 158,68 178,108"/>
+    <ellipse data-r cx="140" cy="150" rx="82" ry="56"/>
+    <path data-r d="M150 96 q22 54 0 108 q30 -54 0 -108z"/>
+    <circle data-r cx="96" cy="136" r="11"/>
+    <path class="ln" d="M68 164 q10 8 20 2"/>`},
+  rocket:{name:'Raketa',pack:'pack_space',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    ${st(48,52,16)}${st(250,70,12)}${st(60,220,11)}${st(248,236,15)}
+    <circle data-r cx="232" cy="150" r="22"/>
+    <polygon data-r points="126,212 150,282 174,212"/>
+    <polygon data-r points="116,168 78,232 118,216"/><polygon data-r points="184,168 222,232 182,216"/>
+    <path data-r d="M150 38 C186 78 192 140 184 214 L116 214 C108 140 114 78 150 38Z"/>
+    <path data-r d="M150 38 C166 54 175 72 180 92 L120 92 C125 72 134 54 150 38Z"/>
+    <circle data-r cx="150" cy="136" r="21"/>
+    <rect data-r x="128" y="182" width="44" height="12" rx="6"/>`},
+  planet:{name:'Planeta',pack:'pack_space',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    ${st(40,40,14)}${st(150,26,9)}${st(266,128,11)}${st(34,170,10)}${st(200,268,13)}
+    <circle data-r cx="252" cy="58" r="22"/><circle data-r cx="64" cy="248" r="16"/>
+    <ellipse data-r cx="150" cy="160" rx="134" ry="36"/>
+    <circle data-r cx="150" cy="150" r="72"/>
+    <path data-r d="M90 112 q60 18 120 0 q6 12 8 22 q-68 20 -136 0 q2 -10 8 -22z"/>
+    <path data-r d="M16 160 A134 36 0 0 0 284 160 L262 160 A112 22 0 0 1 38 160Z"/>`},
+  cat:{name:'Kočička',pack:'pack_animals',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <polygon data-r points="72,118 84,28 142,82"/><polygon data-r points="228,118 216,28 158,82"/>
+    <polygon data-r points="90,100 96,56 124,84"/><polygon data-r points="210,100 204,56 176,84"/>
+    <circle data-r cx="150" cy="164" r="92"/>
+    <ellipse data-r cx="114" cy="150" rx="15" ry="20"/><ellipse data-r cx="186" cy="150" rx="15" ry="20"/>
+    <ellipse data-r cx="96" cy="190" rx="16" ry="10"/><ellipse data-r cx="204" cy="190" rx="16" ry="10"/>
+    <polygon data-r points="138,184 162,184 150,198"/>
+    <path class="ln" d="M150 198 v12 M150 210 q-12 12 -24 4 M150 210 q12 12 24 4 M36 176 l52 6 M40 204 l50 -8 M264 176 l-52 6 M260 204 l-50 -8"/>`},
+  butterfly:{name:'Motýlek',pack:'pack_animals',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <ellipse data-r cx="96" cy="112" rx="60" ry="50" transform="rotate(-20 96 112)"/>
+    <ellipse data-r cx="204" cy="112" rx="60" ry="50" transform="rotate(20 204 112)"/>
+    <ellipse data-r cx="106" cy="204" rx="42" ry="38" transform="rotate(20 106 204)"/>
+    <ellipse data-r cx="194" cy="204" rx="42" ry="38" transform="rotate(-20 194 204)"/>
+    <circle data-r cx="88" cy="104" r="16"/><circle data-r cx="212" cy="104" r="16"/>
+    <circle data-r cx="104" cy="208" r="11"/><circle data-r cx="196" cy="208" r="11"/>
+    <ellipse data-r cx="150" cy="160" rx="14" ry="72"/>
+    <circle data-r cx="150" cy="82" r="17"/>
+    <path class="ln" d="M144 68 q-14 -30 -34 -36 M156 68 q14 -30 34 -36"/>
+    <circle data-r cx="108" cy="32" r="6"/><circle data-r cx="192" cy="32" r="6"/>`}
+};
+const COLORS=['#FF5C93','#FF8A3D','#FFC22E','#FFE66B','#9BE15D','#1FBF92','#4FB6FF','#3D6BFF','#8E6BFF','#C77DFF','#8B5A3C','#9AA0B4','#FFFFFF'];
+const picSvg=(id,cls='pic')=>`<svg class="${cls}" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${PICS[id].svg}</svg>`;
+
+
+
+/* ================= feedback ================= */
+let AC;
+function chime(kind='win'){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const n=AC.currentTime;
+  const notes=kind==='pop'?[880]:kind==='tick'?[660,990]:kind==='no'?[330,262]:[523,659,784,1047];
+  notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=f;const t=n+i*.09;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.16,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.32);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.36)})}catch(e){}}
+function say(t){try{if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='cs-CZ';u.rate=.92;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}}
+const sayKid=t=>{if(V.kid&&kidOf(V.kid).little)say(t)};
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=document.createElement('canvas');c.className='fx';document.body.appendChild(c);
+  const W=c.width=innerWidth,H=c.height=innerHeight,x=c.getContext('2d');
+  const cols=['#FF5C93','#6F5BFF','#FFC22E','#1FBF92','#4FB6FF'];
+  const P=Array.from({length:110},()=>({x:W/2,y:H*.42,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,s:7+Math.random()*7,c:cols[Math.random()*5|0],r:Math.random()*6,vr:(Math.random()-.5)*.3,star:Math.random()<.35}));
+  let t=0;(function f(){x.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;
+    if(p.star){x.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?p.s*.25:p.s*.6;x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}x.fill()}else x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});
+    if(++t<120)requestAnimationFrame(f);else c.remove()})();
+}
+let toastT;
+function toast(msg){document.querySelectorAll('.toast').forEach(e=>e.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;document.body.appendChild(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2600)}
+function celebrate({title,stars,sub,speak,mood='happy',btn='Jupí!',onClose}){
+  const o=document.createElement('div');o.className='ov';
+  o.innerHTML=`<div class="ovbox" role="dialog" aria-modal="true">${bodik(130,mood)}<h2>${esc(title)}</h2>${stars?`<div class="cstars">+${stars} ⭐</div>`:''}${sub?`<p class="muted">${esc(sub)}</p>`:''}<button class="btn big" data-close>${esc(btn)}</button></div>`;
+  document.body.appendChild(o);o.querySelector('[data-close]').focus();
+  o.addEventListener('click',e=>{if(e.target.closest('[data-close]')||e.target===o){o.remove();if(onClose)onClose();maybeReload()}});
+  confetti();chime();if(speak)sayKid(speak);
+}
+function refreshJar(){const j=$('.jar span');if(j&&V.kid){j.textContent=pointsOf(V.kid);const p=j.parentElement;p.classList.remove('bump');void p.offsetWidth;p.classList.add('bump')}}
+
+/* ================= navigation ================= */
+function rootView(){const r=role();if(!r)return{name:'setup'};if(r==='lea'||r==='bea')return{name:'home',kid:r};if(r==='parent')return{name:'parent'};return{name:'picker'}}
+let V=rootView();const stack=[];let tick=null;
+function go(name,extra={}){stack.push(V);V={...V,...extra,name};render();scrollTo(0,0)}
+function back(){V=stack.pop()||rootView();render();maybeReload()}
+function setKidTheme(id){const r=document.documentElement.style;r.setProperty('--kid',`var(--${id||'lea'})`);r.setProperty('--kid-soft',`var(--${id||'lea'}-soft)`)}
+function topbar(title,showJar=true,showBack=true){const k=V.kid&&kidOf(V.kid);
+  return `<header class="top">${showBack?`<button class="round" data-act="back" aria-label="Zpět">${ICON.back}</button>`:`<span class="round" aria-hidden="true" style="font-size:1.6rem">${k?k.avatar:'⭐'}</span>`}<h1>${esc(title)}</h1>${showJar&&k?`<div class="jar" aria-label="Hvězdičky">⭐ <span>${pointsOf(V.kid)}</span></div>`:''}</header>`}
+
+/* ================= screens: setup ================= */
+function vSetup(){
+  if(!DEV.family)return `<div class="hello">${bodik(130)}<p class="bubble">Vítejte v Bodíkově!</p></div>
+    <div class="card setup"><h2>Jste rodič a zakládáte aplikaci?</h2><p class="muted">Vytvoří se vaše rodina. Holčičí telefony pak propojíte odkazem.</p><button class="btn big" data-act="newFamily">Založit rodinu</button></div>
+    <div class="card setup"><h2>Máte odkaz od rodičů?</h2><p class="muted">Otevřete na tomhle telefonu odkaz, který vám rodič poslal. Nebo sem vložte kód rodiny.</p>
+      <input id="famcode" placeholder="Kód rodiny" autocomplete="off" autocapitalize="off"><button class="btn ghost" data-act="joinFamily">Připojit</button></div>`;
+  return `<div class="hello">${bodik(130)}<p class="bubble">Komu patří tenhle telefon?</p></div>
+    <div class="rolegrid">
+      <button class="rolebtn" data-act="setRole" data-r="lea"><span class="ic">${kidOf('lea').avatar}</span>${esc(kidOf('lea').name)}</button>
+      <button class="rolebtn" data-act="setRole" data-r="bea"><span class="ic">${kidOf('bea').avatar}</span>${esc(kidOf('bea').name)}</button>
+      <button class="rolebtn" data-act="setRole" data-r="parent"><span class="ic">🔒</span>Rodiče</button>
+      <button class="rolebtn" data-act="setRole" data-r="shared"><span class="ic">👨‍👩‍👧‍👧</span>Společný</button>
+    </div><p class="note center">Telefon holky otevře rovnou její hvězdičky a úkoly. Dá se to později změnit v rodičovské části.</p>`;
+}
+
+/* ================= screens: kids ================= */
+function vPicker(){
+  const pend=pendingCount(),tp=teamPts(),pct=Math.min(100,Math.round(tp/S.settings.team.target*100));
+  return `<div class="hello">${bodik(140)}<p class="bubble">Ahoj! Kdo si jde hrát?</p></div>
+  <div class="kids">${KIDS.map(id=>{const k=kidOf(id);return `<button class="kidcard k-${id}" data-act="pick" data-id="${id}"><span class="ava">${k.avatar}</span><span class="nm">${esc(k.name)}</span><span class="pts">⭐ ${pointsOf(id)}</span></button>`}).join('')}</div>
+  <div class="card teammini"><span class="ic">${esc(S.settings.team.icon)}</span><div class="t"><b>Společně na: ${esc(S.settings.team.name)}</b><div class="bar"><i style="width:${pct}%"></i></div><span class="muted">${tp} z ${S.settings.team.target} ⭐</span></div></div>
+  <button class="parentbtn" data-act="parentLogin">${role()==='parent'?'Pro rodiče':'🔒 Pro rodiče'} ${pend?`<span class="badge">${pend}</span>`:''}</button>
+  ${SYNC?`<div class="center">${syncBadge()}</div>`:''}`;
+}
+function vHome(){
+  const k=kidOf(V.kid),id=V.kid,w=mWin(),isOwn=role()===id;
+  const all=taskList().filter(t=>t.kid===id);
+  const open=all.filter(t=>t.status==='open'&&(!t.morning||w==='in')),next=open[0];
+  const ms=all.filter(t=>t.morning),mOpen=ms.filter(t=>t.status==='open');
+  const pend=pendingPts(id),s=streakOf(k),pts=pointsOf(id);
+  const locked=ITEMS.filter(i=>!has(id,i.id)&&(!i.needs||has(id,i.needs))).sort((a,b)=>S.settings.prices[id][a.id]-S.settings.prices[id][b.id]);
+  const goal=locked[0],gp=goal?S.settings.prices[id][goal.id]:0;
+  const wk=weekPts(id),wpct=Math.min(100,Math.round(wk/k.weekTarget*100));
+  const lp=sumLog(l=>l.kid===id&&l.type==='learn'&&l.d===today());
+  const mHero=w==='in'&&mOpen.length?`<button class="next sunny" data-act="goTasks"><span class="lbl">☀️ Ranní mise · zbývá <span data-mleft>${minsLeft()}</span> min</span><span class="mrow">${ms.map(t=>`<span class="mi ${t.status!=='open'?'ok':''}">${esc(t.icon)}</span>`).join('')}</span><span class="go">Jdu na to!</span></button>`:'';
+  const mNote=w==='before'&&ms.length?`<div class="card mnote"><span class="sunic">☀️</span><div><b>Ranní mise začne v ${esc(S.settings.morning.start)}</b><br><span class="muted">Najíst se, obléct, zuby a učesat.</span></div></div>`:'';
+  return `${topbar(`Ahoj, ${k.voc}!`,true,!isOwn)}${mNote}
+  ${mHero||(next?`<button class="next" data-act="goTasks"><span class="lbl">Teď udělej</span><span class="tk"><span class="ic">${esc(next.icon)}</span><span><h2>${esc(next.title)}</h2><span class="pill" style="margin-top:6px">+${next.points} ⭐${next.minutes?` · ⏱️ ${next.minutes} min`:''}</span></span></span><span class="go">Jdu na to!</span></button>`
+   :`<div class="card empty">${bodik(110)}<h2>Všechny úkoly hotové!</h2><p class="muted">Můžeš si jít hrát nebo se něco naučit.</p></div>`)}
+  <div class="stats">
+    <div class="stat"><span class="ic">🔥</span><div><b>${s} ${plural(s,'den','dny','dní')}</b><span>v řadě</span></div></div>
+    <div class="stat"><span class="ic">⏳</span><div><b>+${pend} ⭐</b><span>čeká na potvrzení</span></div></div>
+  </div>
+  <div class="tiles">
+    <button class="tile" data-act="goTasks"><span class="ic">✅</span><span class="nm">Úkoly</span>${open.length?`<span class="badge">${open.length}</span>`:''}</button>
+    <button class="tile" data-act="go" data-to="games"><span class="ic">🎨</span><span class="nm">Hry</span></button>
+    <button class="tile wide" data-act="go" data-to="learn"><span class="ic">${k.little?'🍎':'📐'}</span><span><span class="nm">Učení</span><br><span class="sub">${k.little?'Počítání do 5':'Body a čáry'}${lp?` · dnes +${lp} ⭐`:''}</span></span></button>
+    <button class="tile" data-act="go" data-to="race"><span class="ic">🏁</span><span class="nm">Závod</span><span class="sub muted">${wpct} %</span></button>
+    <button class="tile" data-act="go" data-to="shop"><span class="ic">🎁</span><span class="nm">Odemknout</span></button>
+  </div>
+  ${goal?`<div class="card goal"><div class="row" style="justify-content:space-between"><b>${goal.icon} ${esc(goal.name)}</b><span class="pill">${Math.min(pts,gp)} / ${gp} ⭐</span></div><div class="bar"><i style="width:${Math.min(100,pts/gp*100)}%"></i></div><span class="muted sub">${pts>=gp?'Už si to můžeš odemknout!':`Chybí ještě ${gp-pts} ⭐`}</span></div>`:''}
+  ${isOwn?`<button class="parentbtn kidfoot" data-act="parentLogin">🔒 Pro rodiče</button>`:''}`;
+}
+function vTasks(){
+  const id=V.kid,list=taskList().filter(t=>t.kid===id&&!t.morning);
+  const order={open:0,pending:1,done:2};list.sort((a,b)=>order[a.status]-order[b.status]);
+  const ms=morningSection(id);
+  if(!list.length&&!ms)return `${topbar('Úkoly')}<div class="card empty">${bodik(120)}<h2>Dnes tu nic není</h2><p class="muted">Rodiče ti brzy nějaký úkol přidají.</p></div>`;
+  return `${topbar('Úkoly')}${ms}${list.map(taskCard).join('')}`;
+}
+function morningSection(kid){
+  const ms=taskList().filter(t=>t.kid===kid&&t.morning);if(!ms.length)return '';
+  const m=S.settings.morning,w=mWin(),done=ms.filter(t=>t.status!=='open').length;
+  const head=w==='in'?`Do ${esc(m.end)} zbývá <b><span data-mleft>${minsLeft()}</span> min</b>`:w==='before'?`Začne v ${esc(m.start)}`:`Na dnes skončila. Zítra od ${esc(m.start)}!`;
+  return `<section class="card morning"><div class="mhead"><span class="sunic">☀️</span><div><h2>Ranní mise</h2><span class="muted">${head}</span></div><span class="pill">${done}/${ms.length}</span></div>
+    <div class="mgrid">${ms.map(t=>{const can=t.status==='open'&&w==='in',lock=t.status==='open'&&!can;
+      return `<button class="mtile ${t.status} ${lock?'lock':''}" data-act="${can?'mdone':'speak'}" data-id="${t.id}" data-t="${esc(t.title)}"><span class="ic">${esc(t.icon)}</span><span class="nm">${esc(t.title)}</span><span class="st">${t.status==='done'?'✅ Hotovo':t.status==='pending'?'⏳ Čeká':lock?'🔒':`+${t.points} ⭐`}</span></button>`}).join('')}</div>
+    ${w==='in'&&done<ms.length?`<p class="muted sub">Ťukni na úkol, až ho splníš. Když stihneš všechny do ${esc(m.end)}, dostaneš bonus +${m.bonus} ⭐!</p>`:''}</section>`;
+}
+function taskCard(t){
+  const steps=t.steps||[],left=steps.filter(s=>!s.d).length;let body='';
+  if(t.status==='open'){
+    body+=steps.length?`<div class="steps">${steps.map((s,i)=>`<button class="step ${s.d?'on':''}" data-act="step" data-id="${t.id}" data-i="${i}"><span class="box">${s.d?'✓':''}</span><span>${esc(s.t)}</span></button>`).join('')}</div>`:'';
+    body+=`<div class="actions">`;
+    if(t.minutes&&!t.timerEnd)body+=`<button class="btn sun" data-act="timer" data-id="${t.id}">⏱️ Závod s časem (${t.minutes} min)</button>`;
+    if(t.timerEnd)body+=`<div class="tmr" data-tmr="${t.id}"></div>`;
+    body+=left?`<span class="state">Ještě ${left} ${plural(left,'krok','kroky','kroků')}</span>`:`<button class="btn big" data-act="done" data-id="${t.id}">Hotovo!</button>`;
+    body+=`</div>`;
+  }else if(t.status==='pending')body=`<span class="state">⏳ Čeká na potvrzení od rodičů${t.fast?' · ⚡ Rychlík +2':''}</span>`;
+  else body=`<span class="state">✅ Splněno. Zítra znovu!</span>`;
+  return `<article class="task ${t.status}" id="t-${t.id}"><div class="head"><button class="ic" data-act="speak" data-t="${esc(t.title)}" aria-label="Přečíst úkol">${esc(t.icon)}</button><h3>${esc(t.title)}</h3><span class="pill">+${t.points} ⭐</span></div>${body}</article>`;
+}
+function vGames(){
+  return `${topbar('Hry')}
+  <button class="gcard" data-act="go" data-to="mirror"><span class="ic" style="background:var(--bea-soft)">🦋</span><span class="t"><h2>Zrcadlové malování</h2><span class="muted sub">Kresli a obrázek se zrcadlí.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
+  <button class="gcard" data-act="go" data-to="mandala"><span class="ic" style="background:var(--mint-soft)">🌸</span><span class="t"><h2>Mandala</h2><span class="muted sub">Kreslíš a kreslí se to do 4 stran.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
+  <button class="gcard" data-act="go" data-to="colorPick"><span class="ic" style="background:var(--lea-soft)">🖍️</span><span class="t"><h2>Vybarvovánky</h2><span class="muted sub">Ťukni na místo a vybarví se.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
+  <div class="gcard soon"><span class="ic" style="background:var(--sun-soft)">🧩</span><span class="t"><h2>Puzzle</h2><span class="muted">Brzy přibude</span></span></div>
+  <p class="note">Za hry je denně nejvýš ${S.settings.gameCap} ⭐. Nejvíc hvězdiček je za úkoly.</p>`;
+}
+function vMirror(){
+  const k=V.kid,mand=V.name==='mandala';
+  const modes=mand?[['m4','4 strany',null],['m6','6 stran','mandala6'],['m8','8 stran','mandala8']]:[['2','2 strany',null],['4','4 strany','mirror4'],['12','Vločka','kaleido']];
+  return `${topbar(mand?'Mandala':'Zrcadlové malování')}
+  <div class="canvaswrap ${mand?'circ':''}" id="cvwrap"><canvas id="cv" aria-label="Plocha na malování"></canvas><svg id="guides" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
+  <div class="tools">
+    <div class="chips">${modes.map(([m,l,it])=>{const lock=it&&!has(k,it);return `<button class="chip ${lock?'lock':''}" data-act="${lock?'lockedItem':'mode'}" data-m="${m}" data-item="${it||''}">${lock?'🔒 ':''}${l}</button>`}).join('')}</div>
+    <div class="swatches">${COLORS.slice(0,10).map(c=>`<button class="sw" data-act="col" data-c="${c}" style="background:${c}" aria-label="Barva"></button>`).join('')}
+      <button class="sw ${has(k,'rainbow')?'rb':''}" data-act="${has(k,'rainbow')?'rainbow':'lockedItem'}" data-item="rainbow" aria-label="Duhový štětec" style="${has(k,'rainbow')?'':'background:var(--line);display:grid;place-items:center'}">${has(k,'rainbow')?'':'🔒'}</button></div>
+    <div class="row">${[6,12,22].map(w=>`<button class="size" data-act="size" data-w="${w}" aria-label="Velikost"><i style="width:${w*.9}px;height:${w*.9}px"></i></button>`).join('')}
+      <button class="chip ${has(k,'glitter')?'':'lock'}" data-act="${has(k,'glitter')?'glitter':'lockedItem'}" data-item="glitter">${has(k,'glitter')?'':'🔒 '}✨ Třpytky</button></div>
+    <div class="row"><button class="btn ghost" data-act="clear">Smazat</button><button class="btn big" data-act="mirrorDone">Hotovo! ⭐</button></div>
+  </div>`;
+}
+function vColorPick(){
+  const k=V.kid;
+  return `${topbar('Vybarvovánky')}<div class="pics">${Object.keys(PICS).map(id=>{const p=PICS[id],lock=p.pack&&!has(k,p.pack);
+    return `<button class="picbtn" data-act="${lock?'lockedItem':'pickPic'}" data-id="${id}" data-item="${p.pack||''}">${picSvg(id)}<span>${esc(p.name)}</span>${lock?`<span class="lockov"><b>🔒</b>${S.settings.prices[k][p.pack]} ⭐</span>`:''}</button>`}).join('')}</div>`;
+}
+function vColor(){
+  return `${topbar(PICS[V.pic].name)}<div class="colorpic" id="colorpic">${picSvg(V.pic)}</div>
+  <div class="swatches" style="justify-content:center">${COLORS.map(c=>`<button class="sw" data-act="fillcol" data-c="${c}" style="background:${c}" aria-label="Barva"></button>`).join('')}</div>
+  <div class="row" style="justify-content:center"><button class="btn ghost" data-act="go" data-to="colorPick">Jiný obrázek</button><button class="btn big" data-act="colorDone">Hotovo! ⭐</button></div>`;
+}
+function vShop(){
+  const id=V.kid,pts=pointsOf(id);
+  return `${topbar('Odemknout')}<p class="muted sub">Za hvězdičky si odemkneš lepší malování a nové obrázky.</p>${ITEMS.map(i=>{
+    const own=has(id,i.id),price=S.settings.prices[id][i.id],blocked=i.needs&&!has(id,i.needs);let act;
+    if(own)act=`<span class="state">✅ Máš odemčeno</span>`;
+    else if(blocked)act=`<span class="state">🔒 Nejdřív odemkni: ${esc(itemById(i.needs).name)}</span>`;
+    else if(pts>=price)act=`<button class="btn" data-act="buy" data-item="${i.id}">Odemknout za ${price} ⭐</button>`;
+    else act=`<div class="bar"><i style="width:${pts/price*100}%"></i></div><span class="muted">Chybí ještě ${price-pts} ⭐</span>`;
+    return `<article class="item ${own?'owned':''}" id="i-${i.id}"><div class="head"><span class="ic">${i.icon}</span><div class="t"><h3>${esc(i.name)}</h3><span class="muted sub">${esc(i.desc)}</span></div>${own?'':`<span class="pill">${price} ⭐</span>`}</div>${act}</article>`}).join('')}`;
+}
+function vRace(){
+  const lanes=KIDS.map(id=>{const k=kidOf(id),p=weekPts(id),pct=Math.min(100,Math.round(p/k.weekTarget*100));
+    return `<div class="lane"><div class="nm"><span>${esc(k.name)} ${pct>=100?'<span class="trophy">🏆 V cíli!</span>':''}</span><span>${pct} %</span></div>
+      <div class="track"><span class="flag">🏁</span><span class="runner" style="left:calc(28px + (100% - 76px) * ${pct/100});background:var(--${id})">${k.avatar}</span></div>
+      <span class="muted">${p} z ${k.weekTarget} ⭐ za úkoly tento týden</span></div>`}).join('');
+  const T=S.settings.team,tp=teamPts(),pct=Math.min(100,Math.round(tp/T.target*100)),d=daysLeftInWeek();
+  return `${topbar('Hvězdný závod')}
+  <div class="card sec">${lanes}<p class="note">Každá má svůj vlastní cíl, aby to bylo fér. Kdo bude v cíli první? Závod končí ${d===0?'dnes večer':`za ${d} ${plural(d,'den','dny','dní')}`}.</p></div>
+  <div class="card teambig"><span class="ic">${esc(T.icon)}</span><h2>Společně na: ${esc(T.name)}</h2><div class="bar"><i style="width:${pct}%"></i></div><b>${tp} z ${T.target} ⭐</b><p class="muted">Každá hvězdička za úkol od Ley i Bey se počítá do společné odměny.</p></div>`;
+}
+
+/* ================= learning ================= */
+const FRUITS=[
+  {e:'🍎',g:'n',f:['jablko','jablka','jablek']},{e:'🍐',g:'f',f:['hruška','hrušky','hrušek']},
+  {e:'🍓',g:'f',f:['jahoda','jahody','jahod']},{e:'🍌',g:'m',f:['banán','banány','banánů']},
+  {e:'🍊',g:'m',f:['pomeranč','pomeranče','pomerančů']},{e:'🍋',g:'m',f:['citron','citrony','citronů']},
+  {e:'🍑',g:'f',f:['broskev','broskve','broskví']},{e:'🥝',g:'n',f:['kiwi','kiwi','kiwi']}];
+const COUNTW=['jedna','dvě','tři','čtyři','pět'];
+const numW=(n,g)=>n===1?{m:'jeden',f:'jedna',n:'jedno'}[g]:n===2?(g==='m'?'dva':'dvě'):COUNTW[n-1];
+const fruitPhrase=(n,fr)=>`${numW(n,fr.g)} ${n===1?fr.f[0]:n<5?fr.f[1]:fr.f[2]}`;
+let L=null;
+const ROUND_LEA=5,ROUND_BEA=8;
+function progressDots(){return `<div class="progress" aria-label="Postup">${Array.from({length:L.total},(_,i)=>`<i class="${i<L.i?'f':i===L.i?'c':''}"></i>`).join('')}</div>`}
+function vLearn(){
+  const k=kidOf(V.kid),lp=sumLog(l=>l.kid===V.kid&&l.type==='learn'&&l.d===today()),cap=S.settings.learnCap;
+  const capNote=`<p class="note">Za každé dokončené kolo jsou hvězdičky, dnes máš ${lp} z ${cap} ⭐.</p>`;
+  if(k.little)return `${topbar('Učení')}
+    <button class="lcard" data-act="startLearn" data-g="learnCount"><span class="ic">🍎</span><span class="t"><h2>Kolik je tu?</h2><span class="muted sub">Spočítej ovoce.</span><span class="pill">+3 ⭐ za kolo</span></span></button>
+    <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
+  return `${topbar('Učení')}
+    <button class="lcard" data-act="go" data-to="geoLesson"><span class="ic" style="background:var(--bea-soft)">📒</span><span class="t"><h2>Tahák: body a čáry</h2><span class="muted">Bod, úsečka, polopřímka, přímka</span></span></button>
+    <button class="lcard" data-act="startLearn" data-g="geoQuiz"><span class="ic">📐</span><span class="t"><h2>Kvíz z geometrie</h2><span class="muted">8 otázek, 4. třída</span><span class="pill">+3 ⭐, za bezchybné kolo +4 ⭐</span></span></button>${capNote}`;
+}
+function startLearn(g){
+  if(g==='learnCount'){L={g,i:0,total:ROUND_LEA,first:0};L.q=newCountQ()}
+  if(g==='learnFind'){L={g,i:0,total:ROUND_LEA,first:0};L.q=newFindQ()}
+  if(g==='geoQuiz'){L={g,i:0,total:ROUND_BEA,first:0,qs:makeGeoRound()};L.q=L.qs[0];L.q.tried=[]}
+  go(g);speakQ();
+}
+function speakQ(){if(!L||!L.q)return;if(L.g==='learnCount')sayKid(`Kolik je tu ${L.q.fr.f[2]}?`);if(L.g==='learnFind')sayKid(findQ(L.q))}
+function newCountQ(){let n;do{n=1+(Math.random()*5|0)}while(L&&L.q&&L.q.n===n);return{fr:pick(FRUITS),n,marks:[],wrong:false,locked:false}}
+function newFindQ(){let n;do{n=1+(Math.random()*5|0)}while(L&&L.q&&L.q.n===n);const others=shuffle([1,2,3,4,5].filter(x=>x!==n)).slice(0,2);return{fr:pick(FRUITS),n,groups:shuffle([n,...others]),wrong:false,locked:false,bad:[]}}
+function vLearnCount(){const q=L.q;
+  return `${topbar('Kolik je tu?')}${progressDots()}
+  <div class="qrow"><p class="qtext">Kolik je tu ${esc(q.fr.f[2])}?</p><button class="round" data-act="speakQ" aria-label="Přečíst otázku">🔊</button></div>
+  <div class="fruitbox">${Array.from({length:q.n},(_,i)=>`<button class="fruit ${q.marks[i]?'counted':''}" data-act="countFruit" data-i="${i}" aria-label="Ovoce">${q.fr.e}${q.marks[i]?`<span class="n">${q.marks[i]}</span>`:''}</button>`).join('')}</div>
+  <p class="muted center">Ťukni na každé ovoce a počítej nahlas.</p>
+  <div class="numbtns">${[1,2,3,4,5].map(n=>`<button class="numbtn" data-act="countAns" data-n="${n}">${n}<span class="dt">${'<i></i>'.repeat(n)}</span></button>`).join('')}</div>`;
+}
+const findQ=q=>`Kde ${q.n>=2&&q.n<=4?'jsou':'je'} ${fruitPhrase(q.n,q.fr)}?`;
+function vLearnFind(){const q=L.q;
+  return `${topbar('Najdi číslo')}${progressDots()}
+  <div class="qrow"><div class="bignum">${q.n}</div><button class="round" data-act="speakQ" aria-label="Přečíst otázku">🔊</button></div>
+  <p class="qtext">${esc(findQ(q))}</p>
+  <div class="groups">${q.groups.map((g,i)=>`<button class="group ${q.bad.includes(i)?'bad':''}" data-act="findAns" data-i="${i}">${q.fr.e.repeat(g)}</button>`).join('')}</div>`;
+}
+function learnNext(){
+  L.i++;
+  if(L.i>=L.total){finishLearn();return}
+  if(L.g==='learnCount')L.q=newCountQ();
+  if(L.g==='learnFind')L.q=newFindQ();
+  if(L.g==='geoQuiz'){L.q=L.qs[L.i];L.q.tried=[]}
+  render();speakQ();
+}
+function finishLearn(){
+  const perfect=L.first===L.total;
+  const pts=L.g==='geoQuiz'?(perfect?4:3):3;
+  const text=L.g==='geoQuiz'?'Učení: geometrie':'Učení: počítání';
+  const title=perfect?'Bez jediné chyby!':'Kolo dokončeno!';
+  const g=L.g;L=null;
+  capAward('learn',S.settings.learnCap,pts,text,title,'Výborně! Jsi šikulka!',()=>{back()});
+}
+function countAuto(){const q=L.q;q.marks=[];q.locked=true;render();
+  let i=0;const step=()=>{if(!L||L.q!==q)return;if(i<q.n){q.marks[i]=i+1;say(COUNTW[i]);i++;render();setTimeout(step,800)}else{q.locked=false;render()}};setTimeout(step,500)}
+
+/* ---- geometry (Bea, 4th grade) ---- */
+const LET='ABCDEKLMNPRSTXY';
+const letters=n=>shuffle([...LET]).slice(0,n);
+const f1=v=>v.toFixed(1);
+function toEdge(p,d){let t=1e9;const X0=10,X1=310,Y0=10,Y1=190;
+  if(d.x>1e-6)t=Math.min(t,(X1-p.x)/d.x);if(d.x<-1e-6)t=Math.min(t,(X0-p.x)/d.x);
+  if(d.y>1e-6)t=Math.min(t,(Y1-p.y)/d.y);if(d.y<-1e-6)t=Math.min(t,(Y0-p.y)/d.y);return{x:p.x+d.x*t,y:p.y+d.y*t}}
+const neg=d=>({x:-d.x,y:-d.y});
+const gl=(a,b,cls='g-line')=>`<line class="${cls}" x1="${f1(a.x)}" y1="${f1(a.y)}" x2="${f1(b.x)}" y2="${f1(b.y)}"/>`;
+const gpt=p=>`<g class="g-pt"><line x1="${f1(p.x-6)}" y1="${f1(p.y-6)}" x2="${f1(p.x+6)}" y2="${f1(p.y+6)}"/><line x1="${f1(p.x-6)}" y1="${f1(p.y+6)}" x2="${f1(p.x+6)}" y2="${f1(p.y-6)}"/></g>`;
+function lab(p,n,t,cls=''){let nx=n.x,ny=n.y;if(ny>0){nx=-nx;ny=-ny}return `<text ${cls?`class="${cls}"`:''} x="${f1(p.x+nx*20)}" y="${f1(p.y+ny*20)}" text-anchor="middle" dominant-baseline="middle">${t}</text>`}
+const ptL=(p,n,t)=>gpt(p)+lab(p,n,t);
+function randLine(len=55){const ang=(Math.random()*120-60)*Math.PI/180,d={x:Math.cos(ang),y:Math.sin(ang)},c={x:160+(Math.random()*40-20),y:105+(Math.random()*20-10)};
+  return{a:{x:c.x-d.x*len,y:c.y-d.y*len},b:{x:c.x+d.x*len,y:c.y+d.y*len},d,n:{x:-d.y,y:d.x},c}}
+const geoSvg=inner=>`<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Obrázek k otázce">${inner}</svg>`;
+const LINE_OPTS=['bod','úsečka','polopřímka','přímka'];
+const GQ={
+  what(){const kind=pick(LINE_OPTS),[A,B]=letters(2),{a,b,d,n}=randLine();let s='',exp='';
+    if(kind==='bod'){const p={x:130+Math.random()*60,y:90+Math.random()*30};s=ptL(p,{x:0,y:-1},A);exp=`Je to bod ${A}. Bod je jen místo, nemá délku. Značíme ho velkým tiskacím písmenem.`}
+    if(kind==='úsečka'){s=gl(a,b)+ptL(a,n,A)+ptL(b,n,B);exp=`Je to úsečka ${A}${B}. Má dva krajní body, ${A} a ${B}, takže ji můžeme změřit pravítkem.`}
+    if(kind==='polopřímka'){s=gl(a,toEdge(a,d))+ptL(a,n,A)+ptL(b,n,B);exp=`Je to polopřímka ${A}${B}. Začíná v bodě ${A} (počátek) a za bodem ${B} pokračuje dál bez konce.`}
+    if(kind==='přímka'){s=gl(toEdge(a,neg(d)),toEdge(a,d))+ptL(a,n,A)+ptL(b,n,B);exp=`Je to přímka ${A}${B}. Nemá začátek ani konec, pokračuje na obě strany donekonečna.`}
+    return{svg:s,q:'Co je na obrázku?',opts:LINE_OPTS,ans:kind,exp}},
+  rayStart(){const [A,B]=letters(2),{a,b,d,n}=randLine();const s=gl(a,toEdge(a,d))+ptL(a,n,A)+ptL(b,n,B);
+    if(Math.random()<.5)return{svg:s,q:'Ve kterém bodě začíná tahle polopřímka?',opts:shuffle([A,B]),ans:A,exp:`Polopřímka začíná v bodě ${A}. Tomu bodu se říká počátek.`};
+    return{svg:s,q:'Jak se jmenuje tahle polopřímka?',opts:shuffle([`polopřímka ${A}${B}`,`polopřímka ${B}${A}`]),ans:`polopřímka ${A}${B}`,exp:`Polopřímka ${A}${B}: první píšeme počátek ${A}, potom bod ${B}, kterým prochází.`}},
+  onLine(){const [A,B,C]=letters(3),{a,b,d,n}=randLine(65);const lineS=gl(toEdge(a,neg(d)),toEdge(a,d));const pl=toEdge(a,d);
+    const sg=(Math.random()<.5?1:-1)*(38+Math.random()*12),off={x:(a.x+b.x)/2+n.x*sg,y:(a.y+b.y)/2+n.y*sg};
+    const s=lineS+lab({x:pl.x-d.x*16,y:pl.y-d.y*16},n,'p','it')+ptL(a,n,A)+ptL(b,n,B)+gpt(off)+`<text x="${f1(off.x+14)}" y="${f1(off.y-12)}">${C}</text>`;
+    return{svg:s,q:'Který bod NEleží na přímce p?',opts:shuffle([A,B,C]),ans:C,exp:`Bod ${C} na přímce p neleží, zapíšeme ${C} ∉ p. Body ${A} a ${B} na ní leží: ${A} ∈ p, ${B} ∈ p.`}},
+  notation(){const [A]=letters(1),on=Math.random()<.5,{a,b,d,n}=randLine(65);const pl=toEdge(a,d);
+    const p=on?{x:(a.x+b.x)/2,y:(a.y+b.y)/2}:{x:(a.x+b.x)/2+n.x*45,y:(a.y+b.y)/2+n.y*45};
+    const s=gl(toEdge(a,neg(d)),toEdge(a,d))+lab({x:pl.x-d.x*16,y:pl.y-d.y*16},n,'p','it')+gpt(p)+`<text x="${f1(p.x+14)}" y="${f1(p.y-12)}">${A}</text>`;
+    const ok=on?`${A} ∈ p`:`${A} ∉ p`;
+    return{svg:s,q:`Jak zapíšeš, co vidíš u bodu ${A} a přímky p?`,opts:shuffle([`${A} ∈ p`,`${A} ∉ p`,`p ∈ ${A}`]),ans:ok,exp:on?`Bod ${A} leží na přímce p, zapíšeme ${A} ∈ p.`:`Bod ${A} na přímce p neleží, zapíšeme ${A} ∉ p (přeškrtnutá značka).`}},
+  countSeg(){const shapes=[
+      {n:3,pts:[{x:160,y:30},{x:265,y:170},{x:55,y:170}],closed:true},
+      {n:4,pts:[{x:70,y:45},{x:250,y:40},{x:270,y:160},{x:55,y:165}],closed:true},
+      {n:3,pts:[{x:40,y:150},{x:115,y:50},{x:200,y:150},{x:280,y:50}],closed:false},
+      {n:2,pts:[{x:60,y:60},{x:160,y:160},{x:260,y:60}],closed:false}];
+    const sh=pick(shapes),Ls=letters(sh.pts.length);let s='';const P=sh.pts,m=P.length;
+    for(let i=0;i<(sh.closed?m:m-1);i++)s+=gl(P[i],P[(i+1)%m]);
+    const cx=P.reduce((a,p)=>a+p.x,0)/m,cy=P.reduce((a,p)=>a+p.y,0)/m;
+    P.forEach((p,i)=>{const v={x:p.x-cx,y:p.y-cy},l=Math.hypot(v.x,v.y)||1;s+=gpt(p)+`<text x="${f1(p.x+v.x/l*20)}" y="${f1(p.y+v.y/l*20)}" text-anchor="middle" dominant-baseline="middle">${Ls[i]}</text>`});
+    const segs=[];for(let i=0;i<(sh.closed?m:m-1);i++)segs.push(Ls[i]+Ls[(i+1)%m]);
+    return{svg:s,q:'Kolik úseček je na obrázku?',opts:['2','3','4','5'],ans:String(sh.n),exp:`Úsečky jsou ${segs.slice(0,-1).join(', ')} a ${segs.at(-1)}. Celkem ${sh.n}.`}},
+  threePts(){const [A,B,C]=letters(3),{a,b,d,n}=randLine(80);const mid={x:(a.x+b.x)/2+d.x*(Math.random()*20-10),y:(a.y+b.y)/2+d.y*(Math.random()*20-10)};
+    const s=gl(toEdge(a,neg(d)),toEdge(a,d),'g-faint')+ptL(a,n,A)+ptL(mid,n,B)+ptL(b,n,C);
+    return{svg:s,q:`Kolik různých úseček určují body ${A}, ${B} a ${C}?`,opts:['2','3','4','6'],ans:'3',exp:`Úsečky ${A}${B}, ${B}${C} a ${A}${C}. Nezapomeň na tu dlouhou ${A}${C}!`}},
+  longer(){const [A,B,C,D]=letters(4);const l1=90+Math.random()*80;let l2;do{l2=90+Math.random()*80}while(Math.abs(l2-l1)<28);
+    const x1=40+Math.random()*(260-l1),x2=40+Math.random()*(260-l2);const a={x:x1,y:70},b={x:x1+l1,y:70},c={x:x2,y:145},e={x:x2+l2,y:145},n={x:0,y:-1};
+    const s=gl(a,b)+ptL(a,n,A)+ptL(b,n,B)+gl(c,e)+ptL(c,n,C)+ptL(e,n,D);const ans=l1>l2?A+B:C+D;
+    return{svg:s,q:'Která úsečka je delší?',opts:[A+B,C+D],ans,exp:`Delší je úsečka ${ans}. Úsečky můžeme porovnat, protože mají konec, a změřit pravítkem: |${A}${B}| a |${C}${D}|.`}},
+  concept(){const items=[
+      {q:'Která čára nemá žádný krajní bod?',ans:'přímka',exp:'Přímka nemá začátek ani konec.'},
+      {q:'Která čára má jen jeden krajní bod, počátek?',ans:'polopřímka',exp:'Polopřímka má počátek, ale konec nemá.'},
+      {q:'Kterou čáru můžeme změřit pravítkem?',ans:'úsečka',exp:'Úsečka má dva krajní body, proto má délku.'},
+      {q:'Čím značíme bod?',opts:['velkým písmenem (A)','malým písmenem (a)','číslem (1)'],ans:'velkým písmenem (A)',exp:'Body značíme velkými tiskacími písmeny: A, B, C…'},
+      {q:'Čím značíme přímku?',opts:['malým písmenem (p)','velkým písmenem (P)','číslem (1)'],ans:'malým písmenem (p)',exp:'Přímku značíme malým písmenem, třeba p, q. Nebo dvěma body, kterými prochází: přímka AB.'}];
+    const it=pick(items);return{svg:'',q:it.q,opts:shuffle([...(it.opts||['úsečka','polopřímka','přímka'])]),ans:it.ans,exp:it.exp}},
+  cross(){const [P]=letters(1);const c={x:160,y:100},a1=(20+Math.random()*30)*Math.PI/180,a2=-(20+Math.random()*40)*Math.PI/180;
+    const d1={x:Math.cos(a1),y:Math.sin(a1)},d2={x:Math.cos(a2),y:Math.sin(a2)};
+    const e1=toEdge(c,d1),e2=toEdge(c,d2);
+    const s=gl(toEdge(c,neg(d1)),e1)+gl(toEdge(c,neg(d2)),e2)+lab({x:e1.x-d1.x*16,y:e1.y-d1.y*16},{x:-d1.y,y:d1.x},'p','it')+lab({x:e2.x-d2.x*16,y:e2.y-d2.y*16},{x:-d2.y,y:d2.x},'q','it')+gpt(c)+`<text x="${c.x}" y="${c.y-20}" text-anchor="middle">${P}</text>`;
+    return{svg:s,q:`Přímky p a q se protínají v bodě ${P}. Jak se takový bod jmenuje?`,opts:shuffle(['průsečík','počátek','krajní bod','střed']),ans:'průsečík',exp:`Bod ${P} je průsečík přímek p a q. Leží na obou přímkách: ${P} ∈ p, ${P} ∈ q.`}}
+};
+function makeGeoRound(){const order=shuffle(['what','what','rayStart','onLine','notation','countSeg','threePts','longer','concept','cross']).slice(0,ROUND_BEA);return order.map(k=>GQ[k]())}
+function vGeoQuiz(){const q=L.q,solved=q.tried.includes(q.ans);
+  return `${topbar('Kvíz z geometrie')}${progressDots()}
+  ${q.svg?`<div class="geo">${geoSvg(q.svg)}</div>`:''}
+  <p class="qtext">${esc(q.q)}</p>
+  <div class="opts">${q.opts.map(o=>`<button class="opt ${q.tried.includes(o)?(o===q.ans?'ok':'bad'):''}" data-act="geoAns" data-o="${esc(o)}" ${solved?'disabled':''}>${esc(o)}</button>`).join('')}</div>
+  ${solved?`<div class="explain">✅ ${esc(q.exp)}</div><button class="btn big" data-act="learnNext" style="align-self:center">${L.i+1<L.total?'Další otázka':'Hotovo!'}</button>`:q.tried.length?`<div class="explain">Skoro! Zkus jinou možnost.</div>`:''}`;
+}
+function vGeoLesson(){
+  const n={x:0,y:-1},A={x:110,y:60},B={x:210,y:60};
+  const card=(t,svg,txt,zap)=>`<article class="card lesson"><h3>${t}</h3><div class="geo">${geoSvg(svg)}</div><p>${txt}</p><span class="zap">${zap}</span></article>`;
+  return `${topbar('Tahák: body a čáry')}
+  ${card('Bod',gpt({x:160,y:100})+`<text x="160" y="76" text-anchor="middle">A</text>`,'Bod je jen místo. Nemá délku ani šířku. Kreslíme ho křížkem a značíme velkým tiskacím písmenem.','bod A')}
+  ${card('Úsečka',gl({x:80,y:110},{x:240,y:110})+ptL({x:80,y:110},n,'A')+ptL({x:240,y:110},n,'B'),'Úsečka má dva krajní body. Začíná a končí, proto ji můžeme změřit pravítkem.','úsečka AB, |AB| = 4 cm')}
+  ${card('Polopřímka',gl({x:80,y:110},{x:310,y:110})+ptL({x:80,y:110},n,'A')+ptL({x:180,y:110},n,'B'),'Polopřímka má jen jeden krajní bod, počátek. Na druhou stranu pokračuje bez konce. Počátek píšeme první.','polopřímka AB (začíná v A)')}
+  ${card('Přímka',gl({x:10,y:110},{x:310,y:110})+ptL({x:110,y:110},n,'A')+ptL({x:210,y:110},n,'B')+`<text class="it" x="290" y="92">p</text>`,'Přímka nemá začátek ani konec. Značíme ji malým písmenem nebo dvěma body, kterými prochází.','přímka p, přímka AB')}
+  ${card('Leží, neleží',gl({x:10,y:120},{x:310,y:120})+`<text class="it" x="290" y="102">p</text>`+ptL({x:110,y:120},n,'A')+gpt({x:210,y:60})+`<text x="226" y="48">B</text>`,'Bod A leží na přímce p. Bod B na přímce p neleží.','A ∈ p    B ∉ p')}
+  ${card('Průsečík',gl({x:40,y:30},{x:280,y:170})+gl({x:40,y:170},{x:280,y:30})+gpt({x:160,y:100})+`<text x="160" y="78" text-anchor="middle">P</text>`,'Když se dvě přímky protnou, bod, kde se potkají, se jmenuje průsečík.','P je průsečík přímek p a q')}
+  <button class="btn big" data-act="startLearn" data-g="geoQuiz" style="align-self:center">Spustit kvíz 📐</button>`;
+}
+
+/* ================= parent ================= */
+function vParent(){
+  const st=S.settings,tab=V.ptab||'approve',pend=taskList().filter(t=>t.status==='pending'),isParentPhone=role()==='parent';
+  const tabs=[['approve','Schválit',pend.length],['tasks','Úkoly'],['points','Body'],['settings','Nastavení']];
+  let body='';
+  if(tab==='approve'){
+    body=pend.length?`<div class="card sec">${pend.map(t=>`<div class="prow ap"><span class="ic">${esc(t.icon)}</span><div class="t"><span class="kidtag ${t.kid}">${esc(kidOf(t.kid).name)}</span> <b>${esc(t.title)}</b><br><span class="muted">+${t.points} ⭐${t.fast?' · ⚡ rychlík +2':''}</span></div><div class="btns"><button class="mini no" data-act="reject" data-id="${t.id}">Ještě ne</button><button class="mini ok" data-act="approve" data-id="${t.id}">Potvrdit ✓</button></div></div>`).join('')}</div>`
+      :`<div class="card empty">${bodik(100)}<h2>Nic nečeká</h2><p class="muted">Když holky splní úkol, objeví se tady.</p></div>`;
+    if(pend.length>1)body+=`<button class="btn mint" data-act="approveAll" style="align-self:flex-start">Potvrdit vše (${pend.length})</button>`;
+    body+=`<p class="note">Tip pro ADHD: potvrzujte co nejdřív. Čím kratší čekání na odměnu, tím víc to motivuje.</p>`;
+  }
+  if(tab==='tasks'){
+    const mo=st.morning;
+    body=`<div class="card sec"><h2>☀️ Ranní mise</h2>
+      <p class="note">Objeví se holkám každý den automaticky. Splnit ji jde jen v nastaveném čase.</p>
+      <label class="prow"><span class="t">Ranní mise zapnutá</span><input type="checkbox" id="m-en" ${mo.enabled?'checked':''} data-set="settings/morning/enabled"></label>
+      <label class="prow"><span class="t">Od</span><input type="time" id="m-start" value="${esc(mo.start)}" data-set="settings/morning/start"></label>
+      <label class="prow"><span class="t">Do</span><input type="time" id="m-end" value="${esc(mo.end)}" data-set="settings/morning/end"></label>
+      ${mo.items.map((it,i)=>`<label class="prow"><span class="ic">${esc(it.icon)}</span><span class="t">${esc(it.title)}</span><input type="number" id="m-p${i}" min="0" value="${it.points}" data-set="settings/morning/items/${i}/points"> ⭐</label>`).join('')}
+      <label class="prow"><span class="t">Bonus za celou misi včas</span><input type="number" id="m-bonus" min="0" value="${mo.bonus}" data-set="settings/morning/bonus"> ⭐</label>
+      <label class="prow"><span class="t">Potvrzovat automaticky<br><span class="muted">Hvězdičky hned, bez vašeho schválení</span></span><input type="checkbox" id="m-auto" ${mo.auto?'checked':''} data-set="settings/morning/auto"></label></div>
+    <form class="card sec" id="taskform"><h2>Nový úkol</h2>
+      <div class="field"><span>Pro koho</span><div class="chips" data-group="kid">${[['lea','Lea'],['bea','Bea'],['both','Obě']].map(([v,l],i)=>`<button type="button" class="chip ${i===0?'on':''}" data-v="${v}">${l}</button>`).join('')}</div></div>
+      <label class="field"><span>Co má udělat</span><input id="f-title" maxlength="40" placeholder="Např. Uklidit si ponožky" required></label>
+      <div class="field"><span>Obrázek (pro Leu, která ještě nečte)</span><div class="icons" data-group="icon">${TASK_ICONS.map((ic,i)=>`<button type="button" class="${i===0?'on':''}" data-v="${ic}">${ic}</button>`).join('')}</div></div>
+      <div class="field"><span>Hvězdičky</span><div class="chips" data-group="pts">${[5,10,15,20,30].map(n=>`<button type="button" class="chip ${n===10?'on':''}" data-v="${n}">${n} ⭐</button>`).join('')}</div></div>
+      <div class="field"><span>Jak často</span><div class="chips" data-group="rep"><button type="button" class="chip on" data-v="once">Jednou</button><button type="button" class="chip" data-v="daily">Každý den</button></div></div>
+      <div class="field"><span>Závod s časem (rychlík dostane +2 ⭐)</span><div class="chips" data-group="min">${[[0,'Bez'],[3,'3 min'],[5,'5 min'],[10,'10 min'],[15,'15 min']].map(([v,l],i)=>`<button type="button" class="chip ${i===0?'on':''}" data-v="${v}">${l}</button>`).join('')}</div></div>
+      <label class="field"><span>Malé kroky (každý na nový řádek, nepovinné)</span><textarea id="f-steps" rows="3" placeholder="Hračky do krabice&#10;Oblečení do skříně"></textarea></label>
+      <button class="btn big" type="submit">Přidat úkol</button></form>`;
+    body+=KIDS.map(id=>{const list=taskList().filter(t=>t.kid===id&&!t.morning);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(kidOf(id).name)}</span> úkoly</h2>${list.length?list.map(t=>`<div class="prow"><span class="ic">${esc(t.icon)}</span><div class="t"><b>${esc(t.title)}</b><br><span class="muted">${t.points} ⭐ · ${t.repeat==='daily'?'každý den':'jednou'}${t.minutes?` · ⏱️ ${t.minutes} min`:''}${t.steps&&t.steps.length?` · ${t.steps.length} kroky`:''} · ${({open:'čeká na splnění',pending:'ke schválení',done:'dnes hotovo'})[t.status]}</span></div><button class="mini no" data-act="delTask" data-id="${t.id}">Smazat</button></div>`).join(''):'<p class="muted">Zatím žádné úkoly.</p>'}</div>`}).join('');
+  }
+  if(tab==='points'){
+    body=KIDS.map(id=>{const k=kidOf(id);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(k.name)}</span> má ${pointsOf(id)} ⭐</h2>
+      <div class="row"><input type="number" id="bonus-${id}" min="1" value="5" style="width:90px"><button class="mini ok" data-act="bonus" data-id="${id}" data-sign="1">+ Přidat</button><button class="mini no" data-act="bonus" data-id="${id}" data-sign="-1">− Odebrat</button></div>
+      <label class="prow"><span class="t">Týdenní cíl v závodě</span><input type="number" id="wt-${id}" min="5" value="${k.weekTarget}" data-set="kids/${id}/weekTarget"></label>
+      ${ITEMS.map(i=>`<label class="prow"><span class="ic">${i.icon}</span><span class="t">${esc(i.name)}${has(id,i.id)?' ✅':''}</span><input type="number" id="pr-${id}-${i.id}" min="0" value="${st.prices[id][i.id]}" data-set="settings/prices/${id}/${i.id}"></label>`).join('')}</div>`}).join('');
+    const tp=teamPts();
+    body+=`<div class="card sec"><h2>Společná odměna</h2>
+      <label class="field"><span>Na co holky společně šetří</span><input id="tm-name" value="${esc(st.team.name)}" maxlength="40" data-set="settings/team/name"></label>
+      <label class="field"><span>Obrázek</span><input id="tm-icon" value="${esc(st.team.icon)}" maxlength="4" data-set="settings/team/icon" style="width:90px"></label>
+      <label class="prow"><span class="t">Cíl (hvězdičky z úkolů dohromady)</span><input type="number" id="tm-target" min="10" value="${st.team.target}" data-set="settings/team/target"></label>
+      <p class="muted">Zatím mají ${tp} z ${st.team.target} ⭐.</p>
+      <button class="btn ghost" data-act="teamReset">Odměna předána, začít znovu</button></div>
+      <div class="card sec"><label class="prow"><span class="t">Max. hvězdiček za hry denně</span><input type="number" id="gcap" min="0" value="${st.gameCap}" data-set="settings/gameCap"></label>
+      <label class="prow"><span class="t">Max. hvězdiček za učení denně</span><input type="number" id="lcap" min="0" value="${st.learnCap}" data-set="settings/learnCap"></label></div>
+      <div class="card sec"><h2>Historie</h2><div class="log">${logs().slice(0,30).map(l=>`<div><span class="kidtag ${l.kid}">${esc(kidOf(l.kid).name)}</span><span>${esc(l.text)}</span><span class="p">${l.pts>0?'+':''}${l.pts} ⭐</span></div>`).join('')}</div></div>`;
+  }
+  if(tab==='settings'){
+    const link=`${location.origin}${location.pathname}#rodina=${DEV.family||''}`;
+    body=(SYNC?`<div class="card sec"><h2>Propojení telefonů</h2>${syncBadge()}
+      <p class="note">Pošlete tenhle odkaz do telefonu Ley a Bey (třeba přes WhatsApp). Otevřou ho jednou, vyberou svoje jméno a od té doby se všechno přenáší samo. Odkaz nikomu jinému neposílejte.</p>
+      <div class="codebox" id="famlink">${esc(link)}</div><button class="btn" data-act="copyLink">Kopírovat odkaz</button>
+      <p class="muted">Tento telefon: <b>${esc({lea:'Lea',bea:'Bea',parent:'Rodiče',shared:'Společný'}[role()]||'')}</b></p><button class="btn ghost" data-act="changeRole">Změnit, komu telefon patří</button>
+      <p class="note">Verze aplikace: ${esc(APP_VERSION)}. Nové verze se stahují samy.</p></div>`
+      :`<div class="card sec"><h2>Kde jsou data</h2><p class="note">Tohle je náhled. Hvězdičky a úkoly jsou uložené jen v tomto zařízení. Verze pro tři propojené telefony běží na vaší vlastní adrese.</p></div>`)+
+      `<div class="card sec"><h2>PIN pro rodiče</h2><p class="muted">Výchozí PIN je 1234. Změňte ho, ať se sem holky nedostanou.</p>
+      <div class="row"><input id="newpin" inputmode="numeric" maxlength="4" placeholder="Nový PIN" style="width:140px"><button class="btn" data-act="setPin">Uložit PIN</button></div></div>
+      <div class="card sec"><h2>Začít od nuly</h2><p class="muted">Smaže všechny hvězdičky, úkoly a odemčené věci${SYNC?' na všech telefonech':''}.</p><button class="mini no" data-act="resetAll">Vymazat vše</button></div>`;
+  }
+  return `<div class="parent" style="display:flex;flex-direction:column;gap:16px">${topbar('Pro rodiče',false,!(isParentPhone&&!stack.length))}
+    <nav class="ptabs">${tabs.map(([id,l,n])=>`<button class="${tab===id?'on':''}" data-act="ptab" data-t="${id}">${l}${n?` <span class="badge">${n}</span>`:''}</button>`).join('')}</nav>${body}
+    ${isParentPhone&&!stack.length?`<button class="parentbtn" data-act="go" data-to="picker">👀 Podívat se jako holky</button>`:''}</div>`;
+}
+function pinPad(onOk){
+  let code='';const o=document.createElement('div');o.className='ov';
+  const draw=()=>{o.querySelector('.dots').innerHTML=[0,1,2,3].map(i=>`<i class="${i<code.length?'f':''}"></i>`).join('')};
+  o.innerHTML=`<div class="ovbox" role="dialog" aria-modal="true" aria-label="PIN pro rodiče"><h2>Pro rodiče</h2><p class="muted">Zadejte PIN</p><div class="dots"></div>
+    <div class="keypad">${[1,2,3,4,5,6,7,8,9,'✕',0,'⌫'].map(n=>`<button data-k="${n}">${n}</button>`).join('')}</div></div>`;
+  document.body.appendChild(o);draw();
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(e.target===o){o.remove();return}if(!b)return;const k=b.dataset.k;
+    if(k==='✕'){o.remove();return}if(k==='⌫'){code=code.slice(0,-1);draw();return}
+    if(code.length<4){code+=k;draw()}
+    if(code.length===4){if(code===S.settings.pin){o.remove();onOk()}
+      else{const box=o.querySelector('.ovbox');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');code='';setTimeout(draw,300)}}});
+}
+
+/* ================= render ================= */
+const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirror:vMirror,mandala:vMirror,colorPick:vColorPick,color:vColor,shop:vShop,race:vRace,parent:vParent,
+  learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
+function render(){
+  clearInterval(tick);tick=null;
+  if(['learnCount','learnFind','geoQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  const app=$('#app'),k=V.kid&&kidOf(V.kid);
+  app.classList.toggle('little',!!(k&&k.little));
+  setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
+  app.innerHTML=(MAP[V.name]||vPicker)();
+  if(V.name==='mirror'||V.name==='mandala')setupMirror();
+  if(V.name==='color')setupColor();
+  const win=mWin();
+  if(V.name==='tasks'||V.name==='home')tick=setInterval(()=>{if(mWin()!==win){render();return}document.querySelectorAll('[data-mleft]').forEach(e=>e.textContent=minsLeft());updTimers()},1000);
+  if(V.name==='tasks'){updTimers();if(V.focus){const el=$('#t-'+V.focus);V.focus=null;if(el)el.scrollIntoView({block:'center'})}}
+  if(V.name==='shop'&&V.focusItem){const el=$('#i-'+V.focusItem);V.focusItem=null;if(el)el.scrollIntoView({block:'center'})}
+  if(V.name==='home'&&k)checkUnseen(V.kid);
+}
+function softRender(){
+  const ft=$('#f-title'),fs=$('#f-steps');
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
+  render();
+}
+function checkUnseen(kid){
+  const key='bodikov-seen-'+kid,seen=+ls.get(key)||0,now=Date.now();
+  if(!seen){ls.set(key,String(now));return}
+  const fresh=Object.values(S.log).filter(l=>l.kid===kid&&l.ts>seen&&!l.self&&l.pts>0&&['task','streak','bonus'].includes(l.type));
+  if(!fresh.length)return;
+  ls.set(key,String(Math.max(...fresh.map(l=>l.ts))));
+  const n=fresh.reduce((a,l)=>a+l.pts,0);
+  setTimeout(()=>celebrate({title:'Rodiče potvrdili!',stars:n,sub:`Teď máš ${pointsOf(kid)} ⭐`,speak:`Super! Máš ${n} ${plural(n,'hvězdičku','hvězdičky','hvězdiček')} navíc!`}),250);
+}
+function updTimers(){
+  document.querySelectorAll('[data-tmr]').forEach(el=>{const t=S.tasks[el.dataset.tmr];if(!t||!t.timerEnd)return;
+    const left=Math.max(0,t.timerEnd-Date.now()),tot=t.minutes*60000,f=left/tot,C=2*Math.PI*18,m=Math.floor(left/60000),s=Math.floor(left%60000/1000);
+    el.innerHTML=left>0?`<svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="7"/><circle cx="22" cy="22" r="18" fill="none" stroke="var(--kid)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-f)}"/></svg>${m}:${pad(s)}`
+      :`<span class="state">Čas vypršel, ale dokončit to pořád můžeš!</span>`});
+}
+
+/* ================= actions ================= */
+function capAward(type,cap,pts,text,title,speak,onClose){
+  const k=V.kid||(stack.find(v=>v.kid)||{}).kid;
+  const used=sumLog(l=>l.kid===k&&l.type===type&&l.d===today());
+  const add=Math.max(0,Math.min(pts,cap-used));
+  if(add>0){addLog(k,add,type,text,true);celebrate({title,stars:add,speak,onClose})}
+  else celebrate({title,sub:type==='game'?'Za hry máš dnes hvězdiček dost. Další získáš za úkoly!':'Za učení máš dnes hvězdiček dost. Zítra zase!',speak,onClose});
+  refreshJar();
+}
+function approve(id,{silent=false,self=false}={}){
+  const t=S.tasks[id];if(!t||t.status!=='pending')return;const k=kidOf(t.kid),td=today();
+  addLog(t.kid,t.points,'task',t.title,self);
+  if(t.fast)addLog(t.kid,2,'task','⚡ Rychlík: '+t.title,self);
+  if(k.streak.last!==td){const c=k.streak.last===yesterday()?k.streak.count+1:1;put(`kids/${t.kid}/streak`,{count:c,last:td});if(c%3===0)addLog(t.kid,5,'streak',`🔥 ${c} dní v řadě`,self)}
+  if(t.repeat==='once')put(`tasks/${id}`,null);else put(`tasks/${id}`,{...t,status:'done',doneDate:td,fast:false,timerEnd:null});
+  if(t.morning&&k.mbonus!==td){const ms=Object.values(S.tasks).filter(x=>x.kid===t.kid&&x.morning);
+    if(ms.length&&ms.every(x=>x.status==='done'&&x.doneDate===td)){put(`kids/${t.kid}/mbonus`,td);addLog(t.kid,S.settings.morning.bonus,'task','☀️ Celá ranní mise',self)}}
+  if(!silent){chime('tick');toast(`${k.name} dostane ${t.points} ⭐`);render()}
+}
+function parentEnter(){setKidTheme(null);go('parent',{kid:null,ptab:pendingCount()?'approve':'tasks'})}
+const handlers={
+  back,
+  newFamily:()=>{DEV.family=(uid()+uid()+uid()).replace(/[^a-z0-9]/g,'').slice(0,20);DEV.role='parent';saveDev();startSync();V=rootView();stack.length=0;render();toast('Rodina založená. PIN je 1234, změňte ho v Nastavení.')},
+  joinFamily:()=>{const v=($('#famcode').value||'').trim().toLowerCase().replace(/.*rodina=/,'');if(!/^[a-z0-9]{12,40}$/.test(v)){toast('Kód nesedí. Zkontrolujte ho.');return}DEV.family=v;saveDev();startSync();render()},
+  setRole:b=>{const r=b.dataset.r;const ok=()=>{DEV.role=r;saveDev();stack.length=0;V=rootView();render()};if(r==='parent'||r==='shared')pinPad(ok);else ok()},
+  changeRole:()=>{delete DEV.role;saveDev();stack.length=0;V=rootView();render()},
+  copyLink:()=>{const t=$('#famlink').textContent;navigator.clipboard.writeText(t).then(()=>toast('Odkaz zkopírován'),()=>{const r=document.createRange();r.selectNodeContents($('#famlink'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Odkaz je označený, zkopírujte ho')})},
+  pick:b=>{go('home',{kid:b.dataset.id});const k=kidOf(b.dataset.id);if(k.little)say(`Ahoj ${k.voc}!`);chime('pop')},
+  go:b=>go(b.dataset.to),
+  goTasks:()=>{const n=taskList().find(t=>t.kid===V.kid&&t.status==='open'&&!t.morning);go('tasks',{focus:n&&n.id})},
+  parentLogin:()=>role()==='parent'?parentEnter():pinPad(parentEnter),
+  speak:b=>say(b.dataset.t),
+  step:b=>{const t=S.tasks[b.dataset.id];const steps=clone(t.steps);steps[+b.dataset.i].d=!steps[+b.dataset.i].d;put(`tasks/${t.id}/steps`,steps);chime(steps[+b.dataset.i].d?'pop':'tick');render()},
+  timer:b=>{const t=S.tasks[b.dataset.id];put(`tasks/${t.id}/timerEnd`,Date.now()+t.minutes*60000);chime('pop');sayKid('Připravit, pozor, teď!');render()},
+  done:b=>{const t=S.tasks[b.dataset.id];const fast=!!(t.timerEnd&&Date.now()<t.timerEnd);put(`tasks/${t.id}/fast`,fast);put(`tasks/${t.id}/timerEnd`,null);put(`tasks/${t.id}/status`,'pending');render();
+    celebrate({title:fast?'Rychlík! ⚡':'Hotovo!',stars:t.points+(fast?2:0),sub:'Hvězdičky ti připíšou rodiče, až to uvidí. Ukaž jim to!',speak:'Hotovo! Super práce! Běž to ukázat mamince nebo tatínkovi.'})},
+  mdone:b=>{const t=S.tasks[b.dataset.id];if(!t||mWin()!=='in'){toast('Ranní mise teď neběží');render();return}
+    const before=pointsOf(t.kid);put(`tasks/${t.id}/status`,'pending');put(`tasks/${t.id}/fast`,false);let stars=t.points;
+    if(S.settings.morning.auto){approve(t.id,{silent:true,self:true});stars=pointsOf(t.kid)-before}
+    render();const ms=Object.values(S.tasks).filter(x=>x.kid===t.kid&&x.morning),n=ms.filter(x=>x.status!=='open').length;
+    if(n===ms.length)celebrate({title:'Ranní mise splněná!',stars,sub:S.settings.morning.auto?`Teď máš ${pointsOf(t.kid)} ⭐`:'Ukaž rodičům, že máš všechno hotovo!',speak:'Ranní mise splněná! Jsi úžasná!'});
+    else celebrate({title:'Hotovo!',stars,sub:`Ranní mise: ${n} ze ${ms.length}`,speak:`Hotovo! Ještě ${ms.length-n}.`,btn:'Další!'})},
+  approveAll:()=>{const ids=taskList().filter(t=>t.status==='pending').map(t=>t.id);ids.forEach(id=>approve(id,{silent:true}));chime('tick');toast(`Potvrzeno ${ids.length} úkolů`);render()},
+  lockedItem:b=>{const it=b.dataset.item;toast(`Odemkni si to za ${S.settings.prices[V.kid][it]} ⭐`);go('shop',{focusItem:it})},
+  buy:b=>{const id=V.kid,it=itemById(b.dataset.item),price=S.settings.prices[id][it.id];
+    const o=document.createElement('div');o.className='ov';
+    o.innerHTML=`<div class="ovbox" role="dialog" aria-modal="true"><span style="font-size:4rem">${it.icon}</span><h2>${esc(it.name)}</h2><p class="muted">Odemknout za ${price} ⭐?</p><div class="row" style="justify-content:center"><button class="btn ghost" data-no>Ještě ne</button><button class="btn big" data-yes>Ano!</button></div></div>`;
+    document.body.appendChild(o);
+    o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-no]')){o.remove();return}
+      if(e.target.closest('[data-yes]')){o.remove();if(pointsOf(id)<price||has(id,it.id))return;addLog(id,-price,'unlock',it.name,true);put(`kids/${id}/unlocked/${it.id}`,true);render();
+        celebrate({title:'Odemčeno!',sub:it.name,speak:'Odemčeno! Jdi to vyzkoušet.',btn:'Vyzkoušet'})}})},
+  // drawing
+  mode:b=>{M.mode=b.dataset.m;syncMirrorUI();drawGuides()},
+  col:b=>{M.color=b.dataset.c;M.rainbow=false;syncMirrorUI()},
+  rainbow:()=>{M.rainbow=true;syncMirrorUI()},
+  size:b=>{M.w=+b.dataset.w;syncMirrorUI()},
+  glitter:()=>{M.glitter=!M.glitter;syncMirrorUI()},
+  clear:b=>{if(b.dataset.armed){clearCanvas();M.ink=0;b.dataset.armed='';b.textContent='Smazat'}else{b.dataset.armed='1';b.textContent='Opravdu smazat?';setTimeout(()=>{if(b.isConnected){b.dataset.armed='';b.textContent='Smazat'}},3000)}},
+  mirrorDone:()=>{if(M.ink<500){toast('Ještě trochu dokresli 🙂');return}M.ink=0;capAward('game',S.settings.gameCap,2,V.name==='mandala'?'Mandala':'Zrcadlové malování','Krásný obrázek!','Krásný obrázek!')},
+  pickPic:b=>go('color',{pic:b.dataset.id}),
+  fillcol:b=>{CF.color=b.dataset.c;syncColorUI()},
+  colorDone:()=>{const rs=[...document.querySelectorAll('#colorpic [data-r]')];const filled=rs.filter(r=>r.style.fill&&!/^(rgb\(255, 255, 255\)|#ffffff)$/i.test(r.style.fill)).length;const need=Math.ceil(rs.length*.5);
+    if(filled<need){toast(`Vybarvi ještě ${need-filled} ${plural(need-filled,'místo','místa','míst')} 🖍️`);return}
+    if(CF.awarded){toast('Za tenhle obrázek už hvězdičky máš. Zkus jiný!');return}CF.awarded=true;capAward('game',S.settings.gameCap,2,'Vybarvovánka: '+PICS[V.pic].name,'Krásný obrázek!','Krásný obrázek!')},
+  // learning
+  startLearn:b=>startLearn(b.dataset.g),
+  speakQ:()=>{if(L.g==='learnCount')say(`Kolik je tu ${L.q.fr.f[2]}?`);else say(findQ(L.q))},
+  countFruit:b=>{const q=L.q;if(q.locked)return;const i=+b.dataset.i;if(q.marks[i])return;const n=q.marks.filter(Boolean).length+1;q.marks[i]=n;say(COUNTW[n-1]);chime('pop');render()},
+  countAns:b=>{const q=L.q;if(q.locked)return;const n=+b.dataset.n;
+    if(n===q.n){q.locked=true;b.classList.add('ok');chime('tick');say(`Správně! ${fruitPhrase(q.n,q.fr)}.`);if(!q.wrong)L.first++;setTimeout(learnNext,1500)}
+    else{b.classList.add('bad');chime('no');q.wrong=true;say('Skoro! Spočítáme to spolu.');setTimeout(countAuto,900)}},
+  findAns:b=>{const q=L.q;if(q.locked)return;const i=+b.dataset.i;
+    if(q.groups[i]===q.n){q.locked=true;b.classList.add('ok');chime('tick');say(`Správně! ${fruitPhrase(q.n,q.fr)}.`);if(!q.wrong)L.first++;setTimeout(learnNext,1500)}
+    else{q.wrong=true;q.bad.push(i);chime('no');say(`Tady je ${fruitPhrase(q.groups[i],q.fr)}. Zkus jiné.`);render()}},
+  geoAns:b=>{const q=L.q,o=b.dataset.o;if(q.tried.includes(q.ans))return;q.tried.push(o);
+    if(o===q.ans){if(q.tried.length===1)L.first++;chime('tick')}else chime('no');render()},
+  learnNext:()=>learnNext(),
+  // parent
+  ptab:b=>{V.ptab=b.dataset.t;render()},
+  approve:b=>approve(b.dataset.id),
+  reject:b=>{const t=S.tasks[b.dataset.id];put(`tasks/${t.id}`,{...t,status:'open',fast:false,timerEnd:null,steps:(t.steps||[]).map(s=>({...s,d:false}))});toast('Úkol se vrátil k dokončení');render()},
+  delTask:b=>{if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Opravdu?';return}put(`tasks/${b.dataset.id}`,null);render()},
+  bonus:b=>{const id=b.dataset.id,n=Math.max(1,parseInt($('#bonus-'+id).value||'0',10)),sign=+b.dataset.sign,k=kidOf(id);
+    const d=sign>0?n:-Math.min(n,pointsOf(id));if(!d)return;addLog(id,d,'bonus',sign>0?'Bonus od rodičů':'Odebráno rodiči');toast(`${k.name}: ${d>0?'+':''}${d} ⭐`);render()},
+  teamReset:b=>{if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Opravdu začít znovu?';return}put('settings/team/since',today());toast('Nové kolo začíná');render()},
+  setPin:()=>{const v=$('#newpin').value.trim();if(!/^\d{4}$/.test(v)){toast('PIN musí mít 4 číslice');return}put('settings/pin',v);toast('PIN uložen')},
+  resetAll:b=>{if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Opravdu vše smazat?';return}S=defaults();saveLocal();if(DB)DB.set(clone(S));maintenance();stack.length=0;V=rootView();render();toast('Vše vymazáno')}
+};
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-group] [data-v]');
+  if(g){g.parentElement.querySelectorAll('.on').forEach(x=>x.classList.remove('on'));g.classList.add('on');return}
+  const b=e.target.closest('[data-act]');if(!b||b.closest('.ov'))return;
+  const f=handlers[b.dataset.act];if(f)f(b);
+});
+document.addEventListener('submit',e=>{
+  if(e.target.id!=='taskform')return;e.preventDefault();
+  const val=g=>{const el=document.querySelector(`[data-group="${g}"] .on`);return el?el.dataset.v:null};
+  const title=$('#f-title').value.trim();if(!title){toast('Napište, co má udělat');return}
+  const steps=$('#f-steps').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,6).map(t=>({t,d:false}));
+  const who=val('kid'),kids=who==='both'?KIDS:[who];
+  kids.forEach((kid,i)=>{const id='t'+Date.now().toString(36)+uid();put(`tasks/${id}`,{id,kid,title,icon:val('icon'),points:+val('pts'),repeat:val('rep'),status:'open',minutes:+val('min'),steps:steps.map(s=>({...s})),ts:Date.now()+i})});
+  toast(`Úkol přidán: ${title}`);render();
+});
+document.addEventListener('change',e=>{
+  const el=e.target,p=el.dataset.set;if(!p)return;
+  let v=el.type==='checkbox'?el.checked:el.type==='number'?Math.max(0,parseInt(el.value||'0',10)):el.value.trim();
+  if(el.type==='number'&&/target$/i.test(p))v=Math.max(5,v);
+  if(el.type==='time'&&!/^\d{2}:\d{2}$/.test(v))return;
+  put(p,v);if(p.startsWith('settings/morning'))maintenance();toast('Uloženo');
+});
+
+/* ================= mirror & mandala painting ================= */
+let M=null;
+function setupMirror(){
+  const wrap=$('#cvwrap'),cv=$('#cv');
+  const appW=$('#app').clientWidth-32,size=Math.floor(Math.max(240,Math.min(appW,520,innerHeight-330)));
+  wrap.style.width=wrap.style.height=size+'px';cv.style.width=cv.style.height=size+'px';
+  const dpr=Math.min(2,devicePixelRatio||1);cv.width=size*dpr;cv.height=size*dpr;
+  M={...(M||{mode:'2',color:'#FF5C93',w:12,rainbow:false,glitter:false}),cv,ctx:cv.getContext('2d'),size,dpr,hue:0,ink:0,last:null};
+  const mand=V.name==='mandala',need={'4':'mirror4','12':'kaleido',m6:'mandala6',m8:'mandala8'};
+  if(mand!==M.mode.startsWith('m')||(need[M.mode]&&!has(V.kid,need[M.mode])))M.mode=mand?'m4':'2';
+  if(M.rainbow&&!has(V.kid,'rainbow'))M.rainbow=false;if(M.glitter&&!has(V.kid,'glitter'))M.glitter=false;
+  clearCanvas();drawGuides();syncMirrorUI();
+  const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*M.size/r.width,y:(e.clientY-r.top)*M.size/r.height}};
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);M.last=pt(e);seg(M.last,{x:M.last.x+.1,y:M.last.y})});
+  cv.addEventListener('pointermove',e=>{if(!M.last)return;const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];for(const ev of evs){const p=pt(ev);seg(M.last,p);M.ink+=Math.hypot(p.x-M.last.x,p.y-M.last.y);M.last=p}});
+  const up=()=>{M.last=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+}
+const sym=()=>({'2':1,'4':2,'12':6,m4:4,m6:6,m8:8})[M.mode]||1;
+function clearCanvas(){const{ctx,dpr,size}=M;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size)}
+function drawGuides(){const R=sym();let s='';
+  for(let k=0;k<R;k++){const a=(k*180/R+90)*Math.PI/180,dx=Math.cos(a)*75,dy=Math.sin(a)*75;s+=`<line x1="${50-dx}" y1="${50-dy}" x2="${50+dx}" y2="${50+dy}" stroke="#2B2350" stroke-opacity=".12" stroke-width=".6" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>`}
+  if(M.mode.startsWith('m'))[14,28,42].forEach(r=>{s+=`<circle cx="50" cy="50" r="${r}" fill="none" stroke="#2B2350" stroke-opacity=".12" stroke-width=".6" stroke-dasharray="2 2" vector-effect="non-scaling-stroke"/>`});
+  $('#guides').innerHTML=s}
+function seg(a,b){
+  const{ctx,dpr,size}=M,c=size/2,R=sym();
+  const col=M.rainbow?`hsl(${(M.hue+=3)%360},90%,58%)`:M.color;
+  const sparks=M.glitter?Array.from({length:2},()=>({dx:(Math.random()-.5)*M.w*3,dy:(Math.random()-.5)*M.w*3,r:1+Math.random()*2.5,c:['#FFD84D','#FF9AD5','#9FE7FF','#C9B6FF'][Math.random()*4|0]})):[];
+  for(let k=0;k<R;k++)for(const m of[1,-1]){
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.translate(c,c);ctx.rotate(k*2*Math.PI/R);ctx.scale(m,1);
+    ctx.strokeStyle=col;ctx.lineWidth=M.w;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(a.x-c,a.y-c);ctx.lineTo(b.x-c,b.y-c);ctx.stroke();
+    sparks.forEach(s=>{ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(b.x-c+s.dx,b.y-c+s.dy,s.r,0,7);ctx.fill()});
+  }
+}
+function syncMirrorUI(){
+  document.querySelectorAll('[data-act="mode"]').forEach(b=>b.classList.toggle('on',b.dataset.m===M.mode));
+  document.querySelectorAll('[data-act="col"]').forEach(b=>b.classList.toggle('on',!M.rainbow&&b.dataset.c===M.color));
+  const rb=document.querySelector('[data-act="rainbow"]');if(rb)rb.classList.toggle('on',M.rainbow);
+  document.querySelectorAll('[data-act="size"]').forEach(b=>b.classList.toggle('on',+b.dataset.w===M.w));
+  const gl=document.querySelector('[data-act="glitter"]');if(gl)gl.classList.toggle('on',M.glitter);
+}
+
+/* ================= coloring ================= */
+let CF={color:'#FF5C93',awarded:false};
+function setupColor(){CF.awarded=false;syncColorUI();$('#colorpic').addEventListener('click',e=>{const r=e.target.closest('[data-r]');if(!r)return;r.style.fill=CF.color;chime('pop')})}
+function syncColorUI(){document.querySelectorAll('[data-act="fillcol"]').forEach(b=>b.classList.toggle('on',b.dataset.c===CF.color))}
+
+/* ================= start ================= */
+loadLocal();maintenance();V=rootView();render();
+startSync();
+if(SYNC){setInterval(checkUpdate,5*60000);setTimeout(checkUpdate,8000)}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){maintenance();softRender();checkUpdate()}});
+setInterval(()=>{const before=JSON.stringify(Object.values(S.tasks).map(t=>t.status));maintenance();if(JSON.stringify(Object.values(S.tasks).map(t=>t.status))!==before)softRender()},60000);
+})();
+
+</script>
+</body></html>
