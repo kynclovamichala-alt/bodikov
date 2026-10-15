@@ -367,7 +367,7 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-15.3';
+const APP_VERSION='2026-10-15.4';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -478,6 +478,7 @@ const pendingPts=kid=>taskList().filter(t=>t.kid===kid&&t.status==='pending').re
 const sumLog=f=>Object.values(S.log).filter(f).reduce((a,l)=>a+(+l.pts||0),0);
 const weekPts=kid=>{const ws=weekStart();return sumLog(l=>l.kid===kid&&l.d>=ws&&(l.type==='task'||l.type==='streak'))};
 const teamPts=()=>sumLog(l=>l.d>=S.settings.team.since&&(l.type==='task'||l.type==='streak'));
+const learnCapOf=kid=>{const v=kidOf(kid)&&kidOf(kid).learnCap;return typeof v==='number'?v:S.settings.learnCap};
 const pendingCount=()=>taskList().filter(t=>t.status==='pending').length;
 
 /* ---- morning window ---- */
@@ -489,6 +490,7 @@ const minsLeft=()=>Math.max(1,toMin(S.settings.morning.end)-nowMin());
 /* ---- daily upkeep, idempotent so every phone can run it ---- */
 function maintenance(){
   const td=today();
+  if(!S.settings.migBea50&&(firstSnap||!SYNC||!DEV.family)){put('kids/bea/learnCap',50);put('settings/migBea50',true)}
   Object.values(S.tasks).forEach(t=>{if(t.repeat==='daily'&&t.status==='done'&&t.doneDate!==td)
     put(`tasks/${t.id}`,{...t,status:'open',fast:false,timerEnd:null,steps:(t.steps||[]).map(s=>({...s,d:false}))})});
   const m=S.settings.morning;
@@ -840,7 +842,7 @@ let L=null;
 const ROUND_LEA=5,ROUND_BEA=8;
 function progressDots(){return `<div class="progress" aria-label="Postup">${Array.from({length:L.total},(_,i)=>`<i class="${i<L.i?'f':i===L.i?'c':''}"></i>`).join('')}</div>`}
 function vLearn(){
-  const k=kidOf(V.kid),lp=sumLog(l=>l.kid===V.kid&&l.type==='learn'&&l.d===today()),cap=S.settings.learnCap;
+  const k=kidOf(V.kid),lp=sumLog(l=>l.kid===V.kid&&l.type==='learn'&&l.d===today()),cap=learnCapOf(V.kid);
   const capNote=`<p class="note">Za každé dokončené kolo jsou hvězdičky, dnes máš ${lp} z ${cap} ⭐.</p>`;
   if(k.little)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="learnCount"><span class="ic">🍎</span><span class="t"><h2>Kolik je tu?</h2><span class="muted sub">Spočítej ovoce.</span><span class="pill">+3 ⭐ za kolo</span></span></button>
@@ -1028,6 +1030,7 @@ function vParent(){
   if(tab==='points'){
     body=KIDS.map(id=>parentCourses(id)).join('')+KIDS.map(id=>{const k=kidOf(id);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(k.name)}</span> má ${pointsOf(id)} ⭐</h2>
       <div class="row"><input type="number" id="bonus-${id}" min="1" value="5" style="width:90px"><button class="mini ok" data-act="bonus" data-id="${id}" data-sign="1">+ Přidat</button><button class="mini no" data-act="bonus" data-id="${id}" data-sign="-1">− Odebrat</button></div>
+      <label class="prow"><span class="t">Max. hvězdiček za učení denně</span><input type="number" id="lc-${id}" min="0" value="${learnCapOf(id)}" data-set="kids/${id}/learnCap"></label>
       <label class="prow"><span class="t">Týdenní cíl v závodě</span><input type="number" id="wt-${id}" min="5" value="${k.weekTarget}" data-set="kids/${id}/weekTarget"></label>
       ${itemsFor(id).map(i=>`<label class="prow"><span class="ic">${i.icon}</span><span class="t">${esc(i.name)}${has(id,i.id)?' ✅':''}</span><input type="number" id="pr-${id}-${i.id}" min="0" value="${st.prices[id][i.id]}" data-set="settings/prices/${id}/${i.id}"></label>`).join('')}</div>`}).join('');
     const tp=teamPts();
@@ -1038,7 +1041,7 @@ function vParent(){
       <p class="muted">Zatím mají ${tp} z ${st.team.target} ⭐.</p>
       <button class="btn ghost" data-act="teamReset">Odměna předána, začít znovu</button></div>
       <div class="card sec"><label class="prow"><span class="t">Max. hvězdiček za hry denně</span><input type="number" id="gcap" min="0" value="${st.gameCap}" data-set="settings/gameCap"></label>
-      <label class="prow"><span class="t">Max. hvězdiček za učení denně</span><input type="number" id="lcap" min="0" value="${st.learnCap}" data-set="settings/learnCap"></label></div>
+</div>
       <div class="card sec"><h2>Historie</h2><div class="log">${logs().slice(0,30).map(l=>`<div><span class="kidtag ${l.kid}">${esc(kidOf(l.kid).name)}</span><span>${esc(l.text)}</span><span class="p">${l.pts>0?'+':''}${l.pts} ⭐</span></div>`).join('')}</div></div>`;
   }
   if(tab==='settings'){
@@ -1113,7 +1116,7 @@ function updTimers(){
 
 /* ================= actions ================= */
 function capAward(type,cap,pts,text,title,speak,onClose){
-  const k=V.kid||(stack.find(v=>v.kid)||{}).kid;
+  const k=V.kid||(stack.find(v=>v.kid)||{}).kid;if(type==='learn')cap=learnCapOf(k);
   const used=sumLog(l=>l.kid===k&&l.type===type&&l.d===today());
   const add=Math.max(0,Math.min(pts,cap-used));
   if(add>0){addLog(k,add,type,text,true);celebrate({title,stars:add,speak,onClose})}
