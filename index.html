@@ -343,13 +343,31 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 
 .brk{background:var(--bea-soft);color:var(--bea);border-radius:10px;padding:0 4px}
 .lcard .ic{font-family:var(--display);font-weight:800;color:var(--bea)}
+
+/* courses */
+.stars{white-space:nowrap;font-size:1rem;letter-spacing:1px}
+.stars i{font-style:normal;color:var(--line);font-size:1.15rem}
+.tlist{display:flex;flex-direction:column;gap:8px}
+.trow{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:12px 14px;display:flex;align-items:center;gap:10px;text-align:left;width:100%}
+.trow.done{background:var(--mint-soft)}
+.trow .tn{width:28px;height:28px;border-radius:50%;background:var(--kid-soft);color:var(--kid);display:grid;place-items:center;font-weight:900;flex:none;font-size:.9rem}
+.trow .ti{font-size:1.4rem;width:30px;text-align:center;flex:none;font-weight:900;color:var(--bea)}
+.trow .tt{flex:1;min-width:0;font-family:var(--display);font-size:1.15rem;font-weight:800}
+.lcard .bar{height:10px}
+.lul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;line-height:1.45}
+.lesson .geo{margin-block:4px}
+.geo .g-tick{stroke:var(--bea);stroke-width:3;stroke-linecap:round}
+.geo text.rn{font-size:11px;font-weight:700;font-family:var(--body)}
+.geo text.rn2{font-size:15px;fill:var(--bea)}
+.geo .op1{stroke:#E0402A}.geo .op2{stroke:#3D6BFF}
+.opt{white-space:normal}
 </style>
 </head><body><div id="app"></div>
 <script>
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-15.2';
+const APP_VERSION='2026-10-15.3';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -704,7 +722,7 @@ function vHome(){
   <div class="tiles">
     <button class="tile" data-act="goTasks"><span class="ic">✅</span><span class="nm">Úkoly</span>${open.length?`<span class="badge">${open.length}</span>`:''}</button>
     <button class="tile" data-act="go" data-to="games"><span class="ic">🎨</span><span class="nm">Hry</span></button>
-    <button class="tile wide" data-act="go" data-to="learn"><span class="ic">${k.little?'🍎':k.adult?'🧘':'📐'}</span><span><span class="nm">Učení</span><br><span class="sub">${k.little?'Počítání do 5':k.adult?'Emoce a klid':'Body a čáry'}${lp?` · dnes +${lp} ⭐`:''}</span></span></button>
+    <button class="tile wide" data-act="go" data-to="learn"><span class="ic">${k.little?'🍎':k.adult?'🧘':'📐'}</span><span><span class="nm">Učení</span><br><span class="sub">${k.little?'Počítání do 5':k.adult?'Emoce a klid':'Testy, počítání'}${lp?` · dnes +${lp} ⭐`:''}</span></span></button>
     <button class="tile" data-act="go" data-to="race"><span class="ic">🏁</span><span class="nm">Závod</span><span class="sub muted">${wpct} %</span></button>
     <button class="tile" data-act="go" data-to="shop"><span class="ic">🎁</span><span class="nm">Odemknout</span></button>
   </div>
@@ -832,10 +850,11 @@ function vLearn(){
     <button class="lcard" data-act="go" data-to="calm"><span class="ic" style="background:var(--jirka-soft)">🌬️</span><span class="t"><h2>Jak se uklidnit</h2><span class="muted">Dýchání, uzemnění, STOP</span><span class="pill">+3 ⭐ za cvičení</span></span></button>
     <button class="lcard" data-act="startLearn" data-g="selfTest"><span class="ic" style="background:var(--sun-soft)">📝</span><span class="t"><h2>Test: jak zvládám emoce</h2><span class="muted">8 otázek o tobě</span><span class="pill">+3 ⭐</span></span></button>${capNote}`;
   return `${topbar('Učení')}
+    <h2 style="font-size:1.3rem">📚 Na testy ve škole</h2>${coursesOf(V.kid).map(C=>courseCard(V.kid,C)).join('')}
+    <h2 style="font-size:1.3rem">🧮 Počítání</h2>
     <button class="lcard" data-act="startLearn" data-g="divQuiz"><span class="ic" style="background:var(--sun-soft)">➗</span><span class="t"><h2>Dělení se zbytkem</h2><span class="muted">Třeba 15 : 4 = 3 zb. 3</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
     <button class="lcard" data-act="startLearn" data-g="brQuiz"><span class="ic" style="background:var(--bea-soft)">( )</span><span class="t"><h2>Počítání se závorkami</h2><span class="muted">Třeba (12 + 8) : 4</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
-    <button class="lcard" data-act="go" data-to="geoLesson"><span class="ic" style="background:var(--bea-soft)">📒</span><span class="t"><h2>Tahák: body a čáry</h2><span class="muted">Bod, úsečka, polopřímka, přímka</span></span></button>
-    <button class="lcard" data-act="startLearn" data-g="geoQuiz"><span class="ic">📐</span><span class="t"><h2>Kvíz z geometrie</h2><span class="muted">8 otázek, 4. třída</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>${capNote}`;
+    ${capNote}`;
 }
 function startLearn(g){
   if(g==='learnCount'){L={g,i:0,total:ROUND_LEA,first:0};L.q=newCountQ()}
@@ -871,10 +890,11 @@ function learnNext(){
   if(L.g==='learnFind')L.q=newFindQ();
   if(L.g==='geoQuiz'||L.g==='emoQuiz'){L.q=L.qs[L.i];L.q.tried=[]}
   if(L.g==='divQuiz')L.q=newDivQ();
-  if(L.g==='brQuiz')L.q=L.qs[L.i];
+  if(L.g==='brQuiz'||L.g==='course')L.q=L.qs[L.i];
   render();speakQ();
 }
 function finishLearn(){
+  if(L.g==='course'){finishCourse();return}
   const perfect=L.first===L.total;
   const quiz=['geoQuiz','emoQuiz','divQuiz','brQuiz'].includes(L.g),pts=quiz?(perfect?4:3):3;
   const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky'}[L.g]||'Učení: počítání';
@@ -953,7 +973,7 @@ const GQ={
 };
 function makeGeoRound(){const order=shuffle(['what','what','rayStart','onLine','notation','countSeg','threePts','longer','concept','cross']).slice(0,ROUND_BEA);return order.map(k=>GQ[k]())}
 function vGeoQuiz(){const q=L.q,solved=q.tried.includes(q.ans);
-  return `${topbar(L.g==='emoQuiz'?'Poznej emoci':'Kvíz z geometrie')}${progressDots()}
+  return `${topbar(L.title||(L.g==='emoQuiz'?'Poznej emoci':'Kvíz z geometrie'))}${progressDots()}
   ${q.svg?`<div class="geo">${geoSvg(q.svg)}</div>`:''}
   <p class="qtext">${esc(q.q)}</p>
   <div class="opts">${q.opts.map(o=>`<button class="opt ${q.tried.includes(o)?(o===q.ans?'ok':'bad'):''}" data-act="geoAns" data-o="${esc(o)}" ${solved?'disabled':''}>${esc(o)}</button>`).join('')}</div>
@@ -1006,7 +1026,7 @@ function vParent(){
     body+=KIDS.map(id=>{const list=taskList().filter(t=>t.kid===id&&!t.morning);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(kidOf(id).name)}</span> úkoly</h2>${list.length?list.map(t=>`<div class="prow"><span class="ic">${esc(t.icon)}</span><div class="t"><b>${esc(t.title)}</b><br><span class="muted">${t.points} ⭐ · ${t.repeat==='daily'?'každý den':'jednou'}${t.minutes?` · ⏱️ ${t.minutes} min`:''}${t.steps&&t.steps.length?` · ${t.steps.length} kroky`:''} · ${({open:'čeká na splnění',pending:'ke schválení',done:'dnes hotovo'})[t.status]}</span></div><button class="mini no" data-act="delTask" data-id="${t.id}">Smazat</button></div>`).join(''):'<p class="muted">Zatím žádné úkoly.</p>'}</div>`}).join('');
   }
   if(tab==='points'){
-    body=KIDS.map(id=>{const k=kidOf(id);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(k.name)}</span> má ${pointsOf(id)} ⭐</h2>
+    body=KIDS.map(id=>parentCourses(id)).join('')+KIDS.map(id=>{const k=kidOf(id);return `<div class="card sec"><h2><span class="kidtag ${id}">${esc(k.name)}</span> má ${pointsOf(id)} ⭐</h2>
       <div class="row"><input type="number" id="bonus-${id}" min="1" value="5" style="width:90px"><button class="mini ok" data-act="bonus" data-id="${id}" data-sign="1">+ Přidat</button><button class="mini no" data-act="bonus" data-id="${id}" data-sign="-1">− Odebrat</button></div>
       <label class="prow"><span class="t">Týdenní cíl v závodě</span><input type="number" id="wt-${id}" min="5" value="${k.weekTarget}" data-set="kids/${id}/weekTarget"></label>
       ${itemsFor(id).map(i=>`<label class="prow"><span class="ic">${i.icon}</span><span class="t">${esc(i.name)}${has(id,i.id)?' ✅':''}</span><input type="number" id="pr-${id}-${i.id}" min="0" value="${st.prices[id][i.id]}" data-set="settings/prices/${id}/${i.id}"></label>`).join('')}</div>`}).join('');
@@ -1055,7 +1075,7 @@ const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirr
   learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
 function render(){
   clearInterval(tick);tick=null;stopGame();
-  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz','courseQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
   const app=$('#app'),k=V.kid&&kidOf(V.kid);
   app.classList.toggle('little',!!(k&&k.little));
   setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
@@ -1071,7 +1091,7 @@ function render(){
 }
 function softRender(){
   const ft=$('#f-title'),fs=$('#f-steps');
-  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','courseQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
   if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
   render();
 }
@@ -1532,6 +1552,466 @@ Object.assign(handlers,{
   brKey:b=>{const q=L.q,k=b.dataset.k;if(q.solved)return;if(k==='del')q.a=q.a.slice(0,-1);else if(q.a.length<3)q.a=(q.a+k).replace(/^0(\d)/,'$1');q.msg='';render()},
   brCheck:()=>brCheck(),
   brHelp:()=>{L.q.help=true;render()}
+});
+
+/* ================= Bea: course "Přímky a úsečky" ================= */
+const LN='↔',RY='↦',fmtN=n=>String(Math.round(n*10)/10).replace('.',',');
+const uniq=a=>[...new Set(a)];
+function optsOf(ans,wrong,n=4){const o=uniq([ans,...wrong.filter(w=>w!==ans)]).slice(0,n);return shuffle(o)}
+/* drawing helpers: horizontal line y=100, ticks for points */
+const Y0=100;
+const hl=(x1,x2,y=Y0,cls='g-line')=>`<line class="${cls}" x1="${f1(x1)}" y1="${y}" x2="${f1(x2)}" y2="${y}"/>`;
+const tk=(x,lab,y=Y0,up=false)=>`<line class="g-tick" x1="${f1(x)}" y1="${y-9}" x2="${f1(x)}" y2="${y+9}"/><text x="${f1(x)}" y="${up?y-20:y+32}" text-anchor="middle">${lab}</text>`;
+function drawKind(kind,A,B,xa,xb){ // kind: seg | line | rayL (start at left point) | rayR (start at right point)
+  let s='';
+  if(kind==='seg')s=hl(xa,xb);
+  if(kind==='line')s=hl(10,310);
+  if(kind==='rayL')s=hl(xa,310);
+  if(kind==='rayR')s=hl(10,xb);
+  return s+tk(xa,A)+tk(xb,B);
+}
+const twoPts=()=>{const [A,B]=letters(2);const xa=ri(55,110),xb=ri(200,265);return{A,B,xa,xb}};
+
+const TOPICS=[
+ {id:'primka',icon:'↔',name:'Přímka',
+  lesson:()=>`<p><b>Přímka</b> je nekonečně dlouhá přímá čára. Nemá začátek ani konec, a proto <b>její délku nelze změřit</b>.</p>
+   <div class="geo">${geoSvg(hl(10,310)+tk(110,'A')+tk(220,'B')+`<text class="it" x="295" y="82">p</text>`)}</div>
+   <p>Přímky pojmenováváme <b>malými písmeny</b> (p, q, r…) nebo dvěma body, kterými prochází.</p><span class="zap">${LN}AB &nbsp;·&nbsp; přímka p</span>
+   <p>Dvěma body vede jen jedna přímka.</p>`,
+  gen:[
+   ()=>{const{A,B,xa,xb}=twoPts();return{svg:drawKind('line',A,B,xa,xb),q:'Co je na obrázku?',opts:shuffle(['přímka','polopřímka','úsečka']),ans:'přímka',exp:`Čára pokračuje za oba body ${A} i ${B} až do nekonečna. Je to přímka ${LN}${A}${B}.`}},
+   ()=>({svg:'',q:'Můžeme změřit délku přímky?',opts:shuffle(['Ne, je nekonečně dlouhá','Ano, pravítkem','Jen v milimetrech']),ans:'Ne, je nekonečně dlouhá',exp:'Přímka nemá začátek ani konec, takže délku nemá.'}),
+   ()=>({svg:'',q:'Kolik krajních bodů má přímka?',opts:['0','1','2'],ans:'0',exp:'Přímka nemá žádný krajní bod, pokračuje na obě strany donekonečna.'}),
+   ()=>{const[A,B]=letters(2);return{svg:'',q:`Jak zapíšeš přímku, která prochází body ${A} a ${B}?`,opts:shuffle([LN+A+B,RY+A+B,A+B,`|${A}${B}|`]),ans:LN+A+B,exp:`Přímku zapisujeme se šipkou na obě strany: ${LN}${A}${B}.`}},
+   ()=>({svg:'',q:'Jakými písmeny pojmenováváme přímky?',opts:shuffle(['malými (p, q, r)','velkými (P, Q, R)','čísly (1, 2, 3)']),ans:'malými (p, q, r)',exp:'Přímky popisujeme malými písmeny, body velkými.'}),
+   ()=>({svg:'',q:'Kolik přímek vede dvěma různými body?',opts:shuffle(['jedna','dvě','nekonečně mnoho']),ans:'jedna',exp:'Dvěma body můžeme vést jen jednu přímku.'})
+  ]},
+ {id:'polo',icon:'↦',name:'Polopřímka',
+  lesson:()=>`<p><b>Polopřímka</b> je část přímky. Má vždy <b>počáteční bod</b> a na druhou stranu pokračuje bez konce.</p>
+   <div class="geo">${geoSvg(hl(80,310)+tk(80,'A')+tk(210,'B'))}</div>
+   <span class="zap">${RY}AB</span><p>Při zápisu píšeme <b>první počátek</b>. ${RY}AB začíná v A, ${RY}BA začíná v B. Jsou to dvě různé polopřímky!</p>`,
+  gen:[
+   ()=>{const{A,B,xa,xb}=twoPts(),left=Math.random()<.5,ans=left?RY+A+B:RY+B+A;return{svg:drawKind(left?'rayL':'rayR',A,B,xa,xb),q:'Jak zapíšeš tuto polopřímku?',opts:shuffle([RY+A+B,RY+B+A,LN+A+B,A+B]),ans,exp:`Polopřímka začíná v bodě ${left?A:B}, ten píšeme první: ${ans}.`}},
+   ()=>{const{A,B,xa,xb}=twoPts(),left=Math.random()<.5;return{svg:drawKind(left?'rayL':'rayR',A,B,xa,xb),q:'Ve kterém bodě tato polopřímka začíná?',opts:[A,B],ans:left?A:B,exp:`Na straně bodu ${left?A:B} čára končí. Tam je počátek, za druhým bodem pokračuje dál.`}},
+   ()=>({svg:'',q:'Kolik počátečních bodů má polopřímka?',opts:['0','1','2'],ans:'1',exp:'Polopřímka má právě jeden počáteční bod.'}),
+   ()=>{const[A,B]=letters(2);return{svg:'',q:`Je ${RY}${A}${B} stejná polopřímka jako ${RY}${B}${A}?`,opts:['Ne, mají jiný počátek','Ano, je to totéž'],ans:'Ne, mají jiný počátek',exp:`${RY}${A}${B} začíná v ${A} a míří k ${B}. ${RY}${B}${A} začíná v ${B} a míří opačně.`}},
+   ()=>({svg:'',q:'Polopřímka je…',opts:shuffle(['část přímky s jedním počátkem','část přímky se dvěma krajními body','čára bez začátku a konce']),ans:'část přímky s jedním počátkem',exp:'Polopřímka = část přímky, má vždy počáteční bod.'}),
+   ()=>{const{A,B,xa,xb}=twoPts();return{svg:drawKind('rayL',A,B,xa,xb),q:'Co je na obrázku?',opts:shuffle(['polopřímka','přímka','úsečka']),ans:'polopřímka',exp:`Čára začíná v ${A} a za ${B} pokračuje dál. Je to polopřímka ${RY}${A}${B}.`}}
+  ]},
+ {id:'usecka',icon:'—',name:'Úsečka',
+  lesson:()=>`<p><b>Úsečka</b> je část přímky, která má <b>dva krajní body</b>. Proto můžeme <b>změřit její délku</b>.</p>
+   <div class="geo">${geoSvg(hl(70,250)+tk(70,'A')+tk(250,'B'))}</div>
+   <p>Úsečku zapíšeme jen dvěma písmeny. Délku zapíšeme se svislými čárkami:</p><span class="zap">úsečka AB &nbsp;·&nbsp; |AB| = 11,4 cm</span>`,
+  gen:[
+   ()=>{const{A,B,xa,xb}=twoPts();return{svg:drawKind('seg',A,B,xa,xb),q:'Co je na obrázku?',opts:shuffle(['úsečka','polopřímka','přímka']),ans:'úsečka',exp:`Čára začíná v ${A} a končí v ${B}. Je to úsečka ${A}${B}.`}},
+   ()=>({svg:'',q:'Kolik krajních bodů má úsečka?',opts:['0','1','2'],ans:'2',exp:'Úsečka má vždy dva krajní body.'}),
+   ()=>({svg:'',q:'Co z toho můžeme změřit pravítkem?',opts:shuffle(['úsečku','přímku','polopřímku']),ans:'úsečku',exp:'Jen úsečka má začátek i konec, a tedy délku.'}),
+   ()=>{const[A,B]=letters(2);return{svg:'',q:`Který zápis znamená DÉLKU úsečky ${A}${B}?`,opts:shuffle([`|${A}${B}|`,LN+A+B,RY+A+B,A+B]),ans:`|${A}${B}|`,exp:`Délku zapisujeme mezi svislé čárky: |${A}${B}| = … cm.`}},
+   ()=>{const[A,B]=letters(2);return{svg:'',q:`Jak zapíšeš úsečku s krajními body ${A} a ${B}?`,opts:shuffle([A+B,RY+A+B,LN+A+B,`|${A}${B}|`]),ans:A+B,exp:`Úsečku zapíšeme jen písmeny krajních bodů: ${A}${B}.`}},
+   ()=>({svg:'',q:'Úsečka je…',opts:shuffle(['část přímky se dvěma krajními body','nekonečná přímá čára','část přímky s jedním počátkem']),ans:'část přímky se dvěma krajními body',exp:'Úsečka = část přímky, vždy dva krajní body.'})
+  ]},
+ {id:'poznej',icon:'🔎',name:'Poznej a zapiš',
+  lesson:()=>`<p>Podívej se, kde čára <b>končí</b>:</p>
+   <p>• končí u obou bodů → <b>úsečka</b> AB</p><p>• končí u jednoho bodu → <b>polopřímka</b>, počátek píšeme první: ${RY}AB nebo ${RY}BA</p><p>• nekončí nikde → <b>přímka</b> ${LN}AB</p>
+   <div class="geo">${geoSvg(hl(200,310,40)+tk(200,'E',40,true)+tk(280,'F',40,true)+hl(10,140,140)+tk(60,'G',140)+tk(140,'H',140))}</div>
+   <p>Nahoře je ${RY}EF (začíná v E), dole ${RY}HG (začíná v H).</p>`,
+  gen:[()=>{const{A,B,xa,xb}=twoPts(),kind=pick(['seg','line','rayL','rayR']);
+    const ans={seg:A+B,line:LN+A+B,rayL:RY+A+B,rayR:RY+B+A}[kind];
+    const exp={seg:`Čára končí u obou bodů, je to úsečka ${A}${B}.`,line:`Čára pokračuje za oba body, je to přímka ${LN}${A}${B}.`,rayL:`Čára končí jen u bodu ${A}, to je počátek: ${RY}${A}${B}.`,rayR:`Čára končí jen u bodu ${B}, to je počátek: ${RY}${B}${A}.`}[kind];
+    return{svg:drawKind(kind,A,B,xa,xb),q:'Co je na obrázku? Vyber správný zápis.',opts:shuffle([A+B,LN+A+B,RY+A+B,RY+B+A]),ans,exp}}]},
+ {id:'delka',icon:'📏',name:'Měření délky',
+  lesson:()=>`<p>Úsečku měříme pravítkem. <b>Nulu</b> přiložíme ke krajnímu bodu a čteme, kde je druhý bod.</p>
+   <div class="geo">${geoSvg(rulerSvg(0,62))}</div><span class="zap">|AB| = 62 mm = 6,2 cm</span>
+   <p>Když úsečka nezačíná na nule, <b>odečteme</b>: konec − začátek.</p>`,
+  gen:[()=>{const L=Math.random()<.4?ri(2,9)*10:ri(15,90),s=Math.random()<.6?0:ri(1,Math.floor((100-L)/10))*10,cm=L%10===0&&Math.random()<.6;
+    const [A,B]=letters(2),ans=cm?`${L/10} cm`:`${L} mm`;
+    const wrong=cm?[`${L/10+1} cm`,`${Math.max(1,L/10-1)} cm`,`${L} cm`,`${(s+L)/10} cm`]:[`${L+10} mm`,`${L-10>0?L-10:L+5} mm`,`${L} cm`,`${s+L} mm`];
+    return{svg:rulerSvg(s,L,A,B),q:`Jak dlouhá je úsečka ${A}${B}? |${A}${B}| = ?`,opts:optsOf(ans,s?[wrong[3],...wrong.slice(0,3)]:wrong),ans,
+     exp:s?`${A} je na ${fmtN(s/10)} cm, ${B} na ${fmtN((s+L)/10)} cm. Odečteme: ${s+L} mm − ${s} mm = ${L} mm${cm?` = ${L/10} cm`:''}.`:`Úsečka začíná na nule a končí na ${L} mm${L%10?` (${fmtN(L/10)} cm)`:` = ${L/10} cm`}.`}}]},
+ {id:'jednotky',icon:'🔁',name:'Jednotky délky',
+  lesson:()=>`<span class="zap">1 cm = 10 mm</span><span class="zap">1 dm = 10 cm = 100 mm</span>
+   <p>Z cm na mm: <b>× 10</b> (3 cm = 30 mm). Z mm na cm: <b>: 10</b> (50 mm = 5 cm).</p><p>Desetinná čárka: 11,4 cm = 114 mm, 62 mm = 6,2 cm.</p>`,
+  gen:[
+   ()=>{const x=ri(2,15);return{svg:'',q:`${x} cm = ? mm`,opts:optsOf(`${x*10} mm`,[`${x*100} mm`,`${x} mm`,`${x*10+5} mm`]),ans:`${x*10} mm`,exp:`1 cm = 10 mm, takže ${x} · 10 = ${x*10} mm.`}},
+   ()=>{const y=ri(2,15)*10;return{svg:'',q:`${y} mm = ? cm`,opts:optsOf(`${y/10} cm`,[`${y} cm`,`${y*10} cm`,`${y/10+1} cm`]),ans:`${y/10} cm`,exp:`10 mm = 1 cm, takže ${y} : 10 = ${y/10} cm.`}},
+   ()=>{const z=ri(1,5),mm=Math.random()<.4;return mm?{svg:'',q:`${z} dm = ? mm`,opts:optsOf(`${z*100} mm`,[`${z*10} mm`,`${z*1000} mm`,`${z} mm`]),ans:`${z*100} mm`,exp:`1 dm = 100 mm, takže ${z} dm = ${z*100} mm.`}
+     :{svg:'',q:`${z} dm = ? cm`,opts:optsOf(`${z*10} cm`,[`${z*100} cm`,`${z} cm`,`${z*10+5} cm`]),ans:`${z*10} cm`,exp:`1 dm = 10 cm, takže ${z} dm = ${z*10} cm.`}},
+   ()=>{const a=ri(2,14),b=ri(1,9);return{svg:'',q:`${a},${b} cm = ? mm`,opts:optsOf(`${a*10+b} mm`,[`${a+b} mm`,`${a*100+b} mm`,`${a*10+b+10} mm`]),ans:`${a*10+b} mm`,exp:`${a} cm = ${a*10} mm a ještě ${b} mm, celkem ${a*10+b} mm.`}},
+   ()=>{let m;do{m=ri(21,99)}while(m%10===0);return{svg:'',q:`${m} mm = ? cm`,opts:optsOf(`${fmtN(m/10)} cm`,[`${m} cm`,`${fmtN(m/100)} cm`,`${fmtN(m/10+1)} cm`]),ans:`${fmtN(m/10)} cm`,exp:`${m} mm = ${Math.floor(m/10)} cm a ${m%10} mm, tedy ${fmtN(m/10)} cm.`}},
+   ()=>{const c=ri(3,9),d=pick([c*10,c*10-ri(1,4),c*10+ri(1,4)]),ans=d===c*10?'jsou stejně dlouhé':d<c*10?`${c} cm`:`${d} mm`;return{svg:'',q:`Co je delší: ${c} cm, nebo ${d} mm?`,opts:[`${c} cm`,`${d} mm`,'jsou stejně dlouhé'],ans,exp:`${c} cm = ${c*10} mm. Porovnáme ${c*10} mm a ${d} mm.`}}
+  ]},
+ {id:'shodne',icon:'≅',name:'Shodné úsečky',
+  lesson:()=>`<p><b>Shodné úsečky</b> jsou úsečky, které mají <b>stejnou délku</b>.</p><span class="zap">AB ≅ CD</span>
+   <div class="geo">${geoSvg(hl(40,160,60)+tk(40,'A',60,true)+tk(160,'B',60,true)+hl(150,270,150)+tk(150,'C',150)+tk(270,'D',150))}</div>
+   <p>Pozor na jednotky: 5 cm a 50 mm je stejná délka, takže úsečky jsou shodné.</p>`,
+  gen:[
+   ()=>({svg:'',q:'Úsečky, které mají stejnou délku, jsou…',opts:shuffle(['shodné','kolmé','rovnoběžné','opačné']),ans:'shodné',exp:'Stejná délka = shodné úsečky.'}),
+   ()=>{const[A,B,C,D]=letters(4);return{svg:'',q:`Jak zapíšeš, že úsečky ${A}${B} a ${C}${D} jsou shodné?`,opts:shuffle([`${A}${B} ≅ ${C}${D}`,`${A}${B} ∥ ${C}${D}`,`${A}${B} ⊥ ${C}${D}`,`${A}${B} ∈ ${C}${D}`]),ans:`${A}${B} ≅ ${C}${D}`,exp:'Shodnost zapisujeme značkou ≅.'}},
+   ()=>{const x=ri(2,9),c=[[`CD (|CD| = ${x*10} mm)`,1],[`EF (|EF| = ${x} mm)`,0],[`GH (|GH| = ${x*10+5} mm)`,0],[`KL (|KL| = ${x+1} cm)`,0]];return{svg:'',q:`|AB| = ${x} cm. Která úsečka je s AB shodná?`,opts:shuffle(c.map(z=>z[0])),ans:c[0][0],exp:`${x} cm = ${x*10} mm, takže AB ≅ CD.`}},
+   ()=>{const x=ri(2,9),same=Math.random()<.5,d=same?x*10:x*10+pick([-5,-3,3,5]);return{svg:'',q:`|AB| = ${x} cm, |CD| = ${d} mm. Jsou úsečky shodné?`,opts:[`Ano, AB ≅ CD`,'Ne, nejsou'],ans:same?'Ano, AB ≅ CD':'Ne, nejsou',exp:`${x} cm = ${x*10} mm${same?', délky jsou stejné.':`, ale CD má ${d} mm.`}`}}
+  ]},
+ {id:'lezi',icon:'∈',name:'Leží, neleží',
+  lesson:()=>`<p>Značka <b>∈</b> znamená „leží na“, <b>∉</b> znamená „neleží na“.</p>
+   <div class="geo">${geoSvg(hl(10,310,110,'g-faint')+hl(110,230,110)+tk(50,'A',110)+tk(110,'R',110)+tk(230,'S',110)+tk(285,'B',110)+gpt({x:170,y:50})+'<text x="186" y="40">C</text>')}</div>
+   <p>Na úsečce RS leží jen body <b>mezi R a S</b>. Bod B leží na stejné přímce, ale mimo úsečku.</p><span class="zap">R ∈ RS &nbsp; B ∉ RS &nbsp; C ∉ RS</span>`,
+  gen:[()=>{const xs={A:40,R:100,M:160,S:220,B:280},t={A:0,R:1,M:2,S:3,B:4};
+    const obj=pick(['seg','seg','rayRS','raySR','line']),P=pick(['A','R','M','S','B','C','C']);
+    const name={seg:'RS',rayRS:RY+'RS',raySR:RY+'SR',line:LN+'RS'}[obj];
+    const on=P==='C'?false:obj==='seg'?t[P]>=1&&t[P]<=3:obj==='rayRS'?t[P]>=1:obj==='raySR'?t[P]<=3:true;
+    const svg=hl(10,310)+Object.keys(xs).map(k=>tk(xs[k],k)).join('')+gpt({x:150,y:45})+'<text x="166" y="35">C</text>';
+    const what={seg:'úsečce RS',rayRS:`polopřímce ${RY}RS`,raySR:`polopřímce ${RY}SR`,line:`přímce ${LN}RS`}[obj];
+    let exp;if(P==='C')exp=`Bod C vůbec neleží na čáře, proto C ∉ ${name}.`;
+    else if(on)exp=obj==='seg'?`Bod ${P} je mezi R a S (nebo je krajní), proto ${P} ∈ RS.`:obj==='line'?`Přímka vede přes všechny body na čáře, i přes ${P}.`:`Polopřímka ${name} začíná v ${name[1]} a míří přes ${name[2]} dál. Bod ${P} na ní leží.`;
+    else exp=obj==='seg'?`Bod ${P} leží na přímce, ale mimo úsečku RS (není mezi R a S), proto ${P} ∉ RS.`:`Polopřímka ${name} začíná v ${name[1]} a míří k ${name[2]}. Bod ${P} je na druhé straně od počátku, proto ${P} ∉ ${name}.`;
+    return{svg,q:`Leží bod ${P} na ${what}?`,opts:[`${P} ∈ ${name}`,`${P} ∉ ${name}`],ans:on?`${P} ∈ ${name}`:`${P} ∉ ${name}`,exp}}]},
+ {id:'opacne',icon:'⇆',name:'Opačné polopřímky',
+  lesson:()=>`<p><b>Opačné polopřímky</b> mají <b>společný počátek</b> a míří <b>na opačné strany</b>.</p>
+   <div class="geo">${geoSvg(hl(10,160,70,'g-line op1')+hl(160,310,70,'g-line op2')+tk(50,'S',70)+tk(160,'R',70)+tk(270,'T',70)+hl(60,310,160)+tk(60,'B',160)+tk(170,'C',160)+tk(270,'A',160))}</div>
+   <p>Nahoře: ${RY}RS a ${RY}RT jsou navzájem opačné.</p><p>Dole: ${RY}BA a ${RY}BC míří stejným směrem. Nejsou opačné, mají spoustu společných bodů.</p>`,
+  gen:[
+   ()=>{const ls=letters(3),pos=[60,160,260];const P=pick(ls),[Q,R]=ls.filter(x=>x!==P);const opp=ls.indexOf(P)===1;
+    return{svg:hl(10,310)+ls.map((l,i)=>tk(pos[i],l)).join(''),q:`Jsou polopřímky ${RY}${P}${Q} a ${RY}${P}${R} opačné?`,opts:['Ano, jsou opačné','Ne, nejsou opačné'],ans:opp?'Ano, jsou opačné':'Ne, nejsou opačné',
+     exp:opp?`Obě začínají v ${P} a míří na opačné strany.`:`Obě začínají v ${P}, ale míří stejným směrem. Mají spoustu společných bodů, opačné nejsou.`}},
+   ()=>({svg:hl(60,60,0,'g-line')+`<line class="g-line" x1="60" y1="30" x2="60" y2="170"/><line class="g-line" x1="60" y1="170" x2="300" y2="170"/>`+`<line class="g-tick" x1="51" y1="70" x2="69" y2="70"/><text x="38" y="76">V</text><line class="g-tick" x1="220" y1="161" x2="220" y2="179"/><text x="220" y="196" text-anchor="middle">T</text><text x="40" y="190">A</text>`,
+     q:`Jsou polopřímky ${RY}AV a ${RY}AT opačné?`,opts:['Ano, jsou opačné','Ne, nejsou opačné'],ans:'Ne, nejsou opačné',exp:'Mají společný počátek A, ale nemíří na opačné strany. Svírají pravý úhel.'}),
+   ()=>({svg:'',q:'Opačné polopřímky mají…',opts:shuffle(['společný počátek a opačný směr','různé počátky','stejný směr']),ans:'společný počátek a opačný směr',exp:'Opačné polopřímky začínají ve stejném bodě a míří od sebe.'})
+  ]},
+ {id:'naprimce',icon:'📐',name:'Úsečky na přímce',
+  lesson:()=>`<p>Když leží body na jedné přímce, délky úseček se <b>sčítají</b>.</p>
+   <div class="geo">${geoSvg(hl(10,310)+tk(40,'F')+tk(130,'G')+tk(280,'H')+'<text x="85" y="78" text-anchor="middle" class="rn2">3 cm</text><text x="205" y="78" text-anchor="middle" class="rn2">5 cm</text>')}</div>
+   <span class="zap">|FH| = |FG| + |GH| = 3 + 5 = 8 cm</span>
+   <p>Kolik úseček určují body? 3 body → 3 úsečky, 4 body → 6, 5 bodů → 10.</p>`,
+  gen:[
+   ()=>{const[F,G,H]=letters(3),x=ri(2,7),y=ri(2,7),k=260/(x+y),xg=30+x*k;
+    return{svg:hl(10,310)+tk(30,F)+tk(xg,G)+tk(290,H)+`<text x="${f1((30+xg)/2)}" y="78" text-anchor="middle" class="rn2">${x} cm</text><text x="${f1((xg+290)/2)}" y="78" text-anchor="middle" class="rn2">${y} cm</text>`,
+     q:`|${F}${H}| = ?`,opts:optsOf(`${x+y} cm`,[`${Math.abs(x-y)||x+y+2} cm`,`${x+y+1} cm`,`${x*y} cm`]),ans:`${x+y} cm`,exp:`|${F}${H}| = |${F}${G}| + |${G}${H}| = ${x} + ${y} = ${x+y} cm.`}},
+   ()=>{const[F,G,H]=letters(3),x=ri(2,6),y=ri(2,6),k=260/(x+y),xg=30+x*k;
+    return{svg:hl(10,310)+tk(30,F)+tk(xg,G)+tk(290,H),q:`|${F}${H}| = ${x+y} cm a |${F}${G}| = ${x} cm. Kolik je |${G}${H}|?`,opts:optsOf(`${y} cm`,[`${x+y+x} cm`,`${y+1} cm`,`${x} cm`]),ans:`${y} cm`,exp:`|${G}${H}| = |${F}${H}| − |${F}${G}| = ${x+y} − ${x} = ${y} cm.`}},
+   ()=>{const n=pick([3,4,5]),ls=letters(n).sort(),xs=ls.map((_,i)=>30+i*260/(n-1));const pairs=[];for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)pairs.push(ls[i]+ls[j]);
+    return{svg:hl(10,310)+ls.map((l,i)=>tk(xs[i],l)).join(''),q:`Kolik různých úseček určují body ${ls.join(', ')}?`,opts:['3','4','6','10'],ans:String(pairs.length),exp:`Úsečky: ${pairs.join(', ')}. Celkem ${pairs.length}.`}}
+  ]},
+ {id:'poloha',icon:'⊥',name:'Rovnoběžky a kolmice',
+  lesson:()=>`<p><b>Rovnoběžky</b> se nikdy neprotnou: <b>a ∥ b</b>.</p><p><b>Různoběžky</b> se protnou v jednom bodě (průsečík): <b>a ∦ b</b>.</p>
+   <p><b>Kolmé přímky</b> svírají <b>pravý úhel</b>: <b>a ⊥ b</b>. Rýsujeme je s trojúhelníkem s ryskou.</p>
+   <div class="geo">${geoSvg(polohaSvg('kolme','a','b'))}</div>`,
+  gen:[
+   ()=>{const k=pick(['rovno','ruzno','kolme']),[p,q]=pick([['p','q'],['a','b'],['r','s'],['k','m']]);
+    const L={rovno:`rovnoběžné (${p} ∥ ${q})`,ruzno:`různoběžné (${p} ∦ ${q})`,kolme:`kolmé (${p} ⊥ ${q})`};
+    return{svg:polohaSvg(k,p,q),q:`Jaká je vzájemná poloha přímek ${p} a ${q}?`,opts:[L.rovno,L.ruzno,L.kolme],ans:L[k],
+     exp:{rovno:'Přímky se nikdy neprotnou, jsou rovnoběžné.',ruzno:'Přímky se protínají, ale ne v pravém úhlu. Jsou různoběžné.',kolme:'Přímky se protínají v pravém úhlu (značka v rohu). Jsou kolmé.'}[k]}},
+   ()=>{const it=pick([
+     {q:'Kolmé přímky svírají…',o:['pravý úhel','žádný úhel','ostrý úhel'],a:'pravý úhel',e:'Kolmé přímky svírají pravý úhel (90°).'},
+     {q:'Kolik společných bodů mají dvě rovnoběžky?',o:['žádný','jeden','dva'],a:'žádný',e:'Rovnoběžky se nikdy neprotnou.'},
+     {q:'Co znamená zápis a ∦ b?',o:['a a b jsou různoběžné','a je kolmá na b','a a b jsou rovnoběžné'],a:'a a b jsou různoběžné',e:'Přeškrtnutá značka ∦ znamená „nejsou rovnoběžné“, tedy různoběžné.'},
+     {q:'Co znamená zápis p ⊥ r?',o:['p je kolmá na r','p je rovnoběžná s r','bod p leží na r'],a:'p je kolmá na r',e:'Značka ⊥ znamená „je kolmá na“.'},
+     {q:'Bod, ve kterém se protnou dvě různoběžky, je…',o:['průsečík','počátek','krajní bod'],a:'průsečík',e:'Společný bod dvou různoběžek je průsečík.'},
+     {q:'Čím rýsujeme kolmici?',o:['trojúhelníkem s ryskou','kružítkem','úhloměrem'],a:'trojúhelníkem s ryskou',e:'Kolmici rýsujeme trojúhelníkem s ryskou.'}]);
+     return{svg:'',q:it.q,opts:shuffle(it.o),ans:it.a,exp:it.e}},
+   ()=>{const{svg,tr,fa}=statSvg();const ans=pick(tr);return{svg,q:'Který zápis platí?',opts:shuffle([ans,...shuffle(fa).slice(0,2)]),ans,exp:'a a b jsou rovnoběžky, c je protíná. Bod S je průsečík přímek b a c, na přímce a neleží.'}}
+  ]}
+];
+function rulerSvg(s,L,A='A',B='B'){const x0=20,k=2.8,y=120;let r=`<rect x="${x0-8}" y="${y}" width="${100*k+16}" height="52" rx="6" fill="#FFF3C4" stroke="#2B2350" stroke-width="2"/>`;
+  for(let m=0;m<=100;m++){const x=x0+m*k,h=m%10===0?18:m%5===0?11:6;r+=`<line x1="${f1(x)}" y1="${y}" x2="${f1(x)}" y2="${y+h}" stroke="#2B2350" stroke-width="${m%10===0?1.6:1}"/>`;if(m%10===0)r+=`<text class="rn" x="${f1(x)}" y="${y+36}" text-anchor="middle">${m/10}</text>`}
+  const xa=x0+s*k,xb=x0+(s+L)*k;
+  return r+`<line x1="${f1(xa)}" y1="80" x2="${f1(xa)}" y2="${y}" stroke="#6F5BFF" stroke-dasharray="3 3"/><line x1="${f1(xb)}" y1="80" x2="${f1(xb)}" y2="${y}" stroke="#6F5BFF" stroke-dasharray="3 3"/>`+
+   `<line class="g-line" x1="${f1(xa)}" y1="80" x2="${f1(xb)}" y2="80"/>`+tk(xa,A,80,true)+tk(xb,B,80,true);}
+function polohaSvg(k,p,q){const c={x:160,y:100};
+  if(k==='rovno'){const a=ri(-25,25)*Math.PI/180,d={x:Math.cos(a),y:Math.sin(a)},n={x:-d.y,y:d.x},c1={x:c.x+n.x*35,y:c.y+n.y*35},c2={x:c.x-n.x*35,y:c.y-n.y*35};
+    const e1=toEdge(c1,d),e2=toEdge(c2,d);return gl(toEdge(c1,neg(d)),e1)+gl(toEdge(c2,neg(d)),e2)+`<text class="it" x="${f1(e1.x-14)}" y="${f1(e1.y-10)}">${p}</text><text class="it" x="${f1(e2.x-14)}" y="${f1(e2.y+22)}">${q}</text>`}
+  const a1=ri(-20,20),a2=a1+(k==='kolme'?90:pick([1,-1])*ri(30,60));const d1={x:Math.cos(a1*Math.PI/180),y:Math.sin(a1*Math.PI/180)},d2={x:Math.cos(a2*Math.PI/180),y:Math.sin(a2*Math.PI/180)};
+  const e1=toEdge(c,d1),e2=toEdge(c,d2);let s=gl(toEdge(c,neg(d1)),e1)+gl(toEdge(c,neg(d2)),e2)+`<text class="it" x="${f1(e1.x-16)}" y="${f1(e1.y-10)}">${p}</text><text class="it" x="${f1(e2.x+(e2.x>160?-18:8))}" y="${f1(e2.y+(e2.y>100?-6:20))}">${q}</text>`;
+  if(k==='kolme'){const m=14;s+=`<polyline points="${f1(c.x+d1.x*m)},${f1(c.y+d1.y*m)} ${f1(c.x+d1.x*m+d2.x*m)},${f1(c.y+d1.y*m+d2.y*m)} ${f1(c.x+d2.x*m)},${f1(c.y+d2.y*m)}" fill="none" stroke="#FF5C93" stroke-width="3"/><circle cx="${f1(c.x+(d1.x+d2.x)*m/2)}" cy="${f1(c.y+(d1.y+d2.y)*m/2)}" r="2.5" fill="#FF5C93"/>`}
+  return s;}
+function statSvg(){const ang=ri(-35,-20)*Math.PI/180,d={x:Math.cos(ang),y:Math.sin(ang)};const pa={x:120,y:90},pb={x:170,y:130};
+  const yc=150,tb=(yc-pb.y)/d.y,S={x:pb.x+d.x*tb,y:yc};
+  const s=gl(toEdge(pa,neg(d)),toEdge(pa,d))+gl(toEdge(pb,neg(d)),toEdge(pb,d))+gl({x:10,y:yc},{x:310,y:yc})+gpt(S)+`<text x="${f1(S.x-4)}" y="${yc+28}" text-anchor="middle">S</text>`+
+    `<text class="it" x="${f1(toEdge(pa,d).x-18)}" y="${f1(toEdge(pa,d).y+20)}">a</text><text class="it" x="${f1(toEdge(pb,d).x-6)}" y="${f1(toEdge(pb,d).y+30)}">b</text><text class="it" x="296" y="${yc-10}">c</text>`;
+  return{svg:s,tr:['a ∥ b','c ∦ a','c ∦ b','S ∈ b','S ∈ c','S ∉ a'],fa:['a ∦ b','c ∥ a','S ∈ a','S ∉ c','a ⊥ b','c ∥ b']}}
+
+
+/* ================= Bea: course "Přírodověda" ================= */
+const MC=(q,ans,others,exp)=>()=>({svg:'',q,opts:shuffle([ans,...others]),ans,exp});
+const YN=(q,yes,exp)=>()=>({svg:'',q,opts:['Ano','Ne'],ans:yes?'Ano':'Ne',exp});
+const CL=(qf,groups,expf)=>()=>{const labels=Object.keys(groups),g=pick(labels),x=pick(groups[g]);return{svg:'',q:qf(x),opts:labels,ans:g,exp:expf(x,g)}};
+const li=a=>`<ul class="lul">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+
+/* --- pictures: mushrooms --- */
+const HUB_PARTS={hrib:['klobouk','rourky','třeň','podhoubí'],much:['klobouk','lupeny','prsten','třeň','pochva','podhoubí']};
+const PART_EXP={klobouk:'Klobouk je horní část plodnice.',rourky:'Rourky jsou na spodní straně klobouku hřibů.',lupeny:'Lupeny jsou tenké plátky na spodní straně klobouku, mají je třeba muchomůrky.',
+  'třeň':'Třeň je „nožička“ houby, nese klobouk.',prsten:'Prsten je „sukýnka“ na třeni muchomůrek.',pochva:'Pochva je obal u spodku třeně muchomůrek, lidově „kalich smrti“.',podhoubí:'Podhoubí jsou šedobílá vlákna pod povrchem půdy nebo ve dřevě.'};
+function hubSvg(kind,hi){
+  const H='#FF5C93',f=(p,c)=>p===hi?H:c,sw=p=>p===hi?'stroke="#B0154F" stroke-width="3"':'stroke="#2B2350" stroke-width="2"';
+  let s=`<rect x="0" y="152" width="320" height="48" fill="#C9A27E" opacity=".55"/>`;
+  const mycel=`<g fill="none" stroke="${f('podhoubí','#A7A196')}" stroke-width="${hi==='podhoubí'?3.5:2}" stroke-linecap="round"><path d="M160 156 q-30 10 -60 6 q-20 -2 -34 12"/><path d="M160 156 q25 14 58 8 q22 -4 36 10"/><path d="M160 156 q-6 18 -26 30"/><path d="M160 156 q10 18 32 28"/><path d="M110 162 q-10 10 -4 24"/><path d="M215 166 q6 12 -2 22"/></g>`;
+  if(kind==='hrib'){
+    s+=mycel+`<path d="M140 92 Q128 140 134 156 L186 156 Q192 140 180 92 Z" fill="${f('třeň','#F1E9D8')}" ${sw('třeň')}/>`+
+      `<path d="M88 92 Q160 98 232 92 Q160 112 88 92 Z" fill="${f('rourky','#E9D27A')}" ${sw('rourky')}/>`+
+      `<path d="M86 92 Q100 22 160 20 Q220 22 234 92 Q160 84 86 92 Z" fill="${f('klobouk','#9A5B2E')}" ${sw('klobouk')}/>`;
+  }else{
+    s+=mycel+`<path d="M138 156 Q134 132 150 128 L170 128 Q186 132 182 156 Z" fill="${f('pochva','#F7F3EA')}" ${sw('pochva')}/>`+
+      `<path d="M150 80 L147 130 L173 130 L170 80 Z" fill="${f('třeň','#F7F3EA')}" ${sw('třeň')}/>`+
+      `<path d="M146 98 Q160 92 174 98 L182 112 Q160 104 138 112 Z" fill="${f('prsten','#FFFFFF')}" ${sw('prsten')}/>`+
+      `<path d="M96 76 Q160 70 224 76 L218 86 Q160 80 102 86 Z" fill="${f('lupeny','#FFFDF6')}" ${sw('lupeny')}/>`+
+      `<path d="M94 76 Q104 18 160 16 Q216 18 226 76 Q160 68 94 76 Z" fill="${f('klobouk','#E0402A')}" ${sw('klobouk')}/>`+
+      (hi==='klobouk'?'':`<g fill="#fff"><circle cx="130" cy="44" r="5"/><circle cx="160" cy="32" r="6"/><circle cx="190" cy="46" r="5"/><circle cx="115" cy="62" r="4"/><circle cx="205" cy="62" r="4"/><circle cx="160" cy="56" r="4"/></g>`);
+  }
+  return s;
+}
+/* --- picture: photosynthesis --- */
+function arrow(x1,y1,x2,y2,col,w){const a=Math.atan2(y2-y1,x2-x1),h=12+w;const p1=`${f1(x2-h*Math.cos(a-0.45))},${f1(y2-h*Math.sin(a-0.45))}`,p2=`${f1(x2-h*Math.cos(a+0.45))},${f1(y2-h*Math.sin(a+0.45))}`;
+  return `<line x1="${x1}" y1="${y1}" x2="${f1(x2-Math.cos(a)*6)}" y2="${f1(y2-Math.sin(a)*6)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/><polygon points="${x2},${y2} ${p1} ${p2}" fill="${col}"/>`}
+const FOTO={svetlo:[250,40,190,72],co2:[40,70,118,92],voda:[95,192,152,170],kyslik:[196,112,284,140]};
+function fotoSvg(hi){
+  let s=`<circle cx="285" cy="26" r="24" fill="#FFC22E"/><rect x="0" y="152" width="320" height="48" fill="#C9A27E" opacity=".55"/>`+
+   `<g stroke="#8B5A3C" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M160 152 v26"/><path d="M160 162 l-16 14"/><path d="M160 168 l18 14"/><path d="M160 158 l-24 6"/></g>`+
+   `<path d="M160 152 V48" stroke="#2E8B57" stroke-width="5"/><ellipse cx="128" cy="100" rx="34" ry="12" transform="rotate(-25 128 100)" fill="#4CAF50"/><ellipse cx="192" cy="112" rx="34" ry="12" transform="rotate(25 192 112)" fill="#4CAF50"/>`+
+   `<ellipse cx="132" cy="134" rx="26" ry="9" transform="rotate(-15 132 134)" fill="#5DBB63"/><circle cx="160" cy="42" r="14" fill="#FFD84D" stroke="#E0A800" stroke-width="2"/>`;
+  for(const k in FOTO){const[a,b,c,d]=FOTO[k],out=k==='kyslik';s+=arrow(a,b,c,d,k===hi?'#FF5C93':out?'#E57373':'#64B5F6',k===hi?6:3)}
+  const[a,b]=FOTO[hi];s+=`<text x="${a+(hi==='kyslik'?12:0)}" y="${b-10}" text-anchor="middle" style="fill:#FF5C93">?</text>`;
+  return s;
+}
+const FOTO_NAME={svetlo:'světlo ze slunce',co2:'oxid uhličitý',voda:'voda',kyslik:'kyslík'};
+const FOTO_EXP={svetlo:'Rostlina přijímá světlo ze slunce, bez něj fotosyntéza neprobíhá.',co2:'Listy přijímají ze vzduchu oxid uhličitý.',voda:'Kořeny přijímají z půdy vodu (s živinami).',kyslik:'Při fotosyntéze vzniká kyslík, který rostlina uvolňuje do ovzduší.'};
+
+const SCI_TOPICS=[
+ {id:'lide',icon:'🌍',name:'Příroda a lidé',
+  lesson:()=>`<p>Jsme obklopeni přírodou a <b>jsme na ní závislí</b>. Náš život závisí na <b>přírodních zdrojích</b>, např. na dostatku vody a potravy.</p>
+   ${li(['Potřebujeme <b>vodu, potraviny, oblečení, nábytek a obydlí</b>.','K výživě využíváme <b>rostliny, živočichy i houby</b>.','Látky na oděvy jsou z <b>bavlny, vlny, lnu</b> nebo z umělých vláken (z <b>ropy</b>).','K topení a vaření: <b>uhlí, zemní plyn, dřevo</b>. Benzin a nafta se vyrábí z <b>ropy</b>.','Pravěcí lidé žili <b>sběrem a lovem</b>. První zemědělci <b>káceli lesy</b> a zakládali pole a pastviny.','Počasí umíme jen částečně předpovídat, <b>řídit ho nemůžeme</b>. Při suchu bývá nižší úroda.'])}
+   <p>Kdo přírodu nechrání, škodí sám sobě. Přírodu bychom měli <b>dobře znát a chránit</b>.</p>`,
+  gen:[
+   MC('Na čem závisí náš život?','na přírodních zdrojích (voda, potrava)',['jen na obchodech','na počasí v televizi'],'Jsme na přírodě závislí, potřebujeme hlavně vodu a potravu.'),
+   MC('Z čeho se vyrábějí látky na oděvy?','z bavlny, vlny, lnu nebo umělých vláken',['ze zemního plynu a uhlí','z písku a kamení'],'Oděvy jsou z bavlny, vlny, lnu nebo z umělých vláken.'),
+   MC('Z čeho se vyrábí benzin a nafta?','z ropy',['ze dřeva','z bavlny'],'Benzin a nafta (pohonné hmoty) se vyrábí z ropy.'),
+   MC('Z čeho se vyrábějí umělá vlákna?','z ropy',['z vlny','ze lnu'],'Umělá vlákna se vyrábějí z ropy.'),
+   MC('Co používáme k topení a vaření?','uhlí, zemní plyn, dřevo',['bavlnu a len','písek a kámen'],'K topení a vaření slouží uhlí, zemní plyn a dřevo.'),
+   MC('Jak se živili pravěcí lidé?','sběrem a lovem',['v obchodech','pěstováním v továrnách'],'Pravěcí lidé přírodu moc neovlivňovali, žili sběrem a lovem.'),
+   MC('Jak měnili krajinu první zemědělci?','káceli lesy a zakládali pole a pastviny',['stavěli silnice','sázeli pralesy'],'První zemědělci odlesňovali krajinu a zakládali pole a pastviny.'),
+   MC('Můžeme řídit počasí?','Ne, umíme ho jen částečně předpovídat',['Ano, kdykoli','Jen v létě'],'Počasí umíme částečně předpovídat, ale řídit ho nemůžeme.'),
+   MC('Co se stane, když je dlouho sucho?','bývá nižší úroda',['úroda je vyšší','nic se nestane'],'Pěstování rostlin závisí na počasí. Při suchu je úroda nižší.'),
+   MC('Proč musíme přírodu chránit?','jsme na ní závislí, kdo ji nechrání, škodí sám sobě',['protože je to zákon jen pro lesníky','nemusíme ji chránit'],'Jsme obklopeni přírodou a závislí na ní.'),
+   MC('Proč se učíme poznávat houby, rostliny a živočichy?','abychom přírodě neškodili a chránili ji',['abychom je mohli všechny sníst','nemá to žádný důvod'],'Přírodu musíme dobře znát, abychom jí neubližovali.'),
+   MC('Co z toho využíváme pro svou výživu?','rostliny, živočichy i houby',['jen kameny','jen vodu'],'Pro výživu využíváme rostliny, živočichy i houby.')]},
+ {id:'ziva',icon:'🌱',name:'Živá a neživá příroda',
+  lesson:()=>`<p>Přírodu dělíme na <b>živou</b> a <b>neživou</b>.</p>
+   ${li(['<b>Živá:</b> houby, rostliny, živočichové (i mikroorganismy, které vidíme jen pod mikroskopem).','<b>Neživá:</b> vzduch, voda, teplo a světlo ze slunce, nerosty a horniny, půda.'])}
+   <p>Obě složky jsou důležité a <b>propojené</b>. Živá příroda by bez neživé nemohla existovat.</p>
+   <p>Živé organismy ovlivňují neživou přírodu: z odumřelých částí rostlin a živočichů vzniká <b>humus</b>, nejúrodnější část půdy.</p>
+   <p>Vodní organismy využívají kyslík a oxid uhličitý, které jsou ve vodě.</p>`,
+  gen:[
+   CL(x=>`Patří „${x}“ do živé, nebo neživé přírody?`,{'živá příroda':['houby','rostliny','živočichové','pampeliška lékařská','kapr obecný','hřib smrkový','papoušek','mikroorganismy','strom'],'neživá příroda':['vzduch','voda','písek','skála','půda','teplo a světlo ze slunce','nerosty a horniny']},
+     (x,g)=>g==='živá příroda'?`${x} je živý organismus.`:`${x} patří do neživé přírody.`),
+   CL(x=>`Patří „${x}“ do živé, nebo neživé přírody?`,{'živá příroda':['kopretina','čmelák','muchomůrka','pes','lípa'],'neživá příroda':['kámen','horniny','sluneční světlo','oblaka (vzduch)','řeka (voda)']},(x,g)=>`${x}: ${g}.`),
+   MC('Na jaké dvě části dělíme přírodu?','živou a neživou',['teplou a studenou','velkou a malou'],'Přírodu dělíme na živou a neživou.'),
+   MC('Co tvoří živou přírodu?','houby, rostliny a živočichové',['vzduch, voda a půda','nerosty a horniny'],'Živou přírodu tvoří houby, rostliny a živočichové.'),
+   MC('Co z toho NEpatří do neživé přírody?','houby',['vzduch','půda','voda'],'Houby jsou živé organismy.'),
+   MC('Jak se jmenují organismy, které vidíme jen pod mikroskopem?','mikroorganismy',['nerosty','výtrusy'],'Mikroorganismy jsou živé, ale tak malé, že je vidíme jen mikroskopem.'),
+   MC('Co je humus?','nejúrodnější část půdy z odumřelých rostlin a živočichů',['druh horniny','jedovatá houba'],'Humus vzniká z odumřelých částí těl rostlin a živočichů.'),
+   YN('Může živá příroda existovat bez neživé?',false,'Živá příroda potřebuje vzduch, vodu, světlo a půdu. Obě složky jsou propojené.'),
+   MC('Co potřebují rostliny k životu?','teplo a světlo ze slunce, vodu, vzduch a živiny z půdy',['jen tmu a sníh','jen písek'],'Rostliny potřebují slunce, vodu, vzduch a živiny z půdy.'),
+   MC('Odkud berou kyslík vodní organismy?','z vody, ve které je obsažený',['nepotřebují kyslík','jen ze vzduchu nad hladinou'],'Vodní organismy využívají kyslík a oxid uhličitý obsažené ve vodě.')]},
+ {id:'eko',icon:'🏞️',name:'Ekosystém',
+  lesson:()=>`<p><b>Ekosystém</b> je soubor živých organismů propojených s neživou přírodou na <b>určitém území</b>.</p>
+   ${li(['Rostliny potřebují <b>vodu, světlo, oxid uhličitý a živiny</b>.','Rostliny i živočichové potřebují <b>kyslík</b>.','Kyslík umějí vytvářet <b>jen zelené rostliny</b>.','Rostliny jsou <b>potravou</b> pro živočichy.','<b>Rozkladači</b> rozkládají zbytky odumřelých organismů.','Jednoduchý ekosystém je třeba <b>akvárium</b>.'])}
+   <p><b>Suchozemské:</b> les, louka, pastvina, pole, zahrada, park.<br><b>Vodní:</b> jezero, rybník, řeka, potok.</p>
+   <p>Většinu ekosystémů člověk ovlivňuje (pole, louka). Do zvláště chráněných území téměř nezasahuje, např. <b>Boubínský prales</b>.</p>`,
+  gen:[
+   CL(x=>`Je ${x} suchozemský, nebo vodní ekosystém?`,{suchozemský:['les','louka','pastvina','pole','zahrada','park'],vodní:['jezero','rybník','řeka','potok']},(x,g)=>`${x[0].toUpperCase()+x.slice(1)} je ${g} ekosystém.`),
+   CL(x=>`Je ${x} suchozemský, nebo vodní ekosystém?`,{suchozemský:['les','pole','louka'],vodní:['rybník','řeka','potok']},(x,g)=>`${x}: ${g} ekosystém.`),
+   MC('Co je ekosystém?','živé organismy propojené s neživou přírodou na určitém území',['jen skupina stromů','jen voda v rybníce'],'Ekosystém = živá + neživá příroda na určitém území.'),
+   MC('Které organismy umějí vytvářet kyslík?','jen zelené rostliny',['houby','všichni živočichové'],'Kyslík mohou vytvářet pouze zelené rostliny.'),
+   MC('Co potřebují rostliny ke svému životu?','vodu, světlo, oxid uhličitý a živiny',['jen kyslík a tmu','maso'],'Rostliny potřebují vodu, světlo, oxid uhličitý a další živiny.'),
+   MC('Co potřebují k životu živočichové i rostliny?','kyslík',['jen oxid uhličitý','tmu'],'Živočichové i rostliny potřebují k životu kyslík.'),
+   MC('Co dělají rozkladači?','rozkládají zbytky odumřelých organismů',['vyrábějí kyslík','loví ryby'],'Rozkladači rozkládají zbytky těl odumřelých organismů.'),
+   MC('Co může být jednoduchý ekosystém?','akvárium',['kniha','prázdná sklenice'],'Akvárium je jednoduchý ekosystém: rostliny, ryby, voda, písek, světlo.'),
+   MC('Do kterého ekosystému člověk téměř nezasahuje?','zvláště chráněné území, např. Boubínský prales',['pole','zahrada'],'Zvláště chráněná území člověk téměř neovlivňuje.'),
+   MC('Čím jsou rostliny pro živočichy?','potravou, ze které získávají živiny',['nepřítelem','ničím'],'Rostliny slouží živočichům jako potrava.')]},
+ {id:'deleni',icon:'🗂️',name:'Rozdělení organismů',
+  lesson:()=>`<p>Živé organismy dělíme na <b>houby, rostliny a živočichy</b>.</p>
+   ${li(['<b>Houby:</b> jedlé (hřib smrkový), nejedlé (hřib žlučník), jedovaté (muchomůrka zelená).','<b>Rostliny:</b> byliny (kopretina bílá) a dřeviny: keře (bez černý) a stromy (lípa srdčitá).','<b>Živočichové:</b> bezobratlí (čmelák zemní) a obratlovci: ryby (kapr obecný), obojživelníci (skokan zelený), plazi (zmije obecná), ptáci (kos černý), savci (pes domácí).'])}
+   <p>Organismy mají <b>dvouslovný název</b>. První slovo označuje <b>rod</b> (hřib), celý název <b>druh</b> (hřib smrkový).</p>`,
+  gen:[
+   ()=>{const A=[['kapr obecný','ryby'],['skokan zelený','obojživelníci'],['zmije obecná','plazi'],['kos černý','ptáci'],['pes domácí','savci'],['čmelák zemní','bezobratlí']],G=['ryby','obojživelníci','plazi','ptáci','savci','bezobratlí'];const[x,g]=pick(A);
+     return{svg:'',q:`Kam patří ${x}?`,opts:shuffle([g,...shuffle(G.filter(y=>y!==g)).slice(0,3)]),ans:g,exp:g==='bezobratlí'?`${x} je bezobratlý živočich.`:`${x} patří mezi obratlovce, do skupiny ${g}.`}},
+   ()=>{const A=[['kopretina bílá','byliny'],['bez černý','keře'],['lípa srdčitá','stromy']];const[x,g]=pick(A);return{svg:'',q:`Kam patří ${x}?`,opts:['byliny','keře','stromy'],ans:g,exp:g==='byliny'?`${x} je bylina.`:`${x} patří mezi dřeviny, konkrétně ${g}.`}},
+   ()=>{const A=[['hřib smrkový','houby'],['muchomůrka zelená','houby'],['kopretina bílá','rostliny'],['lípa srdčitá','rostliny'],['bez černý','rostliny'],['kos černý','živočichové'],['skokan zelený','živočichové'],['čmelák zemní','živočichové']];const[x,g]=pick(A);return{svg:'',q:`Do které skupiny organismů patří ${x}?`,opts:['houby','rostliny','živočichové'],ans:g,exp:`${x} patří mezi ${g}.`}},
+   ()=>{const n=pick(['sedmikráska obecná','medvěd hnědý','muchomůrka červená','hřib smrkový','lípa srdčitá','kos černý','skokan zelený','kapr obecný','zmije obecná']),[a,b]=n.split(' ');
+     return{svg:'',q:`Co označuje ROD v názvu „${n}“?`,opts:[a,b,n],ans:a,exp:`Rod je první slovo: ${a}. Celý název „${n}“ je druh.`}},
+   MC('Na jaké tři skupiny dělíme živé organismy?','houby, rostliny, živočichy',['ryby, ptáky, savce','stromy, keře, byliny'],'Základní skupiny: houby, rostliny a živočichové.'),
+   MC('Rostliny dělíme na…','byliny a dřeviny',['ryby a ptáky','jedlé a jedovaté'],'Rostliny jsou byliny a dřeviny.'),
+   MC('Dřeviny dělíme na…','keře a stromy',['mechy a kapradiny','byliny a trávy'],'Dřeviny jsou keře a stromy.'),
+   MC('Živočichy dělíme na…','bezobratlé a obratlovce',['jedlé a nejedlé','velké a malé'],'Živočichové: bezobratlí a obratlovci.'),
+   MC('Co označuje celý dvouslovný název, např. hřib smrkový?','druh',['rod','skupinu'],'Celý název je druh, první slovo je rod.')]},
+ {id:'houby',icon:'🍄',name:'Houby: společné znaky',
+  lesson:()=>`<p>Houby tvoří <b>samostatnou skupinu</b> živých organismů. Liší se od rostlin i od živočichů.</p>
+   ${li(['<b>Nemají zelené barvivo</b> (chlorofyl).','Vyživují se <b>rozkladem odumřelých těl</b> rostlin a živočichů nebo <b>přijímají živiny z kořenů rostlin</b>.','Rozmnožují se <b>výtrusy</b>.','<b>Nepohybují se</b> z místa na místo.','Nemají kořeny, listy ani květy.'])}
+   <p>Na světě je asi <b>1,5 milionu</b> druhů hub, v Česku asi <b>10 000</b>. Na houby se chodí hlavně <b>koncem léta a na podzim</b>.</p>
+   <p>Otrávit se můžeme <b>jedovatými i zkaženými</b> houbami. Otrava se může projevit <b>až dlouho po jídle</b>. Některé houby nemají plodnici, např. <b>kvasinky</b>.</p>`,
+  gen:[
+   MC('Houby jsou…','samostatná skupina živých organismů',['druh rostlin','druh živočichů'],'Houby nejsou rostliny ani živočichové, jsou samostatná skupina.'),
+   YN('Obsahují houby zelené barvivo (chlorofyl)?',false,'Na rozdíl od rostlin houby chlorofyl nemají.'),
+   MC('Jak se houby rozmnožují?','výtrusy',['semeny','cibulemi'],'Houby se rozmnožují výtrusy.'),
+   MC('Jak se houby vyživují?','rozkladem odumřelých těl nebo živinami z kořenů rostlin',['fotosyntézou','lovem hmyzu'],'Houby rozkládají odumřelá těla rostlin a živočichů nebo berou živiny z kořenů rostlin.'),
+   YN('Mohou se houby pohybovat z místa na místo?',false,'Na rozdíl od živočichů se houby nepohybují.'),
+   MC('Co houby NEmají?','kořeny, listy a květy',['klobouk','třeň'],'Houby nemají kořeny, listy ani květy.'),
+   MC('Kolik druhů hub roste v České republice?','asi 10 000',['asi 10','asi 1 milion'],'V Česku roste kolem deseti tisíc druhů hub.'),
+   MC('Kolik druhů hub je asi na celém světě?','asi jeden a půl milionu',['asi sto','asi tisíc'],'Na světě je asi 1,5 milionu druhů hub.'),
+   MC('Které houby nemají plodnici?','kvasinky',['hřiby','bedly'],'Kvasinky jsou houby bez plodnice.'),
+   MC('Čím se můžeme otrávit?','jedovatými i zkaženými houbami',['jen syrovou bedlou','houbami se otrávit nedá'],'Otrava může být způsobena jedovatými i zkaženými houbami.'),
+   MC('Projeví se otrava houbami vždy hned po jídle?','Ne, někdy až dlouho po jídle',['Ano, vždy hned'],'U některých jedovatých hub se otrava projeví až dlouho po jídle.'),
+   MC('Kdy lidé nejčastěji chodí na houby?','koncem léta a na podzim',['v zimě','jen na jaře'],'Na houby se chodí hlavně koncem léta a na podzim.'),
+   MC('Čím se houby liší od rostlin?','nemají zelené barvivo (chlorofyl)',['mají květy','rostou ze semen'],'Rostliny chlorofyl mají, houby ne.')]},
+ {id:'stavba',icon:'🔍',name:'Stavba těla hub',
+  lesson:()=>`<div class="geo">${geoSvg(hubSvg('hrib',''))}</div>
+   <p><b>Plodnice</b> je nadzemní část houby: <b>klobouk</b> a <b>třeň</b>. <b>Podhoubí</b> jsou šedobílá vlákna pod povrchem půdy nebo ve dřevě. Plodnice vyrůstá jen za <b>příznivých podmínek</b>.</p>
+   <p>Pod kloboukem mají houby <b>rourky</b> (hřib smrkový) nebo <b>lupeny</b> (muchomůrka).</p>
+   <div class="geo">${geoSvg(hubSvg('much',''))}</div>
+   <p>Muchomůrky mají na třeni <b>prsten</b> a dole <b>pochvu</b> (lidově „kalich smrti“).</p>`,
+  gen:[
+   ()=>{const kind=pick(['hrib','much','much']),parts=HUB_PARTS[kind],p=pick(parts),all=['klobouk','rourky','lupeny','třeň','prsten','pochva','podhoubí'];
+     return{svg:hubSvg(kind,p),q:`${kind==='hrib'?'Hřib smrkový':'Muchomůrka červená'}: jak se jmenuje růžová část?`,opts:shuffle([p,...shuffle(all.filter(x=>x!==p)).slice(0,3)]),ans:p,exp:PART_EXP[p]}},
+   ()=>{const kind=pick(['hrib','much']),p=pick(HUB_PARTS[kind]);return{svg:hubSvg(kind,p),q:'Jak se jmenuje růžově zvýrazněná část?',opts:shuffle([p,...shuffle(['klobouk','rourky','lupeny','třeň','prsten','pochva','podhoubí'].filter(x=>x!==p)).slice(0,3)]),ans:p,exp:PART_EXP[p]}},
+   MC('Nadzemní část houby se jmenuje…','plodnice',['podhoubí','výtrus'],'Plodnice je to, co vidíme nad zemí.'),
+   MC('Část houby pod povrchem půdy se jmenuje…','podhoubí',['plodnice','klobouk'],'Podhoubí jsou vlákna v půdě nebo ve dřevě.'),
+   MC('Z jakých dvou částí se skládá plodnice?','klobouk a třeň',['kořen a list','prsten a pochva'],'Plodnice = klobouk + třeň.'),
+   MC('Co mají houby na spodní straně klobouku?','rourky nebo lupeny',['listy','květy'],'Hřiby mají rourky, muchomůrky lupeny.'),
+   MC('Co mají muchomůrky na třeni?','prsten a pochvu',['rourky','kořeny'],'Muchomůrky mají prsten a pochvu.'),
+   MC('Jak se lidově říká pochvě muchomůrky?','kalich smrti',['čepička','sukýnka'],'Pochva = „kalich smrti“.'),
+   MC('Jak vypadá podhoubí?','šedobílá vlákna pod zemí nebo ve dřevě',['zelené listy','červený klobouk'],'Podhoubí tvoří šedobílá vlákna.'),
+   MC('Kdy vyrůstá plodnice z podhoubí?','jen za příznivých podmínek',['každý den','jen v zimě'],'Plodnice vyrůstá jen za příznivých podmínek.'),
+   MC('Co má hřib smrkový pod kloboukem?','rourky',['lupeny','prsten'],'Hřib smrkový je rourkatá houba.'),
+   MC('Co má muchomůrka červená pod kloboukem?','lupeny',['rourky','podhoubí'],'Muchomůrka je lupenitá houba.')]},
+ {id:'sber',icon:'🧺',name:'Dělení a sběr hub',
+  lesson:()=>`${li(['<b>Jedlé:</b> hřib smrkový, bedla vysoká, liška obecná.','<b>Nejedlé:</b> hřib žlučník („hořčák“, má narůžovělé ústí rourek a hořkou chuť).','<b>Jedovaté:</b> muchomůrka zelená (naše nejjedovatější), muchomůrka červená, hřib satan.'])}
+   <p><b>Pravidla sběru:</b></p>${li(['Sbíráme jen houby, které <b>dobře známe</b>.','Necháme je <b>zkontrolovat dospělým</b>.','Dáváme je do <b>košíku nebo plátěné tašky</b>, nikdy ne do igelitové (zapaří se a zkazí).','<b>Podhoubí necháme</b> na místě a jemně zahrneme.','Houby, které nesbíráme, <b>neničíme</b>.'])}
+   <p><b>Otrava houbami:</b> zavoláme záchranku <b>155</b> nebo toxikologické středisko, vyvoláme zvracení (jen když to doporučí lékař), podáme <b>aktivní uhlí</b> a lékaři vezmeme <b>zbytky hub</b> jako vzorek.</p>`,
+  gen:[
+   CL(x=>`Je ${x} houba jedlá, nejedlá, nebo jedovatá?`,{jedlá:['hřib smrkový','bedla vysoká','liška obecná'],nejedlá:['hřib žlučník'],jedovatá:['muchomůrka červená','muchomůrka zelená','hřib satan']},(x,g)=>`${x} je ${g}.`),
+   CL(x=>`Je ${x} houba jedlá, nejedlá, nebo jedovatá?`,{jedlá:['hřib smrkový','liška obecná'],nejedlá:['hřib žlučník'],jedovatá:['muchomůrka zelená','hřib satan']},(x,g)=>`${x} je ${g}.`),
+   MC('Která houba je naše nejjedovatější?','muchomůrka zelená',['bedla vysoká','liška obecná','hřib žlučník'],'Muchomůrka zelená je naše nejjedovatější houba.'),
+   MC('Jak se lidově říká hřibu žlučníku?','hořčák',['satan','kozák'],'Žlučník má nahořklou chuť, proto „hořčák“.'),
+   MC('Čím se hřib žlučník liší od hřibu smrkového?','má narůžovělé ústí rourek a hořkou chuť',['má červený klobouk s tečkami','má prsten a pochvu'],'Žlučník má narůžovělé ústí rourek a je hořký.'),
+   MC('Do čeho dáváme nasbírané houby?','do košíku nebo plátěné tašky',['do igelitové tašky','do kapsy'],'Do košíku nebo plátěné tašky, nikdy do igelitu.'),
+   MC('Proč nedáváme houby do igelitové tašky?','zapaří se a zkazí',['igelit je moc těžký','houby by utekly'],'V igelitu se houby zapaří a zkazí. Zkažené houby jsou nebezpečné.'),
+   MC('Které houby sbíráme?','jen ty, které dobře známe',['všechny, které najdeme','jen ty největší'],'Sbíráme jen houby, které dobře známe.'),
+   MC('Co uděláme s podhoubím?','necháme ho na místě a jemně zahrneme',['vytrhneme ho','odneseme domů'],'Podhoubí necháme v zemi, aby houby rostly dál.'),
+   MC('Co uděláme s houbami, které nesbíráme?','necháme je být, neničíme je',['rozšlápneme je','vykopneme je'],'Houby, které nesbíráme, nekopeme ani neničíme.'),
+   MC('Kdo má nasbírané houby zkontrolovat?','dospělý člověk',['kamarád ze třídy','nikdo'],'Houby necháme zkontrolovat dospělým.'),
+   MC('Na jaké číslo zavoláme záchranku při otravě houbami?','155',['158','150'],'Záchranná služba má číslo 155 (158 je policie, 150 hasiči).'),
+   MC('Co vezmeme při otravě houbami k lékaři?','zbytky hub jako vzorek',['fotku lesa','prázdný košík'],'Podle zbytků hub lékař rychleji určí jed a nasadí léčbu.'),
+   MC('Co se podává, když se nedaří vyvolat zvracení?','tablety aktivního uhlí',['sladký čaj','čokoláda'],'Podáme víc tablet aktivního uhlí (např. Carbosorb).')]},
+ {id:'rostliny',icon:'🌻',name:'Rostliny: společné znaky',
+  lesson:()=>`<p>Rostliny jsou živé organismy, obsahují <b>zelené barvivo (chlorofyl)</b>. Společné znaky:</p>
+   ${li(['<b>Výživa a vylučování:</b> přijímají vodu s živinami a oxid uhličitý, vylučují kyslík a vodu.','<b>Dýchání:</b> dýchají všemi částmi těla, přijímají kyslík a uvolňují oxid uhličitý.','<b>Reakce na změny prostředí:</b> při nedostatku vody usychají, na podzim listnatým stromům opadávají listy, některé na noc zavírají květy.','<b>Pohyb:</b> jen svými částmi (otevírají a zavírají květy).','<b>Růst a vývoj:</b> mění vzhled, zvětšují se, ze semene vyroste rostlina.','<b>Rozmnožování:</b> semeny, cibulemi nebo hlízami (brambory).'])}
+   <p>Rostliny nám dávají semena, plody, hlízy a kořeny a jsou <b>zdrojem kyslíku</b>. Velký strom vyrobí za den kyslík pro <b>50 lidí</b>.</p>`,
+  gen:[
+   MC('Co obsahují všechny zelené rostliny?','zelené barvivo (chlorofyl)',['výtrusy hub','kosti'],'Rostliny mají chlorofyl, proto jsou zelené.'),
+   MC('Co rostliny přijímají při výživě?','vodu s živinami a oxid uhličitý',['jen kyslík','maso'],'Při výživě přijímají vodu s živinami a oxid uhličitý.'),
+   MC('Co rostliny vylučují?','kyslík a vodu',['oxid uhličitý a kosti','nic'],'Rostliny vylučují kyslík a vodu.'),
+   MC('Čím rostliny dýchají?','všemi částmi svého těla',['jen kořeny','nedýchají'],'Rostliny dýchají celým tělem.'),
+   MC('Co rostliny při DÝCHÁNÍ přijímají a co uvolňují?','přijímají kyslík, uvolňují oxid uhličitý',['přijímají oxid uhličitý, uvolňují kyslík','nedýchají'],'Při dýchání je to obráceně než při výživě: kyslík dovnitř, oxid uhličitý ven.'),
+   MC('Jak rostliny reagují na nedostatek vody?','usychají',['rychleji rostou','víc kvetou'],'Bez vody rostliny usychají.'),
+   MC('Co se děje s listnatými stromy na podzim?','opadávají jim listy',['kvetou','rostou jim šišky'],'Na podzim opadá většině listnatých stromů listí.'),
+   MC('Jak se rostliny pohybují?','jen svými částmi, např. otevírají a zavírají květy',['chodí z místa na místo','vůbec ne'],'Rostliny se pohybují jen svými částmi.'),
+   MC('Čím se mohou rostliny rozmnožovat?','semeny, cibulemi nebo hlízami',['vejci','jen výtrusy hub'],'Rostliny se rozmnožují semeny, cibulemi nebo hlízami.'),
+   MC('Čím se rozmnožují brambory?','hlízami',['vejci','šiškami'],'Brambory jsou hlízy.'),
+   MC('Co nám rostliny poskytují?','semena, plody, hlízy, kořeny a kyslík',['plast','železo'],'Rostliny nám dávají potravu a kyslík.'),
+   MC('Pro kolik lidí vyrobí velký strom za den kyslík?','asi pro 50 lidí',['pro 1 člověka','pro 1000 lidí'],'Velký strom vyrobí za den kyslík pro 50 lidí.'),
+   MC('Co NEpatří mezi společné znaky rostlin?','pohybují se z místa na místo',['dýchají','rozmnožují se','rostou a vyvíjejí se'],'Rostliny se pohybují jen svými částmi, z místa na místo ne.')]},
+ {id:'foto',icon:'☀️',name:'Fotosyntéza',
+  lesson:()=>`<div class="geo">${geoSvg(fotoSvg('svetlo').replace(/<text[^>]*>\?<\/text>/,''))}</div>
+   <p><b>Fotosyntéza</b> je hlavní způsob výživy rostlin. Probíhá v <b>zelených částech</b> rostliny a potřebuje <b>světlo ze slunce</b>.</p>
+   <p>🔵 Rostlina <b>přijímá</b>: světlo, <b>oxid uhličitý</b> (listy) a <b>vodu</b> (kořeny).</p><p>🔴 Při fotosyntéze <b>vzniká</b>: <b>kyslík</b> (uvolňuje se do ovzduší) a živiny (cukry) pro rostlinu.</p>`,
+  gen:[
+   ()=>{const k=pick(Object.keys(FOTO));return{svg:fotoSvg(k),q:'Co představuje růžová šipka?',opts:shuffle(Object.values(FOTO_NAME)),ans:FOTO_NAME[k],exp:FOTO_EXP[k]}},
+   ()=>{const k=pick(Object.keys(FOTO));return{svg:fotoSvg(k),q:'Rostlina tohle přijímá, nebo to při fotosyntéze vzniká?',opts:['přijímá','vzniká'],ans:k==='kyslik'?'vzniká':'přijímá',exp:FOTO_EXP[k]}},
+   MC('Co je fotosyntéza?','hlavní způsob výživy rostlin',['dýchání živočichů','rozmnožování hub'],'Fotosyntézou si rostliny vyrábějí živiny.'),
+   MC('Co rostlina potřebuje k fotosyntéze?','světlo, vodu a oxid uhličitý',['tmu a kyslík','jen hlínu'],'K fotosyntéze je potřeba světlo, voda a oxid uhličitý.'),
+   MC('Kde probíhá fotosyntéza?','v zelených částech rostliny',['v kořenech pod zemí','jen v květech v noci'],'Fotosyntéza probíhá v zelených částech, kde je chlorofyl.'),
+   MC('Co se při fotosyntéze uvolňuje do ovzduší?','kyslík',['oxid uhličitý','kouř'],'Při fotosyntéze se do ovzduší uvolňuje kyslík.'),
+   MC('Čím rostlina přijímá vodu?','kořeny z půdy',['květy','plody'],'Vodu s živinami přijímají kořeny.'),
+   MC('Odkud bere rostlina energii pro fotosyntézu?','ze světla ze slunce',['z měsíce','z hlíny'],'Fotosyntéza potřebuje světlo (slunce).'),
+   MC('Co při fotosyntéze vzniká?','kyslík a živiny (cukry)',['oxid uhličitý','výtrusy'],'Vzniká kyslík a živiny pro rostlinu.'),
+   YN('Probíhá fotosyntéza v úplné tmě?',false,'Fotosyntéza potřebuje světlo.'),
+   YN('Mohou houby dělat fotosyntézu?',false,'Houby nemají chlorofyl, fotosyntézu neumějí.')]},
+ {id:'trideni',icon:'🌿',name:'Třídění rostlin',
+  lesson:()=>`<p>Rostliny dělíme podle toho, jak se rozmnožují:</p>
+   ${li(['<b>Výtrusné</b>: rozmnožují se výtrusy, nekvetou. Např. <b>kapradiny, mechy, přesličky</b>.','<b>Semenné</b>: rozmnožují se semeny, která jsou ukrytá v plodech. Patří sem <b>byliny</b> a <b>dřeviny</b> (keře a stromy).'])}`,
+  gen:[
+   CL(x=>`Je ${x} výtrusná, nebo semenná rostlina?`,{výtrusná:['kapradina','mech','přeslička'],semenná:['kopretina bílá','lípa srdčitá','bez černý','pampeliška','jabloň','tulipán']},(x,g)=>g==='výtrusná'?`${x} se rozmnožuje výtrusy, nekvete.`:`${x} se rozmnožuje semeny.`),
+   CL(x=>`Je ${x} bylina, keř, nebo strom?`,{bylina:['kopretina bílá','pampeliška lékařská','tulipán','sedmikráska obecná'],keř:['bez černý','šípková růže','líska'],strom:['lípa srdčitá','dub','smrk','jabloň']},(x,g)=>g==='bylina'?`${x} je bylina.`:`${x} je dřevina, konkrétně ${g}.`),
+   MC('Jak se rozmnožují výtrusné rostliny?','výtrusy',['semeny','hlízami'],'Výtrusné rostliny se rozmnožují výtrusy.'),
+   MC('Které rostliny patří mezi výtrusné?','kapradiny, mechy, přesličky',['lípa, dub, smrk','tulipán, kopretina'],'Kapradiny, mechy a přesličky jsou výtrusné.'),
+   YN('Kvetou výtrusné rostliny?',false,'Výtrusné rostliny nekvetou.'),
+   MC('Kde jsou ukrytá semena semenných rostlin?','v plodech',['v kořenech','ve výtrusech'],'Semena jsou ukrytá v plodech.'),
+   MC('Semenné rostliny dělíme na…','byliny a dřeviny',['mechy a kapradiny','houby a řasy'],'Semenné rostliny: byliny a dřeviny.'),
+   MC('Dřeviny jsou…','keře a stromy',['mechy a přesličky','jen trávy'],'Dřeviny = keře a stromy.')]}
+];
+
+/* ================= course engine (Bea) ================= */
+const COURSES={
+  geo:{id:'geo',name:'Přímky a úsečky',sub:'Geometrie, 4. třída',icon:'📐',topics:TOPICS,finalN:12,passFinal:10,color:'var(--bea-soft)'},
+  prir:{id:'prir',name:'Přírodověda',sub:'Na písemku: příroda, houby, rostliny',icon:'🌿',topics:SCI_TOPICS,finalN:15,passFinal:12,color:'var(--mint-soft)'}
+};
+const coursesOf=kid=>kidOf(kid).adult||kidOf(kid).little?[]:Object.values(COURSES);
+const cProg=(kid,cid)=>((kidOf(kid).courses||{})[cid])||{};
+const tStars=(kid,cid,tid)=>Math.min(3,(cProg(kid,cid)[tid]||{}).s||0);
+const courseTotal=cid=>COURSES[cid].topics.length*3;
+const courseStars=(kid,cid)=>COURSES[cid].topics.reduce((a,t)=>a+tStars(kid,cid,t.id),0);
+const coursePct=(kid,cid)=>Math.round(courseStars(kid,cid)/courseTotal(cid)*100);
+const starStr=n=>`<span class="stars">${'⭐'.repeat(n)}${'<i>☆</i>'.repeat(3-n)}</span>`;
+const topicOf=(cid,tid)=>COURSES[cid].topics.find(t=>t.id===tid);
+function makeTopicRound(t,n){const out=[],seen=new Set();let tries=0;
+  while(out.length<n&&tries<120){tries++;const q=pick(t.gen)();const key=q.q+'|'+q.ans+'|'+(q.svg||'').slice(0,60);if(seen.has(key)&&tries<100)continue;seen.add(key);out.push({...q,tried:[],topic:t.id})}
+  return out}
+function startCourse(cid,tid){const C=COURSES[cid];let qs,title;
+  if(tid==='final'){const tops=C.topics;qs=shuffle(tops.flatMap(t=>makeTopicRound(t,1)));while(qs.length<C.finalN)qs.push(...makeTopicRound(pick(tops),1));qs=shuffle(qs).slice(0,C.finalN);title=cid==='prir'?'Zkušební písemka':'Velký test'}
+  else{const t=topicOf(cid,tid);qs=makeTopicRound(t,6);title=t.name}
+  L={g:'course',cid,topic:tid,title,i:0,total:qs.length,first:0,qs};L.q=qs[0];go('courseQuiz');
+}
+function finishCourse(){
+  const kid=V.kid||(stack.find(v=>v.kid)||{}).kid,cid=L.cid,id=L.topic,ok=L.first,tot=L.total,C=COURSES[cid];L=null;
+  const base=`kids/${kid}/courses/${cid}`;
+  if(id==='final'){const pass=ok>=C.passFinal,f=cProg(kid,cid).final||{};put(`${base}/final`,{best:Math.max(f.best||0,ok),passes:(f.passes||0)+(pass?1:0),last:today(),tries:(f.tries||0)+1});
+    addLog(kid,0,'info',`${C.name}: ${cid==='prir'?'písemka':'velký test'} ${ok}/${tot}`,true);
+    if(pass)capAward('learn',S.settings.learnCap,5,`Učení: ${C.name}, závěrečný test`,`🏆 ${ok} z ${tot}! Výborně!`,'',()=>back());
+    else celebrate({title:`${ok} z ${tot}`,sub:`Na pohár potřebuješ aspoň ${C.passFinal} správně napoprvé. Zopakuj si slabší témata a zkus to znovu!`,btn:'Dobře',onClose:()=>back()});
+    return}
+  const pass=ok>=tot-1,p=cProg(kid,cid)[id]||{},ns=Math.min(3,(p.s||0)+(pass?1:0));
+  put(`${base}/${id}`,{s:ns,r:(p.r||0)+1,best:Math.max(p.best||0,ok),last:today()});
+  const tn=topicOf(cid,id).name;
+  if(pass)capAward('learn',S.settings.learnCap,ok===tot?4:3,`Učení: ${C.name} – ${tn}`,ns===3?'Téma zvládnuto! 🏆':`Hvězda za téma! (${ns} ze 3)`,'',()=>back());
+  else celebrate({title:`${ok} z ${tot} napoprvé`,sub:'Na hvězdu za téma potřebuješ aspoň 5 z 6. Přečti si tahák a zkus to znovu!',btn:'Zkusím znovu',onClose:()=>back()});
+}
+function courseCard(kid,C){const pct=coursePct(kid,C.id),f=cProg(kid,C.id).final||{};
+  return `<button class="lcard" data-act="openCourse" data-c="${C.id}"><span class="ic" style="background:${C.color}">${C.icon}</span><span class="t"><h2>${esc(C.name)}</h2><span class="muted">${esc(C.sub)}</span>
+   <span class="bar" style="width:100%"><i style="width:${pct}%"></i></span><span class="pill">Prošla jsi ${pct} %${f.passes?' · 🏆':''}</span></span></button>`}
+function vCourse(){const kid=V.kid,C=COURSES[V.course],cid=C.id,pct=coursePct(kid,cid),st=courseStars(kid,cid),f=cProg(kid,cid).final||{};
+  const next=C.topics.find(t=>tStars(kid,cid,t.id)<3);const fin=cid==='prir'?'Zkušební písemka':'Velký test';
+  return `${topbar(C.name)}
+  <div class="card sec"><div class="row" style="justify-content:space-between"><b>Prošla jsi ${pct} % látky</b><span class="pill">${st} / ${courseTotal(cid)} ⭐</span></div><div class="bar"><i style="width:${pct}%"></i></div>
+   <span class="muted">Každé téma procvič 3× (vždy aspoň 5 z 6 správně) a získej 3 hvězdy. Pak zkus ${fin.toLowerCase()}.</span></div>
+  ${next?`<button class="next" data-act="openTopic" data-c="${cid}" data-id="${next.id}"><span class="lbl">Pokračuj</span><span class="tk"><span class="ic">${next.icon}</span><span><h2>${esc(next.name)}</h2>${starStr(tStars(kid,cid,next.id))}</span></span><span class="go">Jdu na to!</span></button>`
+   :`<div class="card center"><h2>🎉 Všechna témata zvládnutá!</h2><p class="muted">Teď ${fin.toLowerCase()}.</p></div>`}
+  <div class="tlist">${C.topics.map((t,i)=>{const s=tStars(kid,cid,t.id);return `<button class="trow ${s===3?'done':''}" data-act="openTopic" data-c="${cid}" data-id="${t.id}"><span class="tn">${i+1}</span><span class="ti">${t.icon}</span><span class="tt">${esc(t.name)}</span>${starStr(s)}</button>`}).join('')}</div>
+  <button class="lcard" data-act="startCourse" data-c="${cid}" data-id="final"><span class="ic" style="background:var(--sun-soft)">🏆</span><span class="t"><h2>${fin}</h2><span class="muted">${C.finalN} otázek ze všech témat. Pohár od ${C.passFinal} správně.</span><span class="pill">${f.tries?`Nejlepší: ${f.best}/${C.finalN} · pokusy: ${f.tries}${f.passes?` · 🏆 ${f.passes}×`:''}`:'Zatím nezkoušeno'}</span></span></button>`;
+}
+function vTopic(){const C=COURSES[V.course],t=topicOf(C.id,V.topic),kid=V.kid,s=tStars(kid,C.id,t.id),p=cProg(kid,C.id)[t.id]||{};
+  return `${topbar(t.name)}
+  <div class="card sec"><div class="row" style="justify-content:space-between"><b>Tvůj postup</b>${starStr(s)}</div>
+   <span class="muted">${s>=3?'Téma máš zvládnuté! Můžeš si ho kdykoli zopakovat.':`Ještě ${3-s}× procvič na aspoň 5 z 6 správně napoprvé.`}${p.r?` Zkoušela jsi ${p.r}×.`:''}</span></div>
+  <article class="card lesson"><h3>📒 Tahák</h3>${t.lesson()}</article>
+  <button class="btn big" data-act="startCourse" data-c="${C.id}" data-id="${t.id}" style="align-self:center">Procvičit (6 otázek)</button>`;
+}
+function parentCourses(kid){const cs=coursesOf(kid);if(!cs.length)return '';
+  return `<div class="card sec"><h2><span class="kidtag ${kid}">${esc(kidOf(kid).name)}</span> učení na testy</h2>${cs.map(C=>{const f=cProg(kid,C.id).final||{};
+    return `<div class="sec" style="gap:6px"><div class="row" style="justify-content:space-between"><b>${C.icon} ${esc(C.name)}</b><span class="pill">${coursePct(kid,C.id)} %</span></div><div class="bar"><i style="width:${coursePct(kid,C.id)}%"></i></div>
+     <div class="log">${C.topics.map(t=>{const p=cProg(kid,C.id)[t.id]||{};return `<div><span>${t.icon}</span><span>${esc(t.name)}${p.last?` <span class="muted">(${p.r}×, naposledy ${p.last.slice(8,10)}.${p.last.slice(5,7)}.)</span>`:''}</span><span class="p">${'⭐'.repeat(Math.min(3,p.s||0))||'–'}</span></div>`}).join('')}
+     <div><span>🏆</span><span>${C.id==='prir'?'Zkušební písemka':'Velký test'}</span><span class="p">${f.tries?`${f.best}/${C.finalN}`:'–'}</span></div></div></div>`}).join('')}</div>`}
+Object.assign(MAP,{course:vCourse,topic:vTopic,courseQuiz:vGeoQuiz});
+Object.assign(handlers,{
+  openCourse:b=>go('course',{course:b.dataset.c}),
+  openTopic:b=>go('topic',{course:b.dataset.c,topic:b.dataset.id}),
+  startCourse:b=>startCourse(b.dataset.c,b.dataset.id)
 });
 
 /* ================= start ================= */
