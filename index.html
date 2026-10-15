@@ -346,7 +346,7 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-14.4';
+const APP_VERSION='2026-10-15.1';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -380,8 +380,8 @@ const isKidRole=r=>['lea','bea','jirka'].includes(r);
 function defaults(){const d=today(),t=Date.now();return{
   v:2,
   settings:{pin:'1234',gameCap:20,learnCap:15,
-    prices:{lea:{mirror4:20,rainbow:15,glitter:25,kaleido:40,mandala6:20,mandala8:35,pack_space:25,pack_animals:25},
-            bea:{mirror4:40,rainbow:30,glitter:50,kaleido:80,mandala6:40,mandala8:70,pack_space:50,pack_animals:50},
+    prices:{lea:{mirror4:20,rainbow:15,glitter:25,kaleido:40,mandala6:20,mandala8:35,pack_space:25,pack_animals:25,game_tetris:40,game_cars:40,game_build:40},
+            bea:{mirror4:40,rainbow:30,glitter:50,kaleido:80,mandala6:40,mandala8:70,pack_space:50,pack_animals:50,game_tetris:40,game_cars:40,game_build:40},
             jirka:{tetris_neon:30,cars_night:30,build_gold:30}},
     morning:{enabled:true,start:'06:30',end:'08:09',bonus:5,auto:false,kids:{lea:true,bea:true,jirka:false},items:[
       {id:'eat',title:'Najíst se',icon:'🥣',points:5},{id:'dress',title:'Obléct se',icon:'👕',points:5},
@@ -519,6 +519,9 @@ const ITEMS=[
   {id:'mandala8',icon:'🌼',name:'Mandala na 8 stran',desc:'Nejbohatší mandala s osmi stranami.',needs:'mandala6'},
   {id:'pack_space',icon:'🚀',name:'Vybarvovánky: Vesmír',desc:'Raketa a planeta s prstýnkem.'},
   {id:'pack_animals',icon:'🐱',name:'Vybarvovánky: Zvířátka',desc:'Kočička a motýlek.'},
+  {id:'game_tetris',icon:'🧱',name:'Hra: Tetris',desc:'Skládej kostky do řad.'},
+  {id:'game_cars',icon:'🏎️',name:'Hra: Autíčka',desc:'Uhýbej autům na silnici.'},
+  {id:'game_build',icon:'🏗️',name:'Hra: Stavitel',desc:'Postav co nejvyšší věž.'},
   {id:'tetris_neon',aud:'adult',icon:'🟪',name:'Tetris: neonové kostky',desc:'Svítící kostky na tmavém pozadí.'},
   {id:'cars_night',aud:'adult',icon:'🌃',name:'Autíčka: noční jízda',desc:'Závodíš v noci se světly.'},
   {id:'build_gold',aud:'adult',icon:'🏆',name:'Stavitel: zlaté bloky',desc:'Stavíš ze zlata.'}
@@ -736,12 +739,15 @@ function taskCard(t){
 }
 const ITEM_GO={mirror4:['mirror',{mode:'4'}],kaleido:['mirror',{mode:'12'}],rainbow:['mirror',{rainbow:true}],glitter:['mirror',{glitter:true}],
   mandala6:['mandala',{mode:'m6'}],mandala8:['mandala',{mode:'m8'}],pack_space:['color',{pic:'rocket'}],pack_animals:['color',{pic:'cat'}],
-  tetris_neon:['tetris'],cars_night:['cars'],build_gold:['build']};
+  game_tetris:['tetris'],game_cars:['cars'],game_build:['build'],tetris_neon:['tetris'],cars_night:['cars'],build_gold:['build']};
 function openItem(id){const t=ITEM_GO[id];if(!t)return;const[view,o={}]=t;
   if(view==='mirror'||view==='mandala')M={...(M||{mode:'2',color:'#FF5C93',w:12,rainbow:false,glitter:false}),...(o.mode?{mode:o.mode}:{}),...(o.rainbow?{rainbow:true}:{}),...(o.glitter?{glitter:true}:{})};
   if(view==='color')go('color',{pic:o.pic});else go(view)}
 function unlockedCards(){const id=V.kid,own=itemsFor(id).filter(i=>has(id,i.id));if(!own.length)return '';
   return `<h2 style="font-size:1.4rem">🎁 Tvoje odemčené</h2>${own.map(i=>`<button class="gcard" data-act="openItem" data-item="${i.id}"><span class="ic" style="background:var(--sun-soft)">${i.icon}</span><span class="t"><h2>${esc(i.name)}</h2><span class="muted sub">${esc(i.desc)}</span><span class="pill">Hrát ▶</span></span></button>`).join('')}`}
+function lockedGameCards(){const id=V.kid;const l=['game_tetris','game_cars','game_build'].filter(g=>!has(id,g));if(!l.length)return '';
+  return `<h2 style="font-size:1.4rem">🔒 Další hry k odemčení</h2>${l.map(g=>{const i=itemById(g),pr=S.settings.prices[id][g],pts=pointsOf(id);
+    return `<button class="gcard" data-act="lockedItem" data-item="${g}" style="opacity:.85"><span class="ic" style="background:var(--line)">${i.icon}</span><span class="t"><h2>${esc(i.name.replace('Hra: ',''))}</h2><span class="muted sub">${esc(i.desc)}</span><span class="pill">${pts>=pr?`✨ Odemkni za ${pr} ⭐`:`🔒 ${pr} ⭐`}</span></span></button>`}).join('')}`}
 function vGames(){
   if(kidOf(V.kid).adult)return `${topbar('Hry')}
   <button class="gcard" data-act="go" data-to="tetris"><span class="ic" style="background:var(--bea-soft)">🧱</span><span class="t"><h2>Tetris</h2><span class="muted">Skládej řady, ať nic nepřeteče.</span><span class="pill">+2 ⭐ od 3 řad</span></span></button>
@@ -752,7 +758,7 @@ function vGames(){
   <button class="gcard" data-act="go" data-to="mirror"><span class="ic" style="background:var(--bea-soft)">🦋</span><span class="t"><h2>Zrcadlové malování</h2><span class="muted sub">Kresli a obrázek se zrcadlí.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
   <button class="gcard" data-act="go" data-to="mandala"><span class="ic" style="background:var(--mint-soft)">🌸</span><span class="t"><h2>Mandala</h2><span class="muted sub">Kreslíš a kreslí se to do 4 stran.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
   <button class="gcard" data-act="go" data-to="colorPick"><span class="ic" style="background:var(--lea-soft)">🖍️</span><span class="t"><h2>Vybarvovánky</h2><span class="muted sub">Ťukni na místo a vybarví se.</span><span class="pill">+2 ⭐ za obrázek</span></span></button>
-  <div class="gcard soon"><span class="ic" style="background:var(--sun-soft)">🧩</span><span class="t"><h2>Puzzle</h2><span class="muted">Brzy přibude</span></span></div>
+  ${lockedGameCards()}
   <p class="note">Za hry je denně nejvýš ${S.settings.gameCap} ⭐. Nejvíc hvězdiček je za úkoly.</p>`;
 }
 function vMirror(){
