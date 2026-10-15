@@ -340,13 +340,16 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 .divhelp .grp.rest{background:var(--flame-soft)}
 .divhelp i{width:10px;height:10px;border-radius:50%;background:var(--bea)}
 .divhelp .rest i{background:var(--flame)}
+
+.brk{background:var(--bea-soft);color:var(--bea);border-radius:10px;padding:0 4px}
+.lcard .ic{font-family:var(--display);font-weight:800;color:var(--bea)}
 </style>
 </head><body><div id="app"></div>
 <script>
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-15.1';
+const APP_VERSION='2026-10-15.2';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -830,6 +833,7 @@ function vLearn(){
     <button class="lcard" data-act="startLearn" data-g="selfTest"><span class="ic" style="background:var(--sun-soft)">📝</span><span class="t"><h2>Test: jak zvládám emoce</h2><span class="muted">8 otázek o tobě</span><span class="pill">+3 ⭐</span></span></button>${capNote}`;
   return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="divQuiz"><span class="ic" style="background:var(--sun-soft)">➗</span><span class="t"><h2>Dělení se zbytkem</h2><span class="muted">Třeba 15 : 4 = 3 zb. 3</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
+    <button class="lcard" data-act="startLearn" data-g="brQuiz"><span class="ic" style="background:var(--bea-soft)">( )</span><span class="t"><h2>Počítání se závorkami</h2><span class="muted">Třeba (12 + 8) : 4</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
     <button class="lcard" data-act="go" data-to="geoLesson"><span class="ic" style="background:var(--bea-soft)">📒</span><span class="t"><h2>Tahák: body a čáry</h2><span class="muted">Bod, úsečka, polopřímka, přímka</span></span></button>
     <button class="lcard" data-act="startLearn" data-g="geoQuiz"><span class="ic">📐</span><span class="t"><h2>Kvíz z geometrie</h2><span class="muted">8 otázek, 4. třída</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>${capNote}`;
 }
@@ -839,6 +843,7 @@ function startLearn(g){
   if(g==='geoQuiz'){L={g,i:0,total:ROUND_BEA,first:0,qs:makeGeoRound()};L.q=L.qs[0];L.q.tried=[]}
   if(g==='emoQuiz'){L={g,i:0,total:8,first:0,qs:makeEmoRound()};L.q=L.qs[0];L.q.tried=[]}
   if(g==='divQuiz'){L={g,i:0,total:8,first:0};L.q=newDivQ()}
+  if(g==='brQuiz'){L={g,i:0,total:8,first:0,qs:makeBrRound()};L.q=L.qs[0]}
   if(g==='selfTest'){L={g,i:0,total:SELF_TEST.length,first:0,ans:[]}}
   go(g);speakQ();
 }
@@ -866,12 +871,13 @@ function learnNext(){
   if(L.g==='learnFind')L.q=newFindQ();
   if(L.g==='geoQuiz'||L.g==='emoQuiz'){L.q=L.qs[L.i];L.q.tried=[]}
   if(L.g==='divQuiz')L.q=newDivQ();
+  if(L.g==='brQuiz')L.q=L.qs[L.i];
   render();speakQ();
 }
 function finishLearn(){
   const perfect=L.first===L.total;
-  const quiz=['geoQuiz','emoQuiz','divQuiz'].includes(L.g),pts=quiz?(perfect?4:3):3;
-  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem'}[L.g]||'Učení: počítání';
+  const quiz=['geoQuiz','emoQuiz','divQuiz','brQuiz'].includes(L.g),pts=quiz?(perfect?4:3):3;
+  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky'}[L.g]||'Učení: počítání';
   const title=perfect?'Bez jediné chyby!':'Kolo dokončeno!';
   const g=L.g;L=null;
   capAward('learn',S.settings.learnCap,pts,text,title,'Výborně! Jsi šikulka!',()=>{back()});
@@ -1049,7 +1055,7 @@ const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirr
   learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
 function render(){
   clearInterval(tick);tick=null;stopGame();
-  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
   const app=$('#app'),k=V.kid&&kidOf(V.kid);
   app.classList.toggle('little',!!(k&&k.little));
   setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
@@ -1065,7 +1071,7 @@ function render(){
 }
 function softRender(){
   const ft=$('#f-title'),fs=$('#f-steps');
-  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
   if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
   render();
 }
@@ -1486,6 +1492,46 @@ Object.assign(handlers,{
     q.msg='';render()},
   divCheck:()=>divCheck(),
   divHelp:()=>{L.q.help=true;render()}
+});
+
+/* ================= Bea: brackets ================= */
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const BR=[
+  ()=>{const c=ri(2,9);let a,b;do{a=ri(1,9);b=ri(1,9)}while(a+b>10);const s=a+b;return{e:`(${a} + ${b}) · ${c}`,v:s*c,naive:a+b*c,steps:[`${a} + ${b} = ${s}`,`${s} · ${c} = ${s*c}`]}},
+  ()=>{const c=ri(2,9),q=ri(2,10),s=c*q,a=ri(1,s-1),b=s-a;return{e:`(${a} + ${b}) : ${c}`,v:q,naive:b%c===0?a+b/c:null,steps:[`${a} + ${b} = ${s}`,`${s} : ${c} = ${q}`]}},
+  ()=>{const a=ri(2,9);let b,c;do{b=ri(4,18);c=ri(1,b-1)}while(b-c>10);const d=b-c;return{e:`${a} · (${b} − ${c})`,v:a*d,naive:a*b-c,steps:[`${b} − ${c} = ${d}`,`${a} · ${d} = ${a*d}`]}},
+  ()=>{const a=ri(25,70),b=ri(3,15),c=ri(2,Math.min(15,a-b-1));return{e:`${a} − (${b} + ${c})`,v:a-b-c,naive:a-b+c,steps:[`${b} + ${c} = ${b+c}`,`${a} − ${b+c} = ${a-b-c}`]}},
+  ()=>{const a=ri(20,60),b=ri(6,19),c=ri(1,b-1);return{e:`${a} − (${b} − ${c})`,v:a-(b-c),naive:a-b-c>=0?a-b-c:null,steps:[`${b} − ${c} = ${b-c}`,`${a} − ${b-c} = ${a-(b-c)}`]}},
+  ()=>{const c=ri(2,9);let a,b;do{a=ri(5,18);b=ri(1,a-1)}while(a-b>10);const d=a-b;return{e:`(${a} − ${b}) · ${c}`,v:d*c,naive:a-b*c>=0?a-b*c:null,steps:[`${a} − ${b} = ${d}`,`${d} · ${c} = ${d*c}`]}},
+  ()=>{const a=ri(8,30),b=ri(8,30),c=ri(2,12),d=ri(2,Math.min(12,a+b-c-1));return{e:`(${a} + ${b}) − (${c} + ${d})`,v:a+b-c-d,naive:a+b-c+d,steps:[`${a} + ${b} = ${a+b}`,`${c} + ${d} = ${c+d}`,`${a+b} − ${c+d} = ${a+b-c-d}`]}},
+  ()=>{const a=ri(2,9);let b,c;do{b=ri(1,9);c=ri(1,9)}while(b+c>10);const s=a*(b+c),d=ri(1,Math.min(20,s-1));return{e:`${a} · (${b} + ${c}) − ${d}`,v:s-d,naive:a*b+c-d>=0?a*b+c-d:null,steps:[`${b} + ${c} = ${b+c}`,`${a} · ${b+c} = ${s}`,`${s} − ${d} = ${s-d}`]}},
+  ()=>{const c=ri(2,9),q=ri(2,9),d=c*q;let a=ri(2,6),b=ri(2,6);const p=a*b;return{e:`${a} · ${b} + (${d} : ${c})`,v:p+q,naive:null,steps:[`${d} : ${c} = ${q}`,`${a} · ${b} = ${p}`,`${p} + ${q} = ${p+q}`]}}
+];
+function makeBrRound(){return shuffle([...BR]).slice(0,8).map(f=>({...f(),a:'',wrong:false,solved:false,help:false,msg:''}))}
+const brHtml=e=>esc(e).replace(/\([^)]*\)/g,m=>`<span class="brk">${m}</span>`);
+function vBrQuiz(){const q=L.q;
+  return `${topbar('Počítání se závorkami')}${progressDots()}
+  <div class="card sec center"><div class="divex">${brHtml(q.e)} = <span class="divin on ${q.solved?'ok':''}">${esc(q.a)||'&nbsp;'}</span></div>
+  ${q.help&&!q.solved?`<div class="explain">💡 1. krok: ${esc(q.steps[0])}</div>`:''}
+  ${q.solved?`<div class="explain">✅ Správně!<br>${q.steps.map((s,i)=>`${i+1}. ${esc(s)}`).join('<br>')}</div>`:q.msg?`<div class="explain">${q.msg}</div>`:''}</div>
+  ${q.solved?`<button class="btn big" data-act="learnNext" style="align-self:center">${L.i+1<L.total?'Další příklad':'Hotovo!'}</button>`:`
+  <div class="numpad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="ctl" data-act="brKey" data-k="${n}">${n}</button>`).join('')}<button class="ctl" data-act="brKey" data-k="del" aria-label="Smazat">⌫</button><button class="ctl" data-act="brKey" data-k="0">0</button><button class="ctl ok" data-act="brCheck">✓</button></div>
+  <div class="row" style="justify-content:center"><button class="btn ghost" data-act="brHelp">💡 Nápověda</button></div>`}
+  <p class="note center">Pravidlo: nejdřív závorka, pak krát a děleno, nakonec plus a mínus.</p>`;
+}
+function brCheck(){const q=L.q;if(q.a===''){q.msg='Napiš výsledek.';render();return}const a=+q.a;
+  if(a===q.v){q.solved=true;if(!q.wrong&&!q.help)L.first++;chime('tick');render();return}
+  q.wrong=true;chime('no');
+  q.msg=(q.naive!==null&&a===q.naive&&q.naive!==q.v)?'Pozor! Nejdřív se počítá to, co je v <b>závorce</b>.':'Ještě jednou. Začni tím, co je v závorce. 💡 Nápověda ti ukáže první krok.';
+  q.a='';render();
+}
+document.addEventListener('keydown',e=>{if(V.name!=='brQuiz'||!L||L.q.solved)return;
+  if(/^\d$/.test(e.key))handlers.brKey({dataset:{k:e.key}});else if(e.key==='Backspace')handlers.brKey({dataset:{k:'del'}});else if(e.key==='Enter')brCheck()});
+Object.assign(MAP,{brQuiz:vBrQuiz});
+Object.assign(handlers,{
+  brKey:b=>{const q=L.q,k=b.dataset.k;if(q.solved)return;if(k==='del')q.a=q.a.slice(0,-1);else if(q.a.length<3)q.a=(q.a+k).replace(/^0(\d)/,'$1');q.msg='';render()},
+  brCheck:()=>brCheck(),
+  brHelp:()=>{L.q.help=true;render()}
 });
 
 /* ================= start ================= */
