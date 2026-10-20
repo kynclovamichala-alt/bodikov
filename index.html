@@ -476,7 +476,7 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-20.1';
+const APP_VERSION='2026-10-20.2';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -2429,35 +2429,49 @@ function praise(){const id=V.kid,d=doneToday(id);return d?`Dneska jsi ${gw(id,'s
 function tasksReply(){const l=openTasks(V.kid);if(!l.length)return doneToday(V.kid)?'Všechno máš hotové! Jsi hvězda! ⭐':'Zatím nemáš žádný úkol. Můžeš si se mnou hrát!';
   return `Ještě tě čeká: ${l.slice(0,3).map(t=>t.title).join(', ')}${l.length>3?' a další':''}. Dáme to spolu!`}
 const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-function petAnswer(text){const t=norm(text),id=V.kid,has_=r=>r.test(t);
+// lisp-tolerant matching: sibilants and r/ř/l collapse, words compared fuzzily
+const lispN=s=>norm(s).replace(/ch/g,'h').replace(/[szct]/g,'s').replace(/v/g,'f').replace(/[rl]/g,'l').replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();
+function lev(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function wordHit(words,stem){const st=lispN(stem);if(st.includes(' '))return words.join(' ').includes(st)||fuzzyPhrase(words,st.split(' '));
+  return words.some(w=>w.startsWith(st)||(st.length>=5&&w.length>=st.length-1&&lev(w.slice(0,st.length),st)<=1)||(st.length>=6&&lev(w.slice(0,st.length),st)<=2))}
+function fuzzyPhrase(words,ps){for(let i=0;i+ps.length<=words.length;i++){let bad=0;ps.forEach((p,k)=>{const w=words[i+k];if(!(w.startsWith(p)||lev(w.slice(0,Math.max(p.length,2)),p)<=(p.length>=4?1:0)))bad++});if(!bad)return true}return false}
+const PET_RULES=[
+  ['asleep'],
+  [['vtip','fip','vtipek','sasmej','legrac','neco vtipneho'],()=>'joke'],
+  [['hadank','hadej'],()=>'riddle'],
+  [['sazpivej','zpivej','pisnick','pisen','pisnicku'],()=>'song'],
+  [['ukol','co mam delat'],()=>tasksReply()],
+  [['jak se mas','jak je ti','jak se citis'],()=>petStatus()],
+  [['mam te rad','mam te moc','miluju','miluji','pusinku','pusa'],()=>pick(['Já tebe taky moc! 💖','A já tebe nejvíc na světě! Pusinka! 😘'])],
+  [['hrat','hraj','hrajem','pojd si hrat','micek'],()=>'act:petPlay'],
+  [['koupat','vykoupej','umyj','mydlo','vana'],()=>'act:petWash'],
+  [['papat','najist','hlad','jidlo','jist','svacin'],()=>petNow(petOf(V.kid)).food<60?'act:food':'Já jsem najezený! Bříško plné. Ty máš hlad? Dej si svačinku!'],
+  [['hajat','spinkat','spat','dobrou noc','hajinky'],()=>'act:petSleep'],
+  [['pohlad','hlad me','mazl','obejmi','obejmout'],()=>'act:petPet'],
+  [['smutn','brec','plac','je mi zle','boli'],()=>moodReply('sad')],
+  [['slob','nastvan','vstek','stve me'],()=>moodReply('angry')],
+  [['unaven','ospal'],()=>moodReply('tired')],
+  [['nudim','nuda'],()=>pick(['Pojď, pohrajeme si s míčkem!','Řekni „vtip“ a já ti povím vtip!','Splníme spolu úkol? Pak budu větší!'])],
+  [['jak se jmenujes','tve jmeno','jmenujes'],()=>`Jmenuju se ${petName()}! ${sound()}`],
+  [['co mas rad','co te bavi','co rad'],()=>`Mám rád ${PET_LIKES[(petOf(V.kid)||{}).type]||'tebe'}. A nejvíc tebe!`],
+  [['kolik mam','hvesd','bodu','body'],()=>`Máš ${pointsOf(V.kid)} ⭐. To je krása!`],
+  [['dobre rano'],()=>'Dobré ráno! Nezapomeň na ranní misi! ☀️'],
+  [['skolk','skola','ve skole'],()=>kidOf(V.kid).little?'Co jste dneska dělali ve školce? Kreslili jste?':'Co bylo dneska ve škole nejlepší?'],
+  [['dekuj','diky'],()=>'Rádo se stalo! 💛'],
+  [['ahoj','cau','nasdal','cus','sdlavim','hello'],()=>`${sound()} Ahoj {voc}!`],
+  [['haf','mnau','bubu','kvak','buuu','iha'],()=>`${sound()} ${sound()} Hihi!`],
+  [['pochval','jsem sikovn','jsem dobl'],()=>praise()]];
+function petAnswer(text,alts){const id=V.kid,list=[text,...(alts||[])].filter(Boolean);
   if(petNow(petOf(id)).asleep)return 'Zzz… chrrr… (spinká, nejdřív ho probuď)';
-  if(has_(/vtip|zasmej|neco vtipn/))return 'joke';
-  if(has_(/hadank/))return 'riddle';
-  if(has_(/zazpivej|pisn|zpivej/))return 'song';
-  if(has_(/ukol|co mam (dnes|delat)/))return tasksReply();
-  if(has_(/jak se mas|jak je ti|jak se citis/))return petStatus();
-  if(has_(/mam te rad|miluju|mam te moc/))return pick(['Já tebe taky moc! 💖','A já tebe nejvíc na světě!']);
-  if(has_(/smutn|brec|plac|je mi zle/))return moodReply('sad');
-  if(has_(/zlob|nastvan|vztek|stve me/))return moodReply('angry');
-  if(has_(/unaven|chce se mi spat|ospal/))return moodReply('tired');
-  if(has_(/nudim|nuda/))return pick(['Co si zahrát nějakou hru? Nebo mi řekni, ať ti povím vtip!','Pojď, pohrajeme si s míčkem!','Splníme spolu úkol? Pak budu větší!']);
-  if(has_(/jak se jmenujes|tve jmeno/))return `Jmenuju se ${petName()}! ${sound()}`;
-  if(has_(/co mas rad|co te bavi|co rad/))return `Mám rád ${PET_LIKES[(petOf(id)||{}).type]||'tebe'}. A nejvíc tebe!`;
-  if(has_(/hlad|papat|jist|jidlo/))return petNow(petOf(id)).food<60?'Ano! Mám hlad! Dáš mi něco v Péči?':'Já jsem najezený. Ty máš hlad? Tak si dej svačinku!';
-  if(has_(/kolik mam|bod|hvezd/))return `Máš ${pointsOf(id)} ⭐. To je krása!`;
-  if(has_(/dobrou noc|jdu spat/))return 'Dobrou noc, {voc}. Ať se ti zdá něco krásného! 🌙';
-  if(has_(/dobre rano/))return 'Dobré ráno! Nezapomeň na ranní misi! ☀️';
-  if(has_(/skol|skolk/))return pick(['Co jste dneska dělali? Mě by bavilo kreslení!','Ve škole jsi určitě byla šikovná. Co bylo nejlepší?'.replace('byla',gw(id,'byla','byl'))]);
-  if(has_(/dekuj|diky/))return 'Rádo se stalo! 💛';
-  if(has_(/^(ahoj|cau|nazdar|cus|zdravim|hello)/))return `${sound()} Ahoj {voc}!`;
-  if(has_(/pochval|jsem dobr|jsem sikovn/))return praise();
-  return pick([`${sound()} Aha! Povídej mi víc!`,'To je zajímavé! A co dál?','Hmm, tomu úplně nerozumím, ale moc rád tě poslouchám!','Opravdu? To bych chtěl vidět!'])}
-function petRespond(r){if(r==='joke'){const j=pick(PET_JOKES);petSay(j[0],{extra:`<button class="chip" data-act="petReveal" data-v="${esc(j[1])}">Nevím, řekni! 🤔</button>`});return}
+  for(const[stems,fn]of PET_RULES.slice(1))for(const t of list){const w=lispN(t).split(' ').filter(Boolean);if(stems.some(st=>wordHit(w,st)))return fn()}
+  if(kidOf(id).little)return pick([`${sound()} Hihi, to je legrace!`,'Ty jsi ale šikulka, {voc}!','Já tě mám tak rád! 💖','Jů, to se mi líbí! Povídej ještě!',`${sound()} Povídej, povídej, já poslouchám!`,'To je krásné! Pojď si se mnou hrát!']);
+  return pick([`${sound()} Aha! Povídej mi víc!`,'To je zajímavé! A co dál?','Opravdu? To bych chtěl vidět!','Hmm, a jak to bylo dál?'])}
+function petRespond(r){if(typeof r==='string'&&r.startsWith('act:')){const a=r.slice(4);if(a==='food'){V.petTab='food';render();petSay('Mňam! Vyber mi, co si dám! 🍎');return}const b=document.createElement('button');handlers[a](b);if(a==='petPet')petAnim('jump');return}if(r==='joke'){const j=pick(PET_JOKES);petSay(j[0],{extra:`<button class="chip" data-act="petReveal" data-v="${esc(j[1])}">Nevím, řekni! 🤔</button>`});return}
   if(r==='riddle'){const j=pick(PET_RIDDLES);petSay('Hádanka: '+j[0],{extra:`<button class="chip" data-act="petReveal" data-v="${esc(j[1])}">Prozraď! 🤔</button>`});return}
   if(r==='song'){const s=pick(PET_SONGS);petSay('🎵 '+s.join(' '));return}
   petSay(r)}
 function chatHtml(id){return chatOf(id).slice(-12).map(m=>`<div class="cmsg ${m.w}">${esc(m.t)}${m.x?`<div>${m.x}</div>`:''}</div>`).join('')}
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let LISTEN=null;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function talkTab(){const id=V.kid,k=kidOf(id),p=petOf(id)||{};
   return `<div class="card sec chat"><div class="row" style="justify-content:space-between"><b>💬 Povídání s ${esc(p.name)}</b><button class="chip" data-act="petMute">${p.mute?'🔇 Ztlumeno':'🔊 Mluví'}</button></div>
    <div id="chatlog" class="chatlog">${chatHtml(id)||`<p class="muted center">Ťukni na otázku${SR?' nebo na mikrofon a mluv':''}.</p>`}</div>
@@ -2485,12 +2499,17 @@ Object.assign(handlers,{
   petMood:b=>{const m=b.dataset.v;kidSays(MOODS.find(x=>x[0]===m)[1]);setTimeout(()=>petSay(moodReply(m)),300)},
   petReveal:b=>{b.remove();petSay(b.dataset.v)},
   petMute:()=>{const p=petOf(V.kid);put(`kids/${V.kid}/pet/mute`,!p.mute);try{speechSynthesis.cancel()}catch(e){}render()},
-  petListen:b=>{if(!SR)return;try{speechSynthesis.cancel()}catch(e){}const r=new SR();r.lang='cs-CZ';r.interimResults=false;r.maxAlternatives=1;
-    b.classList.add('on');b.textContent='🎤 Poslouchám…';let got=false;
-    r.onresult=e=>{got=true;const t=e.results[0][0].transcript;kidSays(t);setTimeout(()=>petRespond(petAnswer(t)),300)};
-    r.onerror=e=>{if(e.error==='not-allowed')toast('Povol mikrofon v nastavení prohlížeče.');};
-    r.onend=()=>{b.classList.remove('on');b.textContent='🎤 Mluv na mě';if(!got)petSay(pick(['Neslyšel jsem tě, zkus to ještě jednou!','Cos to říkal? Zkus to znovu!'.replace('říkal',gw(V.kid,'říkala','říkal'))]),{})};
-    try{r.start()}catch(e){b.classList.remove('on')}}
+  petListen:b=>{if(!SR)return;if(LISTEN){try{LISTEN.stop()}catch(e){}return}try{speechSynthesis.cancel()}catch(e){}
+    const r=new SR(),lbl=b.textContent;r.lang='cs-CZ';r.interimResults=true;r.continuous=false;r.maxAlternatives=5;LISTEN=r;
+    b.classList.add('on');b.textContent='👂 Poslouchám… mluv!';let finalT='',alts=[],interim='',err='';
+    r.onresult=e=>{interim='';for(let i=0;i<e.results.length;i++){const res=e.results[i];if(res.isFinal){finalT+=' '+res[0].transcript;for(let k=1;k<res.length;k++)alts.push(res[k].transcript)}else interim+=' '+res[0].transcript}
+      b.textContent='👂 '+(finalT+interim).trim().slice(0,40)};
+    r.onerror=e=>{err=e.error;if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Mikrofon není povolený. Povolte ho v nastavení prohlížeče pro tuto stránku.')};
+    r.onend=()=>{LISTEN=null;b.classList.remove('on');b.textContent=lbl;const t=(finalT||interim).trim();
+      if(t){kidSays(t);setTimeout(()=>petRespond(petAnswer(t,alts)),300);return}
+      if(err==='not-allowed'||err==='service-not-allowed')return;
+      petSay(kidOf(V.kid).little?pick(['Ťukni na mikrofon a řekni mi to ještě jednou, nahlas! 👂','Pšš… mluvíš moc potichu. Zkus to znovu!']):'Nic jsem neslyšel. Ťukni a mluv hned potom.')};
+    try{r.start()}catch(e){LISTEN=null;b.classList.remove('on');b.textContent=lbl}}
 });
 
 /* ---- temperament: idle antics, tickle-rage, grumpy bear for adults ---- */
