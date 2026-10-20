@@ -451,13 +451,32 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 .g2t.v2{background:#FFF6E0}.g2t.v4{background:#FFE9B8}.g2t.v8{background:#FFC98A;color:#fff}.g2t.v16{background:#FF9E5C;color:#fff}.g2t.v32{background:#FF7A5C;color:#fff}.g2t.v64{background:#FF5C5C;color:#fff}
 .g2t.v128,.g2t.v256,.g2t.v512{background:#FFD84D;color:#fff;font-size:1.4rem}.g2t.v1024,.g2t.v2048,.g2t.v4096{background:#8E6BFF;color:#fff;font-size:1.1rem}
 .g2over{position:absolute;inset:0;background:rgba(43,35,80,.75);color:#fff;border-radius:var(--r-md);display:grid;place-content:center;gap:10px;text-align:center;font-weight:900;font-size:1.5rem}
+/* ---- pet talk & temperament ---- */
+.bubble2.pop{animation:bpop .35s}
+@keyframes bpop{0%{transform:scale(.7)}70%{transform:scale(1.06)}}
+.petbody.jump{animation:pjump .6s}.petbody.wiggle{animation:pwig .6s}.petbody.spin{animation:pspin .8s}.petbody.shake{animation:pshake .5s 2}
+@keyframes pjump{40%{transform:translateY(-34px) scaleY(1.05)}70%{transform:translateY(0) scaleY(.92)}}
+@keyframes pwig{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+@keyframes pspin{to{transform:rotate(360deg)}}
+@keyframes pshake{25%{transform:translateX(-8px) rotate(-4deg)}75%{transform:translateX(8px) rotate(4deg)}}
+.blink{animation:blink 4s infinite;transform-origin:100px 102px}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.chat{gap:10px}
+.chatlog{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px}
+.cmsg{max-width:82%;padding:8px 12px;border-radius:16px;font-weight:700;line-height:1.3}
+.cmsg.pet{align-self:flex-start;background:var(--sun-soft);border-bottom-left-radius:4px}
+.cmsg.kid{align-self:flex-end;background:var(--kid);color:#fff;border-bottom-right-radius:4px}
+.cmsg .chip{margin-top:6px}
+.btn.mic.on{background:var(--flame);animation:glow2 1s infinite}
+@keyframes glow2{50%{transform:scale(1.04)}}
+.moodc{font-size:1.5rem;padding:6px 12px}
 </style>
 </head><body><div id="app"></div>
 <script>
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-10-19.1';
+const APP_VERSION='2026-10-20.1';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -2258,18 +2277,20 @@ const petOf=kid=>kidOf(kid).pet||null;
 const petXp=(kid,p)=>sumLog(l=>l.kid===kid&&(l.type==='task'||l.type==='streak')&&l.ts>=(p.born||0));
 const stageOf=xp=>{let s=0;STAGES.forEach((x,i)=>{if(xp>=x.min)s=i});return s};
 const clamp=v=>Math.max(0,Math.min(100,v));
+function nightH(a,b){if(b-a>72*3600000)a=b-72*3600000;let n=0;for(let t=a;t<b;t+=900000){const hr=new Date(t).getHours();if(hr>=21||hr<7)n+=Math.min(900000,b-t)}return n/3600000}
 function petNow(p){ // apply time decay without writing
   const now=Date.now(),h=Math.max(0,(now-(p.ts||now))/3600000),asleep=p.sleepUntil&&p.sleepUntil>(p.ts||0);
-  const sleepH=asleep?Math.max(0,Math.min(now,p.sleepUntil)-(p.ts||now))/3600000:0,awakeH=h-sleepH;
-  return{...p,food:clamp((p.food??80)-h*4),joy:clamp((p.joy??80)-awakeH*3),clean:clamp((p.clean??80)-h*2),energy:clamp((p.energy??80)-awakeH*3+sleepH*40),asleep:!!(p.sleepUntil&&p.sleepUntil>now),ts:now}}
+  let sleepH=asleep?Math.max(0,Math.min(now,p.sleepUntil)-(p.ts||now))/3600000:0;sleepH=Math.min(h,sleepH+nightH(p.ts||now,now)*(asleep?0:1));const awakeH=Math.max(0,h-sleepH);
+  return{...p,food:clamp((p.food??80)-h*4),joy:clamp((p.joy??80)-awakeH*3),clean:clamp((p.clean??80)-h*2),energy:clamp((p.energy??80)-awakeH*2+sleepH*40),asleep:!!(p.sleepUntil&&p.sleepUntil>now),ts:now}}
 const petMood=p=>{const m=(p.food+p.joy+p.clean+p.energy)/4;return m>=60?'happy':m>=30?'ok':'sad'};
 function petWish(p){if(p.asleep)return 'Zzz… spinkám';if(p.food<30)return 'Mám hlad!';if(p.clean<30)return 'Chci se vykoupat!';if(p.energy<25)return 'Jsem ospalý…';if(p.joy<30)return 'Pohraj si se mnou!';return pick(['Mám tě rád!','Jsem spokojený!','Hurá, jsi tu!','Splníme dneska úkol?'])}
 function petSvg(p,size=200){
   const T=PET_TYPES.find(t=>t.id===p.type)||PET_TYPES[0],xp=p.xp||0,st=stageOf(xp);
   if(st===0)return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" class="petsvg"><ellipse cx="100" cy="180" rx="46" ry="8" fill="rgba(0,0,0,.12)"/><path d="M100 30 C140 30 158 100 158 128 C158 162 132 180 100 180 C68 180 42 162 42 128 C42 100 60 30 100 30Z" fill="#FFF8EE" stroke="#2B2350" stroke-width="4"/><circle cx="80" cy="90" r="10" fill="${T.col}"/><circle cx="122" cy="120" r="13" fill="${T.col}"/><circle cx="92" cy="146" r="8" fill="${T.col}"/>${xp>=2?'<path d="M70 70 l12 10 l8 -12 l10 12" fill="none" stroke="#2B2350" stroke-width="3"/>':''}</svg>`;
   const sc=[0,.78,.9,1,1.05][st],mood=petMood(p),sleep=p.asleep;
-  const eyes=sleep?'<path d="M76 104 q8 6 16 0 M108 104 q8 6 16 0" stroke="#2B2350" stroke-width="4" fill="none" stroke-linecap="round"/>':mood==='happy'?'<path d="M74 106 q10 -12 20 0 M106 106 q10 -12 20 0" stroke="#2B2350" stroke-width="5" fill="none" stroke-linecap="round"/>':'<circle cx="84" cy="102" r="7" fill="#2B2350"/><circle cx="116" cy="102" r="7" fill="#2B2350"/><circle cx="86" cy="99" r="2.5" fill="#fff"/><circle cx="118" cy="99" r="2.5" fill="#fff"/>';
-  const mouth=sleep?'<ellipse cx="100" cy="124" rx="5" ry="4" fill="#2B2350"/>':mood==='sad'?'<path d="M88 128 q12 -10 24 0" stroke="#2B2350" stroke-width="4" fill="none" stroke-linecap="round"/>':'<path d="M88 120 q12 14 24 0" stroke="#2B2350" stroke-width="4" fill="#FF8FB1" stroke-linecap="round"/>';
+  const angry=!sleep&&(p.angry||(typeof PET_ANGRY!=='undefined'&&PET_ANGRY>Date.now()&&p.live));
+  const eyes=sleep?'<path d="M76 104 q8 6 16 0 M108 104 q8 6 16 0" stroke="#2B2350" stroke-width="4" fill="none" stroke-linecap="round"/>':angry?'<path d="M70 84 l24 10 M130 84 l-24 10" stroke="#2B2350" stroke-width="6" stroke-linecap="round"/><circle cx="84" cy="104" r="7" fill="#2B2350"/><circle cx="116" cy="104" r="7" fill="#2B2350"/><circle cx="86" cy="101" r="2" fill="#fff"/><circle cx="118" cy="101" r="2" fill="#fff"/>':mood==='happy'?'<g class="blink"><ellipse cx="84" cy="102" rx="9" ry="11" fill="#2B2350"/><ellipse cx="116" cy="102" rx="9" ry="11" fill="#2B2350"/><circle cx="87" cy="97" r="4" fill="#fff"/><circle cx="119" cy="97" r="4" fill="#fff"/><circle cx="81" cy="106" r="2" fill="#fff"/><circle cx="113" cy="106" r="2" fill="#fff"/></g>':'<circle cx="84" cy="102" r="7" fill="#2B2350"/><circle cx="116" cy="102" r="7" fill="#2B2350"/><circle cx="86" cy="99" r="2.5" fill="#fff"/><circle cx="118" cy="99" r="2.5" fill="#fff"/>';
+  const mouth=angry?'<path d="M86 126 l7 -6 l7 6 l7 -6 l7 6" stroke="#2B2350" stroke-width="4" fill="#fff" stroke-linejoin="round"/>':sleep?'<ellipse cx="100" cy="124" rx="5" ry="4" fill="#2B2350"/>':mood==='sad'?'<path d="M88 128 q12 -10 24 0" stroke="#2B2350" stroke-width="4" fill="none" stroke-linecap="round"/>':'<path d="M88 120 q12 14 24 0" stroke="#2B2350" stroke-width="4" fill="#FF8FB1" stroke-linecap="round"/>';
   const ears={pes:`<ellipse cx="58" cy="92" rx="16" ry="34" transform="rotate(20 58 92)" fill="${T.col}" filter="brightness(.8)"/><ellipse cx="142" cy="92" rx="16" ry="34" transform="rotate(-20 142 92)" fill="${T.col}" filter="brightness(.8)"/>`,
     kocka:`<polygon points="56,78 64,36 92,62" fill="${T.col}"/><polygon points="144,78 136,36 108,62" fill="${T.col}"/><polygon points="64,70 68,48 84,62" fill="#FFB3C7"/><polygon points="136,70 132,48 116,62" fill="#FFB3C7"/>`,
     zajic:`<ellipse cx="80" cy="34" rx="12" ry="36" fill="${T.col}"/><ellipse cx="120" cy="34" rx="12" ry="36" fill="${T.col}"/><ellipse cx="80" cy="36" rx="6" ry="26" fill="#FFC9D9"/><ellipse cx="120" cy="36" rx="6" ry="26" fill="#FFC9D9"/>`,
@@ -2313,14 +2334,15 @@ function vPet(){const id=V.kid,pts=pointsOf(id);
   if(tab==='wear'){const own=p.owned||{},w=p.wear||{};body=`${['hat','glasses','neck'].map(sl=>`<div class="wearrow">${PET_WEAR.filter(x=>x.slot===sl).map(x=>{const o=own[x.id],on=w[sl]===x.id;
       return `<button class="wearbtn ${on?'on':''}" data-act="${o?'petWear':'petBuyWear'}" data-w="${x.id}"><span>${x.e}</span><i>${on?'Nosí':o?'Obléct':`${x.cost} ⭐`}</i></button>`}).join('')}</div>`).join('')}
      <button class="btn ghost" data-act="petUnwear">Svléct vše</button>`}
+  if(tab==='talk')body=talkTab();
   if(tab==='home'){const own=p.owned||{},w=p.wear||{};body=`<div class="bgrow">${PET_BG.map(b=>{const o=b.cost===0||own['bg_'+b.id],on=(w.bg||'louka')===b.id;
       return `<button class="bgbtn ${on?'on':''}" data-act="${o?'petBg':'petBuyBg'}" data-b="${b.id}" style="background:${b.css}"><i>${b.name}<br>${on?'✓':o?'Vybrat':`${b.cost} ⭐`}</i></button>`}).join('')}</div>`}
   return `${topbar(p.name)}
-  <div class="petscene" style="background:${bg.css}"><div class="bubble2">${esc(petWish(q))}</div><button class="petbody" data-act="petPet" aria-label="Pohladit">${petSvg(q,200)}${petWearHtml(q,200)}</button></div>
+  <div class="petscene" style="background:${bg.css}"><div class="bubble2">${esc(petBubble(q))}</div><button class="petbody" data-act="petPet" aria-label="Pohladit">${petSvg({...q,live:true},200)}${petWearHtml(q,200)}</button></div>
   <div class="card sec">${bar('🍎','Sytost',q.food)}${bar('💛','Radost',q.joy)}${bar('🛁','Čistota',q.clean)}${bar('⚡','Energie',q.energy)}
    <div class="row" style="justify-content:space-between"><b>${STAGES[st].name}</b><span class="muted">${nxt?`do další úrovně ${nxt.min-q.xp} ⭐ z úkolů`:'nejvyšší úroveň!'}</span></div>
    <div class="bar"><i style="width:${nxt?Math.min(100,(q.xp-STAGES[st].min)/(nxt.min-STAGES[st].min)*100):100}%"></i></div><span class="note">${st===0?'Splň úkol a mazlíček se vylíhne!':'Roste z hvězdiček za splněné úkoly.'}</span></div>
-  <nav class="ptabs"><button class="${tab==='care'||tab==='food'?'on':''}" data-act="petTab" data-t="care">Péče</button><button class="${tab==='wear'?'on':''}" data-act="petTab" data-t="wear">Šatník</button><button class="${tab==='home'?'on':''}" data-act="petTab" data-t="home">Domeček</button></nav>
+  <nav class="ptabs"><button class="${tab==='care'||tab==='food'?'on':''}" data-act="petTab" data-t="care">Péče</button><button class="${tab==='wear'?'on':''}" data-act="petTab" data-t="wear">Šatník</button><button class="${tab==='home'?'on':''}" data-act="petTab" data-t="home">Domeček</button><button class="${tab==='talk'?'on':''}" data-act="petTab" data-t="talk">Povídání</button></nav>
   ${body}`;
 }
 function petFx(e){const s=$('.petscene');if(!s)return;const el=document.createElement('span');el.className='petfx';el.textContent=e;el.style.left=(40+Math.random()*20)+'%';s.appendChild(el);setTimeout(()=>el.remove(),1200)}
@@ -2332,7 +2354,7 @@ Object.assign(handlers,{
     put(`kids/${id}/pet`,{type:V.petPick||'pes',name,born:Date.now(),ts:Date.now(),food:80,joy:90,clean:90,energy:90,owned:{},wear:{}});render();
     celebrate({title:`Ahoj, ${name}!`,sub:'Tvůj mazlíček je zatím vajíčko. Splň úkol a vylíhne se!',speak:`Ahoj ${name}!`})},
   petTab:b=>{V.petTab=b.dataset.t;render()},
-  petPet:()=>{const p=petOf(V.kid);if(petNow(p).asleep){toast('Psst, spinká…');return}petAct(q=>{q.joy=clamp(q.joy+6)},'💖');if(kidOf(V.kid).little)say(pick(['Mňau!','Haf!','To je příjemné!']))},
+  petPet:()=>{const p=petOf(V.kid);if(petNow(p).asleep){toast('Psst, spinká…');return}petAct(q=>{q.joy=clamp(q.joy+6)},'💖');},
   petPlay:()=>{const p=petNow(petOf(V.kid));if(p.asleep){toast('Nejdřív ho probuď');return}if(p.energy<10){toast('Je moc unavený, ať se vyspí');return}petAct(q=>{q.joy=clamp(q.joy+20);q.energy=clamp(q.energy-12);q.food=clamp(q.food-5)},'⚽')},
   petWash:()=>petAct(q=>{q.clean=100;q.joy=clamp(q.joy+5)},'🫧'),
   petSleep:()=>petAct(q=>{q.sleepUntil=q.asleep?0:Date.now()+90*60000},null,'tick'),
@@ -2346,6 +2368,148 @@ Object.assign(handlers,{
     addLog(id,-x.cost,'pet',`Mazlíček: domeček ${x.name}`,true);petAct(q=>{q.owned={...(q.owned||{}),['bg_'+x.id]:true};q.wear={...(q.wear||{}),bg:x.id}},'🏠','win')},
   petBg:b=>petAct(q=>{q.wear={...(q.wear||{}),bg:b.dataset.b}})
 });
+
+/* ================= pet talking ================= */
+const PET_SND={pes:['Haf haf!','Haf!','Hafík!'],kocka:['Mňau!','Mrrr, mňau!','Přede… vrrr'],zajic:['Ňuf ňuf!','Hop hop!'],drak:['Rrraaa!','Fffú!','Uáá, plamínek!'],jednorozec:['Íhaha!','Blik, blik!','Třpyt, třpyt!'],medved:['Brumm!','Brum brum!','Mrumm!']};
+const PET_PITCH={pes:1.3,kocka:1.55,zajic:1.7,drak:.8,jednorozec:1.5,medved:.7};
+const PET_LIKES={pes:'aportovat míček a dlouhé procházky',kocka:'vyhřívat se na sluníčku a klubíčka',zajic:'mrkvičku a skákání po louce',drak:'teplé kamínky a foukat bublinky',jednorozec:'duhu a třpytky',medved:'med a zimní spaní'};
+const PET_JOKES=[
+ ['Víš, proč má žirafa tak dlouhý krk?','Protože jí smrdí nohy! 😆'],
+ ['Jak se jmenuje medvěd, který nemá zuby?','Gumový medvídek! 🐻'],
+ ['Proč šla slepice přes silnici?','Aby se dostala na druhou stranu! 🐔'],
+ ['Potkají se dvě mušky. Jedna říká: Půjdeme pěšky?','A druhá: Ne, počkáme na psa! 🐕'],
+ ['Pepíček se ptá: Paní učitelko, může být někdo potrestán za něco, co neudělal?','Nemůže. Tak to je dobře, já jsem neudělal úkol! 😅'],
+ ['Co dělá ryba, když jí je smutno?','Pláče, ale nikdo to nepozná, protože je ve vodě. 🐟'],
+ ['Proč nosí sloni červené ponožky?','Aby se mohli schovat v jahodách! 🍓'],
+ ['Co je to: malé, zelené a klepe na dveře?','Hrášek, co chce dovnitř! 🫛'],
+ ['Víš, co řekla nula osmičce?','Pěkný pásek! 0️⃣8️⃣'],
+ ['Jaké zvíře je nejlepší na matematiku?','Počítající pavouk, má osm nohou na počítání! 🕷️']];
+const PET_RIDDLES=[
+ ['Má to ručičky, ale nemá to ruce. Tiká to.','Hodiny ⏰'],['Bílé, studené a padá to z nebe.','Sníh ❄️'],['Má to zuby, ale nekouše to.','Hřeben 🪮'],
+ ['Kulaté, červené a visí to na stromě.','Jablko 🍎'],['Má to klávesy, ale neodemkne to žádné dveře.','Klavír 🎹'],['Patří to tobě, ale ostatní to používají víc než ty.','Tvoje jméno 😊'],
+ ['Čím víc z ní odebereš, tím je větší.','Díra 🕳️'],['Kolik nohou má pavouk?','Osm 🕷️'],['Na nebi svítí v noci a někdy je jako rohlíček.','Měsíc 🌙'],['Má to krk, ale nemá to hlavu.','Láhev 🍾']];
+const PET_SONGS=[['Skákal pes přes oves,','přes zelenou louku,','šel za ním myslivec,','péro na klobouku.'],['Pec nám spadla, pec nám spadla,','kdopak nám ji postaví?','Starý pecař není doma','a mladý to neumí.']];
+const CHAT={};let PETSAY={t:'',ts:0};
+const fem=id=>!kidOf(id).adult;
+const gw=(id,f,m)=>fem(id)?f:m;
+const ukolu=n=>n===1?'úkol':n>=2&&n<=4?'úkoly':'úkolů';
+const noEmoji=t=>t.replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍⃣]/gu,'').replace(/\s+/g,' ').trim();
+const petName=()=>{const p=petOf(V.kid);return p&&p.name||'mazlíček'};
+function petVoice(t){const p=petOf(V.kid)||{};if(p.mute)return;try{if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(noEmoji(t));u.lang='cs-CZ';u.pitch=PET_PITCH[p.type]||1.2;u.rate=kidOf(V.kid).little?.88:1;speechSynthesis.speak(u)}catch(e){}}
+function chatOf(id){return CHAT[id]=CHAT[id]||[]}
+function petSay(t,opt={}){const id=V.kid;t=t.replace(/\{voc\}/g,kidOf(id).voc||kidOf(id).name);PETSAY={t,ts:Date.now(),kid:id};
+  const c=chatOf(id);c.push({w:'pet',t,x:opt.extra||''});if(c.length>30)c.splice(0,c.length-30);
+  const b=$('.bubble2');if(b){b.textContent=t;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}
+  const lg=$('#chatlog');if(lg){lg.innerHTML=chatHtml(id);lg.scrollTop=lg.scrollHeight}
+  if(!opt.silent)petVoice(opt.speak||t)}
+function kidSays(t){const c=chatOf(V.kid);c.push({w:'kid',t});const lg=$('#chatlog');if(lg){lg.innerHTML=chatHtml(V.kid);lg.scrollTop=lg.scrollHeight}}
+function petBubble(q){return PETSAY.kid===V.kid&&Date.now()-PETSAY.ts<20000?PETSAY.t:petWish(q)}
+const sound=()=>pick(PET_SND[(petOf(V.kid)||{}).type]||['Ahoj!']);
+function openTasks(id){return taskList().filter(t=>t.kid===id&&t.status==='open')}
+function doneToday(id){return Object.values(S.log||{}).filter(l=>l.kid===id&&l.type==='task'&&l.d===today()).length}
+function petGreeting(){const id=V.kid,p=petOf(id),q={...petNow(p),xp:petXp(id,p)},h=new Date().getHours(),k=kidOf(id);
+  const hi=h<10?`Dobré ráno, ${k.voc}!`:h>=18?`Dobrý večer, ${k.voc}!`:`Ahoj ${k.voc}!`;
+  if(q.asleep)return 'Zzz… chrrr… (spinká, ťukni na Probudit)';
+  if(stageOf(q.xp)===0)return `${hi} Ťuk ťuk, jsem ještě ve vajíčku. Splň úkol a já se vylíhnu!`;
+  let need='';if(q.food<30)need='Mám hrozný hlad, dáš mi něco?';else if(q.clean<30)need='Jsem celý ulepený, vykoupeš mě?';else if(q.energy<25)need='Jsem moc unavený…';else if(q.joy<30)need='Stýskalo se mi! Pohraješ si se mnou?';
+  const n=openTasks(id).length,d=doneToday(id),st=(k.streak||{}).count||0;
+  let t=n?`Dneska máš ještě ${n} ${ukolu(n)}. Když je splníš, vyrostu!`:d?`Dneska už máš hotovo ${d} ${ukolu(d)}. Jsem na tebe pyšný!`:st>=2?`Už ${st} dní v řadě plníš úkoly. Paráda!`:pick(['Co budeme dneska dělat?','Popovídáš si se mnou?','Mám tě moc rád!']);
+  return `${sound()} ${hi} ${need||t}`}
+function petStatus(){const q=petNow(petOf(V.kid));if(q.asleep)return 'Mmm… spinkám… zzz';
+  if(q.food<30)return 'Kručí mi v bříšku. Dáš mi papat?';if(q.clean<30)return 'Jsem celý ulepený, vykoupeš mě?';if(q.energy<25)return 'Jsem utahaný, chtěl bych spinkat.';if(q.joy<30)return 'Trošku se nudím. Pohraješ si se mnou?';
+  return pick(['Mám se skvěle! A jak se máš ty?','Báječně, protože jsi tady! A ty?','Bříško plné, kožíšek čistý, je mi fajn. A tobě?'])}
+const MOODS=[['happy','😀'],['ok','😐'],['sad','😢'],['angry','😡'],['tired','😴']];
+function moodReply(m){const id=V.kid,ad=kidOf(id).adult;return {
+  happy:pick(['To mám radost! Co se ti dneska povedlo?','Juchů! Tvoje radost je i moje radost!']),
+  ok:'Takový obyčejný den, co? Pomazlíme se a hned bude líp.',
+  sad:ad?`Je mi líto, že je ti smutno. Obejmu tě. Pomáhá o tom s někým mluvit nebo se jít projít.`:`Je mi líto, že jsi ${gw(id,'smutná','smutný')}. Obejmu tě 🤗. Pomůže to říct mamince. A já jsem tu s tebou.`,
+  angry:'Zlobit se je normální. Zkusíme dračí dech? Nadechni se nosem… a pomalu vyfoukni pusou fúúú. A ještě dvakrát!',
+  tired:'Taky bych si zdřímnul. Dobrý spánek dělá zázraky.'}[m]}
+function praise(){const id=V.kid,d=doneToday(id);return d?`Dneska jsi ${gw(id,'splnila','splnil')} ${d} ${ukolu(d)}. Jsi ${gw(id,'šikulka','borec')}, {voc}!`:pick([`Jsi ${gw(id,'úžasná','úžasný')}, {voc}!`,'Věřím ti, dneska to zvládneš!',`Jsi ${gw(id,'moje nejlepší kamarádka','můj nejlepší kamarád')}!`])}
+function tasksReply(){const l=openTasks(V.kid);if(!l.length)return doneToday(V.kid)?'Všechno máš hotové! Jsi hvězda! ⭐':'Zatím nemáš žádný úkol. Můžeš si se mnou hrát!';
+  return `Ještě tě čeká: ${l.slice(0,3).map(t=>t.title).join(', ')}${l.length>3?' a další':''}. Dáme to spolu!`}
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function petAnswer(text){const t=norm(text),id=V.kid,has_=r=>r.test(t);
+  if(petNow(petOf(id)).asleep)return 'Zzz… chrrr… (spinká, nejdřív ho probuď)';
+  if(has_(/vtip|zasmej|neco vtipn/))return 'joke';
+  if(has_(/hadank/))return 'riddle';
+  if(has_(/zazpivej|pisn|zpivej/))return 'song';
+  if(has_(/ukol|co mam (dnes|delat)/))return tasksReply();
+  if(has_(/jak se mas|jak je ti|jak se citis/))return petStatus();
+  if(has_(/mam te rad|miluju|mam te moc/))return pick(['Já tebe taky moc! 💖','A já tebe nejvíc na světě!']);
+  if(has_(/smutn|brec|plac|je mi zle/))return moodReply('sad');
+  if(has_(/zlob|nastvan|vztek|stve me/))return moodReply('angry');
+  if(has_(/unaven|chce se mi spat|ospal/))return moodReply('tired');
+  if(has_(/nudim|nuda/))return pick(['Co si zahrát nějakou hru? Nebo mi řekni, ať ti povím vtip!','Pojď, pohrajeme si s míčkem!','Splníme spolu úkol? Pak budu větší!']);
+  if(has_(/jak se jmenujes|tve jmeno/))return `Jmenuju se ${petName()}! ${sound()}`;
+  if(has_(/co mas rad|co te bavi|co rad/))return `Mám rád ${PET_LIKES[(petOf(id)||{}).type]||'tebe'}. A nejvíc tebe!`;
+  if(has_(/hlad|papat|jist|jidlo/))return petNow(petOf(id)).food<60?'Ano! Mám hlad! Dáš mi něco v Péči?':'Já jsem najezený. Ty máš hlad? Tak si dej svačinku!';
+  if(has_(/kolik mam|bod|hvezd/))return `Máš ${pointsOf(id)} ⭐. To je krása!`;
+  if(has_(/dobrou noc|jdu spat/))return 'Dobrou noc, {voc}. Ať se ti zdá něco krásného! 🌙';
+  if(has_(/dobre rano/))return 'Dobré ráno! Nezapomeň na ranní misi! ☀️';
+  if(has_(/skol|skolk/))return pick(['Co jste dneska dělali? Mě by bavilo kreslení!','Ve škole jsi určitě byla šikovná. Co bylo nejlepší?'.replace('byla',gw(id,'byla','byl'))]);
+  if(has_(/dekuj|diky/))return 'Rádo se stalo! 💛';
+  if(has_(/^(ahoj|cau|nazdar|cus|zdravim|hello)/))return `${sound()} Ahoj {voc}!`;
+  if(has_(/pochval|jsem dobr|jsem sikovn/))return praise();
+  return pick([`${sound()} Aha! Povídej mi víc!`,'To je zajímavé! A co dál?','Hmm, tomu úplně nerozumím, ale moc rád tě poslouchám!','Opravdu? To bych chtěl vidět!'])}
+function petRespond(r){if(r==='joke'){const j=pick(PET_JOKES);petSay(j[0],{extra:`<button class="chip" data-act="petReveal" data-v="${esc(j[1])}">Nevím, řekni! 🤔</button>`});return}
+  if(r==='riddle'){const j=pick(PET_RIDDLES);petSay('Hádanka: '+j[0],{extra:`<button class="chip" data-act="petReveal" data-v="${esc(j[1])}">Prozraď! 🤔</button>`});return}
+  if(r==='song'){const s=pick(PET_SONGS);petSay('🎵 '+s.join(' '));return}
+  petSay(r)}
+function chatHtml(id){return chatOf(id).slice(-12).map(m=>`<div class="cmsg ${m.w}">${esc(m.t)}${m.x?`<div>${m.x}</div>`:''}</div>`).join('')}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function talkTab(){const id=V.kid,k=kidOf(id),p=petOf(id)||{};
+  return `<div class="card sec chat"><div class="row" style="justify-content:space-between"><b>💬 Povídání s ${esc(p.name)}</b><button class="chip" data-act="petMute">${p.mute?'🔇 Ztlumeno':'🔊 Mluví'}</button></div>
+   <div id="chatlog" class="chatlog">${chatHtml(id)||`<p class="muted center">Ťukni na otázku${SR?' nebo na mikrofon a mluv':''}.</p>`}</div>
+   ${SR?`<button class="btn big mic" data-act="petListen">🎤 ${k.little?'Mluv na mě':'Řekni mu něco'}</button>`:''}
+   ${!k.little?`<form id="talkform" class="row"><input id="talkin" maxlength="120" placeholder="Napiš mu…" autocomplete="off" style="flex:1"><button class="btn">Poslat</button></form>`:''}
+   <div class="chips">${[['how','👋 Jak se máš?'],['joke','🤣 Vtip'],['riddle','❓ Hádanka'],['song','🎵 Zazpívej'],['tasks','📋 Co mám dělat?'],['praise','⭐ Pochval mě'],['likes','💛 Co máš rád?']].map(([v,l])=>`<button class="chip" data-act="petAsk" data-v="${v}">${l}</button>`).join('')}</div>
+   <span class="muted">Jak se mám já:</span><div class="chips">${MOODS.map(([m,e])=>`<button class="chip moodc" data-act="petMood" data-v="${m}">${e}</button>`).join('')}</div>
+   ${k.adult?`<button class="btn ghost" data-act="go" data-to="calm">🌬️ Cvičení na uklidnění</button>`:''}</div>`}
+const ASKS={how:['Jak se máš?',()=>petStatus()],joke:['Řekni mi vtip!','joke'],riddle:['Dej mi hádanku!','riddle'],song:['Zazpívej mi!','song'],tasks:['Co mám dneska dělat?',()=>tasksReply()],praise:['Pochval mě!',()=>praise()],likes:['Co máš rád?',()=>`Mám rád ${PET_LIKES[(petOf(V.kid)||{}).type]||'tebe'}. A nejvíc tebe! 💛`]};
+SETUP.pet=()=>{const id=V.kid,p=petOf(id);if(!p||!p.type||!has(id,'pet'))return;
+  if(!V._greet){V._greet=true;petSay(petGreeting())}
+  const lg=$('#chatlog');if(lg)lg.scrollTop=lg.scrollHeight;
+  const f=$('#talkform');if(f)f.addEventListener('submit',e=>{e.preventDefault();const i=$('#talkin'),t=i.value.trim();if(!t)return;i.value='';kidSays(t);setTimeout(()=>petRespond(petAnswer(t)),350)})};
+/* wrap care actions with speech */
+{const wrap=(name,lines)=>{const o=handlers[name];handlers[name]=b=>{const before=petOf(V.kid)&&petNow(petOf(V.kid));o(b);const after=petOf(V.kid)&&petNow(petOf(V.kid));const t=typeof lines==='function'?lines(b,before,after):pick(lines);if(t)setTimeout(()=>{if(PET_ANGRY>Date.now())return;petSay(t)},60)}};
+  wrap('petPet',(b,bf)=>bf&&bf.asleep?null:pick([sound(),'To je příjemné!','Ještě, ještě!','Mám tě rád, {voc}!','Hihi, to lechtá!',sound()+' Mazlení je nejlepší!']));
+  wrap('petPlay',(b,bf)=>!bf||bf.asleep||bf.energy<10?null:pick(['Juchů, chyť to!','To byla zábava!','Ještě jednou, ještě jednou!','Jsi nejlepší parťák na hraní!']));
+  wrap('petWash',()=>pick(['Bublinky! Hihi!','Jsem čistý jako sníh!','Brr, to je voda!','Voním jako kytička!']));
+  wrap('petSleep',(b,bf)=>bf&&bf.asleep?'Dobré ráno! Už jsem vyspaný! ☀️':pick(['Dobrou noc, {voc}…','Zívá… jdu spinkat. Zzz']));
+  wrap('petFeed',(b,bf,af)=>bf&&af&&af.food>bf.food?{jablko:'Mňam, křupavé jablíčko!',mrkev:'Mrkvička! To je zdravé!',pizza:'Pizza! To je hostina!',dort:'Dort?! To je jak na narozeniny! 🎂'}[b.dataset.f]:null);
+  wrap('petWear',()=>pick(['Sluší mi to?','Jsem krasavec, co?','Tohle mi moc sluší!']));
+  wrap('petBuyWear',()=>'Juchů, nová věc! Děkuju!');wrap('petBuyBg',()=>'Nový domeček! To je nádhera!')}
+Object.assign(handlers,{
+  petAsk:b=>{const[q,r]=ASKS[b.dataset.v];kidSays(q);setTimeout(()=>petRespond(petNow(petOf(V.kid)).asleep?'Zzz… chrrr… (spinká)':typeof r==='function'?r():r),300)},
+  petMood:b=>{const m=b.dataset.v;kidSays(MOODS.find(x=>x[0]===m)[1]);setTimeout(()=>petSay(moodReply(m)),300)},
+  petReveal:b=>{b.remove();petSay(b.dataset.v)},
+  petMute:()=>{const p=petOf(V.kid);put(`kids/${V.kid}/pet/mute`,!p.mute);try{speechSynthesis.cancel()}catch(e){}render()},
+  petListen:b=>{if(!SR)return;try{speechSynthesis.cancel()}catch(e){}const r=new SR();r.lang='cs-CZ';r.interimResults=false;r.maxAlternatives=1;
+    b.classList.add('on');b.textContent='🎤 Poslouchám…';let got=false;
+    r.onresult=e=>{got=true;const t=e.results[0][0].transcript;kidSays(t);setTimeout(()=>petRespond(petAnswer(t)),300)};
+    r.onerror=e=>{if(e.error==='not-allowed')toast('Povol mikrofon v nastavení prohlížeče.');};
+    r.onend=()=>{b.classList.remove('on');b.textContent='🎤 Mluv na mě';if(!got)petSay(pick(['Neslyšel jsem tě, zkus to ještě jednou!','Cos to říkal? Zkus to znovu!'.replace('říkal',gw(V.kid,'říkala','říkal'))]),{})};
+    try{r.start()}catch(e){b.classList.remove('on')}}
+});
+
+/* ---- temperament: idle antics, tickle-rage, grumpy bear for adults ---- */
+let PET_ANGRY=0,PET_IDLE=null,PET_TAPS=[];
+const IDLE_SWEET=['Hihi!','Podívej, umím skákat!','Lalala…','Mám tě rád!','Co děláš?','Pojď si hrát!','Juchů!','Kdy půjdeme ven?','Splníme úkol?'];
+const IDLE_GRUMPY=['Brum! Kdo mě tu ruší?','Já nespím, já jen přemýšlím.','Grrr! Dělám strašného medvěda. Bojíš se?','Kde je můj med?! 🍯','Jirko, nemáš náhodou nějaký úkol? Já to vidím!','Nesahej mi na čepici!','Hmpf. Dneska mám náladu na rošťárny.','Kdo snědl moji svačinu?! Grrr!','Ještě jednou mě ignoruješ a budu bručet celý den!','Tak co, šéfe, makáme, nebo ležíme?'];
+const isGrumpy=()=>kidOf(V.kid).adult||(petOf(V.kid)||{}).type==='medved'&&!kidOf(V.kid).little;
+function petAnim(c){const b=$('.petbody');if(!b)return;b.classList.remove('jump','wiggle','spin','shake');void b.offsetWidth;b.classList.add(c);b.addEventListener('animationend',()=>b.classList.remove(c),{once:true})}
+function petIdleStart(){clearInterval(PET_IDLE);PET_IDLE=setInterval(()=>{if(V.name!=='pet'){clearInterval(PET_IDLE);return}
+  const p=petOf(V.kid);if(!p||!p.type)return;const q=petNow(p);if(q.asleep||stageOf(petXp(V.kid,p))===0)return;if(Date.now()-PETSAY.ts<9000)return;
+  const gr=isGrumpy();petAnim(pick(gr?['shake','jump','wiggle']:['jump','wiggle','spin']));
+  if(gr&&Math.random()<.35){PET_ANGRY=Date.now()+2500;rePet();setTimeout(rePet,2600)}
+  petSay(pick(gr?IDLE_GRUMPY:IDLE_SWEET),{silent:!gr||Math.random()<.5})},11000)}
+function rePet(){const b=$('.petbody');if(!b||V.name!=='pet')return;const p=petOf(V.kid);if(!p)return;const q={...petNow(p),xp:petXp(V.kid,p),live:true};b.innerHTML=petSvg(q,200)+petWearHtml(q,200)}
+{const o=SETUP.pet;SETUP.pet=()=>{o();if(petOf(V.kid)&&petOf(V.kid).type)petIdleStart()}}
+{const o=handlers.petPet;handlers.petPet=b=>{const now=Date.now();if(PET_ANGRY>now){petAnim('shake');return}PET_TAPS=PET_TAPS.filter(t=>now-t<2500);PET_TAPS.push(now);
+  if(PET_TAPS.length>=5&&!petNow(petOf(V.kid)).asleep){PET_TAPS=[];PET_ANGRY=now+3000;petAnim('shake');rePet();setTimeout(rePet,3100);
+    petSay(isGrumpy()?pick(['GRRRR! Dost lechtání, nebo tě sním! …Dělám si legraci. 😄','Rrrr! Já jsem divoký medvěd! Nesahat!','Brum brum BRUM! Teď jsem fakt zuřivý! …No dobře, už ne.']):pick(['Grrr! Dost lechtání! Hihi!','Já se zlobím! …Ne, nezlobím. 😄','Uff, to už je moc!']));return}
+  o(b);petAnim('jump')}}
 
 /* ================= games registry ================= */
 const GAMES=[
