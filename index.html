@@ -476,7 +476,7 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-11-01.1';
+const APP_VERSION='2026-11-02.1';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -1194,6 +1194,8 @@ function vParent(){
       :`<div class="card sec"><h2>Kde jsou data</h2><p class="note">Tohle je náhled. Hvězdičky a úkoly jsou uložené jen v tomto zařízení. Verze pro tři propojené telefony běží na vaší vlastní adrese.</p></div>`)+
       `<div class="card sec"><h2>PIN pro rodiče</h2><p class="muted">Výchozí PIN je 1234. Změňte ho, ať se sem holky nedostanou.</p>
       <div class="row"><input id="newpin" inputmode="numeric" maxlength="4" placeholder="Nový PIN" style="width:140px"><button class="btn" data-act="setPin">Uložit PIN</button></div></div>
+      <div class="card sec"><h2>Záloha dat</h2><p class="muted">Stáhne všechny hvězdičky, úkoly, mazlíčky, samolepky a pokroky v učení do jednoho souboru. Uložte si ho třeba na Google Disk.</p>
+      <div class="row"><button class="btn" data-act="backupDl">⬇️ Stáhnout zálohu</button><label class="btn ghost" for="restorefile">⬆️ Obnovit ze zálohy</label><input type="file" id="restorefile" accept="application/json,.json" hidden></div></div>
       <div class="card sec"><h2>Začít od nuly</h2><p class="muted">Smaže všechny hvězdičky, úkoly a odemčené věci${SYNC?' na všech telefonech':''}.</p><button class="mini no" data-act="resetAll">Vymazat vše</button></div>`;
   }
   return `<div class="parent" style="display:flex;flex-direction:column;gap:16px">${topbar('Pro rodiče',false,!(isParentPhone&&!stack.length))}
@@ -1343,6 +1345,8 @@ const handlers={
     const d=sign>0?n:-Math.min(n,pointsOf(id));if(!d)return;addLog(id,d,'bonus',sign>0?'Bonus od rodičů':'Odebráno rodiči');toast(`${k.name}: ${d>0?'+':''}${d} ⭐`);render()},
   teamReset:b=>{if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Opravdu začít znovu?';return}put('settings/team/since',today());toast('Nové kolo začíná');render()},
   setPin:()=>{const v=$('#newpin').value.trim();if(!/^\d{4}$/.test(v)){toast('PIN musí mít 4 číslice');return}put('settings/pin',v);toast('PIN uložen')},
+  backupDl:()=>{const blob=new Blob([JSON.stringify({app:'bodikov',version:APP_VERSION,saved:new Date().toISOString(),family:DEV.family||null,state:S},null,1)],{type:'application/json'});
+    const u=URL.createObjectURL(blob),el=document.createElement('a');el.href=u;el.download=`bodikov-zaloha-${today()}.json`;document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Záloha stažena')},
   resetAll:b=>{if(!b.dataset.armed){b.dataset.armed='1';b.textContent='Opravdu vše smazat?';return}S=defaults();saveLocal();if(DB)DB.set(clone(S));maintenance();stack.length=0;V=rootView();render();toast('Vše vymazáno')}
 };
 document.addEventListener('click',e=>{
@@ -2396,6 +2400,12 @@ document.addEventListener('submit',e=>{if(e.target.id!=='rewardform')return;e.pr
   const title=$('#rw-title').value.trim(),price=Math.max(1,parseInt($('#rw-price').value||'0',10));if(!title){toast('Napište, co dostanou');return}
   const icon=(document.querySelector('[data-group="rwicon"] .on')||{}).dataset?.v||'🎁',f=(document.querySelector('[data-group="rwfor"] .on')||{}).dataset?.v||'all';
   const id='r'+Date.now().toString(36)+uid();put(`rewards/${id}`,{id,title,icon,price,for:f});toast(`Odměna přidána: ${title}`);render()});
+
+document.addEventListener('change',e=>{if(e.target.id!=='restorefile')return;const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{let d;try{d=JSON.parse(r.result)}catch(x){toast('Tohle není soubor se zálohou');return}
+    if(!d||d.app!=='bodikov'||!d.state){toast('Tohle není záloha Bodíkova');return}
+    if(!confirm(`Obnovit zálohu ze dne ${String(d.saved||'').slice(0,10)}? Současná data${SYNC?' na všech telefonech':''} se přepíšou.`))return;
+    S=normalize(clone(d.state));saveLocal();if(DB)DB.set(clone(S));stack.length=0;V=rootView();render();toast('Záloha obnovena')};r.readAsText(f)});
 
 /* ================= virtual pet (tamagotchi) ================= */
 const PET_TYPES=[

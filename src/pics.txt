@@ -1,0 +1,70 @@
+/* ---------- coloring pictures (viewBox 300x300) ---------- */
+const st=(cx,cy,R)=>`<polygon data-r points="${starPts(cx,cy,R)}"/>`;
+const PICS={
+  house:{name:'Domeček',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <circle data-r cx="248" cy="52" r="28"/>
+    <path data-r d="M30 92 a16 16 0 0 1 22 -20 a22 22 0 0 1 40 4 a15 15 0 0 1 -2 28 h-52 a12 12 0 0 1 -8 -12z"/>
+    <rect data-r x="0" y="236" width="300" height="64"/>
+    <rect data-r x="192" y="62" width="26" height="50"/>
+    <polygon data-r points="58,132 150,56 242,132"/>
+    <rect data-r x="74" y="132" width="152" height="108"/>
+    <rect data-r x="130" y="172" width="40" height="68"/>
+    <rect data-r x="88" y="150" width="32" height="32"/><rect data-r x="180" y="150" width="32" height="32"/>
+    <circle data-r cx="150" cy="104" r="12"/>`},
+  flower:{name:'Kytička',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <rect data-r x="145" y="130" width="10" height="100"/>
+    <ellipse data-r cx="122" cy="192" rx="26" ry="12" transform="rotate(-30 122 192)"/>
+    <ellipse data-r cx="178" cy="172" rx="26" ry="12" transform="rotate(30 178 172)"/>
+    ${[0,60,120,180,240,300].map(a=>`<ellipse data-r cx="150" cy="70" rx="22" ry="34" transform="rotate(${a} 150 110)"/>`).join('')}
+    <circle data-r cx="150" cy="110" r="25"/>
+    <polygon data-r points="112,236 188,236 178,292 122,292"/>
+    <rect data-r x="104" y="222" width="92" height="18" rx="6"/>`},
+  fish:{name:'Rybička',pack:null,svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <rect data-r x="0" y="262" width="300" height="38"/>
+    <path data-r d="M40 262 q-10 -40 8 -70 q14 30 4 70z"/><path data-r d="M262 262 q-12 -50 10 -86 q16 40 4 86z"/>
+    <circle data-r cx="62" cy="72" r="11"/><circle data-r cx="84" cy="44" r="8"/><circle data-r cx="58" cy="26" r="5"/>
+    <polygon data-r points="198,150 262,104 262,196"/>
+    <polygon data-r points="112,104 158,68 178,108"/>
+    <ellipse data-r cx="140" cy="150" rx="82" ry="56"/>
+    <path data-r d="M150 96 q22 54 0 108 q30 -54 0 -108z"/>
+    <circle data-r cx="96" cy="136" r="11"/>
+    <path class="ln" d="M68 164 q10 8 20 2"/>`},
+  rocket:{name:'Raketa',pack:'pack_space',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    ${st(48,52,16)}${st(250,70,12)}${st(60,220,11)}${st(248,236,15)}
+    <circle data-r cx="232" cy="150" r="22"/>
+    <polygon data-r points="126,212 150,282 174,212"/>
+    <polygon data-r points="116,168 78,232 118,216"/><polygon data-r points="184,168 222,232 182,216"/>
+    <path data-r d="M150 38 C186 78 192 140 184 214 L116 214 C108 140 114 78 150 38Z"/>
+    <path data-r d="M150 38 C166 54 175 72 180 92 L120 92 C125 72 134 54 150 38Z"/>
+    <circle data-r cx="150" cy="136" r="21"/>
+    <rect data-r x="128" y="182" width="44" height="12" rx="6"/>`},
+  planet:{name:'Planeta',pack:'pack_space',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    ${st(40,40,14)}${st(150,26,9)}${st(266,128,11)}${st(34,170,10)}${st(200,268,13)}
+    <circle data-r cx="252" cy="58" r="22"/><circle data-r cx="64" cy="248" r="16"/>
+    <ellipse data-r cx="150" cy="160" rx="134" ry="36"/>
+    <circle data-r cx="150" cy="150" r="72"/>
+    <path data-r d="M90 112 q60 18 120 0 q6 12 8 22 q-68 20 -136 0 q2 -10 8 -22z"/>
+    <path data-r d="M16 160 A134 36 0 0 0 284 160 L262 160 A112 22 0 0 1 38 160Z"/>`},
+  cat:{name:'Kočička',pack:'pack_animals',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <polygon data-r points="72,118 84,28 142,82"/><polygon data-r points="228,118 216,28 158,82"/>
+    <polygon data-r points="90,100 96,56 124,84"/><polygon data-r points="210,100 204,56 176,84"/>
+    <circle data-r cx="150" cy="164" r="92"/>
+    <ellipse data-r cx="114" cy="150" rx="15" ry="20"/><ellipse data-r cx="186" cy="150" rx="15" ry="20"/>
+    <ellipse data-r cx="96" cy="190" rx="16" ry="10"/><ellipse data-r cx="204" cy="190" rx="16" ry="10"/>
+    <polygon data-r points="138,184 162,184 150,198"/>
+    <path class="ln" d="M150 198 v12 M150 210 q-12 12 -24 4 M150 210 q12 12 24 4 M36 176 l52 6 M40 204 l50 -8 M264 176 l-52 6 M260 204 l-50 -8"/>`},
+  butterfly:{name:'Motýlek',pack:'pack_animals',svg:`<rect data-r x="0" y="0" width="300" height="300"/>
+    <ellipse data-r cx="96" cy="112" rx="60" ry="50" transform="rotate(-20 96 112)"/>
+    <ellipse data-r cx="204" cy="112" rx="60" ry="50" transform="rotate(20 204 112)"/>
+    <ellipse data-r cx="106" cy="204" rx="42" ry="38" transform="rotate(20 106 204)"/>
+    <ellipse data-r cx="194" cy="204" rx="42" ry="38" transform="rotate(-20 194 204)"/>
+    <circle data-r cx="88" cy="104" r="16"/><circle data-r cx="212" cy="104" r="16"/>
+    <circle data-r cx="104" cy="208" r="11"/><circle data-r cx="196" cy="208" r="11"/>
+    <ellipse data-r cx="150" cy="160" rx="14" ry="72"/>
+    <circle data-r cx="150" cy="82" r="17"/>
+    <path class="ln" d="M144 68 q-14 -30 -34 -36 M156 68 q14 -30 34 -36"/>
+    <circle data-r cx="108" cy="32" r="6"/><circle data-r cx="192" cy="32" r="6"/>`}
+};
+const COLORS=['#FF5C93','#FF8A3D','#FFC22E','#FFE66B','#9BE15D','#1FBF92','#4FB6FF','#3D6BFF','#8E6BFF','#C77DFF','#8B5A3C','#9AA0B4','#FFFFFF'];
+const picSvg=(id,cls='pic')=>`<svg class="${cls}" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${PICS[id].svg}</svg>`;
+

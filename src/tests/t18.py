@@ -1,0 +1,25 @@
+import asyncio
+from playwright.async_api import async_playwright
+html=open('/home/claude/bodikov.html').read().replace("MAP.games=vGames2;","MAP.games=vGames2;window.__T={S:()=>S,addLog,render,V:()=>V,go,put,back};",1)
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch();pg=await b.new_page(viewport={'width':390,'height':844})
+        errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
+        await pg.set_content('<!doctype html><html><head><meta charset=utf8></head><body>'+html+'</body></html>')
+        await pg.evaluate("window.__said=[];const _s=window.speechSynthesis;window.SpeechSynthesisUtterance=function(t){this.text=t};Object.defineProperty(window,'speechSynthesis',{value:{speak:u=>__said.push(u.text+' @'+u.pitch),cancel:()=>{}}})")
+        await pg.click('[data-id=jirka]')
+        await pg.evaluate("__T.addLog('jirka',300,'task','t',true);__T.put('kids/jirka/unlocked/pet',true);__T.put('kids/jirka/pet',{type:'medved',name:'Bručoun',born:0,ts:Date.now()-20*3600000,food:80,joy:80,clean:80,energy:80,owned:{},wear:{}});__T.go('pet')")
+        await pg.wait_for_timeout(400);print('greet',await pg.locator('.bubble2').text_content())
+        await pg.screenshot(path='/tmp/claude-0/sh/t1.png')
+        for i in range(5): await pg.click('.petbody',force=True)
+        await pg.wait_for_timeout(300);print('angry',await pg.locator('.bubble2').text_content());await pg.screenshot(path='/tmp/claude-0/sh/t2.png')
+        await pg.click('[data-act=petTab][data-t=talk]')
+        for v in ['how','joke','tasks']: await pg.click(f'[data-act=petAsk][data-v={v}]');await pg.wait_for_timeout(400)
+        await pg.locator('[data-act=petReveal]').last.click();await pg.wait_for_timeout(200)
+        await pg.fill('#talkin','Jsem dneska naštvaný');await pg.click('#talkform button');await pg.wait_for_timeout(500)
+        await pg.fill('#talkin','co máš rád?');await pg.click('#talkform button');await pg.wait_for_timeout(500)
+        await pg.click('[data-act=petMood][data-v=sad]');await pg.wait_for_timeout(400)
+        await pg.wait_for_timeout(11500)
+        await pg.screenshot(path='/tmp/claude-0/sh/t3.png',full_page=True)
+        print('\n'.join(await pg.evaluate("__said")));print(errs);await b.close()
+asyncio.run(main())
