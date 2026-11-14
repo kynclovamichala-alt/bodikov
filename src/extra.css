@@ -215,3 +215,12 @@
 .btn.mic.on{background:var(--flame);animation:glow2 1s infinite}
 @keyframes glow2{50%{transform:scale(1.04)}}
 .moodc{font-size:1.5rem;padding:6px 12px}
+/* ---- English course ---- */
+.ftable{width:100%;border-collapse:separate;border-spacing:0 4px}
+.ftable td{background:var(--sun-soft);padding:7px 10px;font-size:1rem}
+.ftable td:first-child{border-radius:10px 0 0 10px;color:var(--ink-soft);font-weight:700}
+.ftable td:last-child{border-radius:0 10px 10px 0}
+.ftable u{text-decoration-color:#FF5C93;text-decoration-thickness:3px}
+.mnem{display:flex;gap:10px;align-items:flex-start;background:#FFF3C4;border:2px dashed #F2B705;border-radius:14px;padding:10px 12px;line-height:1.35}
+.mnem .mi{font-size:2rem;line-height:1}
+.ensay{background:var(--card);border-radius:99px;box-shadow:var(--shadow);padding:2px 7px;font-size:.9rem;margin-left:4px}

@@ -30,7 +30,7 @@ node -e "const s=require('fs').readFileSync('index.html','utf8');const m=[...s.m
 ## Struktura zdrojů (`src/`)
 Jednosouborová aplikace, vanilla JS/HTML/CSS. `build.py` vloží do `app.js`:
 - `/*PICS*/` ← `pics.txt` (obrázky k vybarvování)
-- `/*ADULT*/` ← v tomto pořadí: `adult.js, course.js, science.js, engine.js, vlast.js, rewards.js, pet.js, talk.js, games2.js` (vše v jednom `<script>`, sdílí globální rozsah – pozor na kolize názvů konstant, např. `CL` je v science.js)
+- `/*ADULT*/` ← v tomto pořadí: `adult.js, course.js, science.js, engine.js, vlast.js, angl.js, rewards.js, pet.js, talk.js, games2.js` (vše v jednom `<script>`, sdílí globální rozsah – pozor na kolize názvů konstant, např. `CL` je v science.js)
 - CSS = `base.css.txt` + `extra.css`
 
 | Soubor | Obsah |
@@ -40,7 +40,8 @@ Jednosouborová aplikace, vanilla JS/HTML/CSS. `build.py` vloží do `app.js`:
 | `course.js` | kurz Přímky a úsečky (TOPICS, 11 témat) |
 | `science.js` | kurz Přírodověda (SCI_TOPICS, 10 témat), helpery `MC, YN, CL, li` |
 | `vlast.js` | kurz Vlastivěda (VL_TOPICS, 7 témat): stát, demokracie, symboly, obyvatelé, svátky, kultura, umění |
-| `engine.js` | `COURSES` (geo, prir, vlast), mistrovství: ≥5/6 napoprvé = hvězda, 3 hvězdy na téma, závěrečný test (`exam:true` → „Zkušební písemka“); pokrok v `kids/{kid}/courses/{cid}/{tid}` |
+| `angl.js` | kurz Angličtina: have / have got (EN_TOPICS, 7 témat: kladně, zkratky, zápor, otázky, krátké odpovědi, have + do/does, směs), mnemotechnické pomůcky (`mnem`), tabulky tvarů s 🔊 (anglické TTS, `sayEn`) |
+| `engine.js` | `COURSES` (geo, prir, vlast, angl), mistrovství: ≥5/6 napoprvé = hvězda, 3 hvězdy na téma, závěrečný test (`exam:true` → „Zkušební písemka“); pokrok v `kids/{kid}/courses/{cid}/{tid}` |
 | `rewards.js` | odměny od rodičů (`rewards`, `claims`), album samolepek (6 sérií × 12), obchod `vShop2`, záloha/obnova dat (JSON) |
 | `pet.js` | mazlíček (tamagoči) – 100 ⭐, typy, krmení, šatník, domeček, růst z bodů za úkoly, noční spánek |
 | `talk.js` | mazlíček mluví (TTS cs-CZ), záložka Povídání, rozpoznávání řeči tolerantní k šišlání (`lispN`, `lev`), hlasové povely, nálada, „bručoun“ povaha pro Jirku, vztek po 5× lechtání |
