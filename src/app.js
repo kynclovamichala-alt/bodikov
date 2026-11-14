@@ -436,7 +436,8 @@ function vLearn(){
   const capNote=`<p class="note">Za každé dokončené kolo jsou hvězdičky, dnes máš ${lp} z ${cap} ⭐.</p>`;
   if(k.little)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="learnCount"><span class="ic">🍎</span><span class="t"><h2>Kolik je tu?</h2><span class="muted sub">Spočítej ovoce.</span><span class="pill">+3 ⭐ za kolo</span></span></button>
-    <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
+    <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>
+    <button class="lcard" data-act="startLeaEn"><span class="ic" style="background:var(--bea-soft)">🇬🇧</span><span class="t"><h2>Anglická slovíčka</h2><span class="muted sub">Poslouchej a najdi obrázek.</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
   if(k.adult)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="emoQuiz"><span class="ic" style="background:var(--lea-soft)">🎭</span><span class="t"><h2>Poznej emoci</h2><span class="muted">8 situací ze života</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
     <button class="lcard" data-act="go" data-to="calm"><span class="ic" style="background:var(--jirka-soft)">🌬️</span><span class="t"><h2>Jak se uklidnit</h2><span class="muted">Dýchání, uzemnění, STOP</span><span class="pill">+3 ⭐ za cvičení</span></span></button>
@@ -491,7 +492,7 @@ function finishLearn(){
   if(L.g==='course'){finishCourse();return}
   const perfect=L.first===L.total;
   const quiz=['geoQuiz','emoQuiz','divQuiz','brQuiz','iyQuiz'].includes(L.g),pts=quiz?(perfect?4:3):3;
-  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky',iyQuiz:'Učení: vyjmenovaná slova'}[L.g]||'Učení: počítání';
+  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky',iyQuiz:'Učení: vyjmenovaná slova',learnEn:'Učení: anglická slovíčka'}[L.g]||'Učení: počítání';
   const title=perfect?'Bez jediné chyby!':'Kolo dokončeno!';
   const g=L.g;L=null;
   capAward('learn',S.settings.learnCap,pts,text,title,'Výborně! Jsi šikulka!',()=>{back()});
@@ -676,7 +677,7 @@ const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirr
   learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
 function render(){
   clearInterval(tick);tick=null;stopGame();
-  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz','courseQuiz','iyQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz','courseQuiz','iyQuiz','learnEn'].includes(V.name)&&!L)V=stack.pop()||rootView();
   const app=$('#app'),k=V.kid&&kidOf(V.kid);
   app.classList.toggle('little',!!(k&&k.little));
   setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
@@ -693,7 +694,7 @@ function render(){
 }
 function softRender(){
   const ft=$('#f-title'),fs=$('#f-steps');
-  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','courseQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build','pexeso','puzzle','bubbles','music','pixel','diff','maze','hangman','duel','snake','breakout','parking','g2048','iyQuiz'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','courseQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build','pexeso','puzzle','bubbles','music','pixel','diff','maze','hangman','duel','snake','breakout','parking','g2048','iyQuiz','learnEn'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
   if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
   render();
 }

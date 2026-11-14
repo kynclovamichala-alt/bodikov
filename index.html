@@ -479,13 +479,19 @@ canvas.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 .mnem{display:flex;gap:10px;align-items:flex-start;background:#FFF3C4;border:2px dashed #F2B705;border-radius:14px;padding:10px 12px;line-height:1.35}
 .mnem .mi{font-size:2rem;line-height:1}
 .ensay{background:var(--card);border-radius:99px;box-shadow:var(--shadow);padding:2px 7px;font-size:.9rem;margin-left:4px}
+/* ---- Lea English words ---- */
+.encats .chip{font-size:1.6rem;padding:6px 12px}
+.enplay{align-self:center;width:110px;height:110px;border-radius:50%;background:var(--kid);color:#fff;font-size:3.4rem;box-shadow:0 8px 0 rgba(0,0,0,.15);animation:glow2 1.6s infinite}
+.enopts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.enpic{aspect-ratio:1;border-radius:24px;background:var(--card);box-shadow:var(--shadow);font-size:3.6rem;display:grid;place-items:center;transition:transform .15s}
+.enpic.bad{opacity:.35;animation:pshake .4s}.enpic.ok{background:var(--mint);transform:scale(1.08)}
 </style>
 </head><body><div id="app"></div>
 <script>
 (()=>{
 /* ================= configuration ================= */
 const FIREBASE_CONFIG={"apiKey": "AIzaSyCSkTu9ANGdUGY8XKWBuHOg0Y4fshWZJO4", "authDomain": "aplikacedeti.firebaseapp.com", "databaseURL": "https://aplikacedeti-default-rtdb.europe-west1.firebasedatabase.app", "projectId": "aplikacedeti", "storageBucket": "aplikacedeti.firebasestorage.app", "messagingSenderId": "518520810177", "appId": "1:518520810177:web:f4bbfe7711c64f4b1a4240"};
-const APP_VERSION='2026-11-14.1';
+const APP_VERSION='2026-11-14.2';
 const SYNC=!!FIREBASE_CONFIG;
 
 /* ================= helpers ================= */
@@ -990,7 +996,8 @@ function vLearn(){
   const capNote=`<p class="note">Za každé dokončené kolo jsou hvězdičky, dnes máš ${lp} z ${cap} ⭐.</p>`;
   if(k.little)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="learnCount"><span class="ic">🍎</span><span class="t"><h2>Kolik je tu?</h2><span class="muted sub">Spočítej ovoce.</span><span class="pill">+3 ⭐ za kolo</span></span></button>
-    <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
+    <button class="lcard" data-act="startLearn" data-g="learnFind"><span class="ic" style="background:var(--sun-soft)">🔢</span><span class="t"><h2>Najdi číslo</h2><span class="muted sub">Kde je tolik ovoce?</span><span class="pill">+3 ⭐ za kolo</span></span></button>
+    <button class="lcard" data-act="startLeaEn"><span class="ic" style="background:var(--bea-soft)">🇬🇧</span><span class="t"><h2>Anglická slovíčka</h2><span class="muted sub">Poslouchej a najdi obrázek.</span><span class="pill">+3 ⭐ za kolo</span></span></button>${capNote}`;
   if(k.adult)return `${topbar('Učení')}
     <button class="lcard" data-act="startLearn" data-g="emoQuiz"><span class="ic" style="background:var(--lea-soft)">🎭</span><span class="t"><h2>Poznej emoci</h2><span class="muted">8 situací ze života</span><span class="pill">+3 ⭐, bez chyby +4 ⭐</span></span></button>
     <button class="lcard" data-act="go" data-to="calm"><span class="ic" style="background:var(--jirka-soft)">🌬️</span><span class="t"><h2>Jak se uklidnit</h2><span class="muted">Dýchání, uzemnění, STOP</span><span class="pill">+3 ⭐ za cvičení</span></span></button>
@@ -1045,7 +1052,7 @@ function finishLearn(){
   if(L.g==='course'){finishCourse();return}
   const perfect=L.first===L.total;
   const quiz=['geoQuiz','emoQuiz','divQuiz','brQuiz','iyQuiz'].includes(L.g),pts=quiz?(perfect?4:3):3;
-  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky',iyQuiz:'Učení: vyjmenovaná slova'}[L.g]||'Učení: počítání';
+  const text={geoQuiz:'Učení: geometrie',emoQuiz:'Učení: emoce',divQuiz:'Učení: dělení se zbytkem',brQuiz:'Učení: závorky',iyQuiz:'Učení: vyjmenovaná slova',learnEn:'Učení: anglická slovíčka'}[L.g]||'Učení: počítání';
   const title=perfect?'Bez jediné chyby!':'Kolo dokončeno!';
   const g=L.g;L=null;
   capAward('learn',S.settings.learnCap,pts,text,title,'Výborně! Jsi šikulka!',()=>{back()});
@@ -1230,7 +1237,7 @@ const MAP={setup:vSetup,picker:vPicker,home:vHome,tasks:vTasks,games:vGames,mirr
   learn:vLearn,learnCount:vLearnCount,learnFind:vLearnFind,geoQuiz:vGeoQuiz,geoLesson:vGeoLesson};
 function render(){
   clearInterval(tick);tick=null;stopGame();
-  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz','courseQuiz','iyQuiz'].includes(V.name)&&!L)V=stack.pop()||rootView();
+  if(['learnCount','learnFind','geoQuiz','emoQuiz','selfTest','breath','ground','divQuiz','brQuiz','courseQuiz','iyQuiz','learnEn'].includes(V.name)&&!L)V=stack.pop()||rootView();
   const app=$('#app'),k=V.kid&&kidOf(V.kid);
   app.classList.toggle('little',!!(k&&k.little));
   setKidTheme(V.name==='parent'||V.name==='setup'?null:V.kid);
@@ -1247,7 +1254,7 @@ function render(){
 }
 function softRender(){
   const ft=$('#f-title'),fs=$('#f-steps');
-  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','courseQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build','pexeso','puzzle','bubbles','music','pixel','diff','maze','hangman','duel','snake','breakout','parking','g2048','iyQuiz'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
+  const busy=['mirror','mandala','color','learnCount','learnFind','geoQuiz','divQuiz','brQuiz','courseQuiz','emoQuiz','selfTest','breath','ground','tetris','cars','build','pexeso','puzzle','bubbles','music','pixel','diff','maze','hangman','duel','snake','breakout','parking','g2048','iyQuiz','learnEn'].includes(V.name)||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))||(ft&&ft.value)||(fs&&fs.value);
   if(busy){const j=$('.jar span');if(j&&V.kid)j.textContent=pointsOf(V.kid);return}
   render();
 }
@@ -2443,6 +2450,37 @@ const EN_TOPICS=[
 COURSES.angl={id:'angl',name:'Angličtina: have got',sub:'I have got, has got, zápor, otázky + pomůcky',icon:'🇬🇧',topics:EN_TOPICS,finalN:15,passFinal:12,color:'var(--sun-soft)',exam:true};
 function sayEnText(t){try{if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.85;const v=speechSynthesis.getVoices().find(v=>/^en(-|_)GB/i.test(v.lang))||speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 handlers.sayEn=b=>sayEnText(b.dataset.t);
+
+/* ================= Lea: English words by ear (listen → pick a picture) ================= */
+const EN_WORDS={
+  zvirata:{ic:'🐶',w:[['🐶','dog','pes'],['🐱','cat','kočka'],['🐟','fish','ryba'],['🐦','bird','ptáček'],['🐴','horse','koník'],['🐮','cow','kravička'],['🐷','pig','prasátko'],['🦆','duck','kachnička'],['🐰','rabbit','zajíček'],['🐻','bear','medvěd'],['🐵','monkey','opička'],['🦁','lion','lev']]},
+  jidlo:{ic:'🍎',w:[['🍎','apple','jablko'],['🍌','banana','banán'],['🥛','milk','mléko'],['🎂','cake','dort'],['🥚','egg','vajíčko'],['🍞','bread','chleba'],['🧀','cheese','sýr'],['🍓','strawberry','jahoda'],['🍦','ice cream','zmrzlina'],['🍕','pizza','pizza'],['💧','water','voda'],['🥕','carrot','mrkev']]},
+  veci:{ic:'⚽',w:[['⚽','ball','míč'],['🚗','car','auto'],['🏠','house','domeček'],['📖','book','knížka'],['🧸','teddy bear','plyšový medvídek'],['👟','shoe','bota'],['🎩','hat','klobouk'],['☀️','sun','sluníčko'],['🌸','flower','kytička'],['🌳','tree','strom'],['⭐','star','hvězdička'],['🚲','bike','kolo']]},
+  barvy:{ic:'🎨',w:[['🔴','red','červená'],['🔵','blue','modrá'],['🟡','yellow','žlutá'],['🟢','green','zelená'],['🟠','orange','oranžová'],['🟣','purple','fialová'],['⚫','black','černá'],['⚪','white','bílá'],['🩷','pink','růžová'],['🟤','brown','hnědá']]},
+  cisla:{ic:'🔢',w:[['1️⃣','one','jedna'],['2️⃣','two','dvě'],['3️⃣','three','tři'],['4️⃣','four','čtyři'],['5️⃣','five','pět'],['6️⃣','six','šest'],['7️⃣','seven','sedm'],['8️⃣','eight','osm'],['9️⃣','nine','devět'],['🔟','ten','deset']]},
+  telo:{ic:'👀',w:[['👀','eyes','oči'],['👃','nose','nos'],['👄','mouth','pusa'],['👂','ear','ucho'],['✋','hand','ruka'],['🦶','foot','noha'],['🦷','tooth','zub'],['💇','hair','vlasy']]}
+};
+const EN_CATS=[['vse','🌈'],...Object.entries(EN_WORDS).map(([k,v])=>[k,v.ic])];
+function enPool(cat){return cat&&EN_WORDS[cat]?EN_WORDS[cat].w:Object.values(EN_WORDS).flatMap(c=>c.w)}
+function makeEnRound(cat){const pool=enPool(cat),used=shuffle([...pool]).slice(0,ROUND_LEA);
+  return used.map(w=>{const others=shuffle(pool.filter(x=>x[1]!==w[1])).slice(0,2);return{w,opts:shuffle([w,...others]),bad:[],wrong:false,locked:false}})}
+function enSpeakQ(){if(!L||L.g!=='learnEn')return;const q=L.qs[L.i];if(q)sayEnText(q.w[1])}
+function vLearnEn(){const q=L.qs[L.i];
+  return `${topbar('Anglická slovíčka')}${progressDots()}
+   <div class="chips encats">${EN_CATS.map(([k,ic])=>`<button class="chip ${L.cat===k||(!L.cat&&k==='vse')?'on':''}" data-act="enCat" data-v="${k}" aria-label="Skupina slovíček">${ic}</button>`).join('')}</div>
+   <button class="enplay" data-act="enPlay" aria-label="Přehrát slovíčko">🔊</button>
+   <p class="muted center">Poslouchej a ťukni na správný obrázek.</p>
+   <div class="enopts">${q.opts.map((o,i)=>`<button class="enpic ${q.bad.includes(i)?'bad':''} ${q.locked&&o[1]===q.w[1]?'ok':''}" data-act="enAns" data-i="${i}" aria-label="Obrázek">${o[0]}</button>`).join('')}</div>`}
+SETUP.learnEn=()=>{if(L&&L.g==='learnEn'&&!L.qs[L.i].said){L.qs[L.i].said=true;setTimeout(enSpeakQ,350)}};
+MAP.learnEn=vLearnEn;
+Object.assign(handlers,{
+  startLeaEn:()=>{L={g:'learnEn',i:0,total:ROUND_LEA,first:0,cat:'vse',qs:makeEnRound()};go('learnEn')},
+  enPlay:()=>enSpeakQ(),
+  enCat:b=>{const c=b.dataset.v;L.cat=c;L.qs=makeEnRound(c==='vse'?null:c);L.i=0;L.first=0;render()},
+  enAns:b=>{const q=L.qs[L.i];if(q.locked)return;clearTimeout(L.tmr);const o=q.opts[+b.dataset.i];
+    if(o[1]===q.w[1]){q.locked=true;if(!q.wrong)L.first++;chime('tick');render();sayEnText(o[1]);setTimeout(()=>say(pick(['Správně!','Výborně!','Super!','Jo!'])+` To je ${o[2]}.`),1100);setTimeout(learnNext,2900)}
+    else{q.wrong=true;q.bad.push(+b.dataset.i);chime('no');render();say(`To je ${o[2]}. Poslouchej znovu.`);L.tmr=setTimeout(enSpeakQ,1900)}}
+});
 
 /* ================= real-world rewards ================= */
 const DEFAULT_REWARDS=[

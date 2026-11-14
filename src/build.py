@@ -3,7 +3,7 @@ src=os.path.dirname(os.path.abspath(__file__))
 root=os.path.dirname(src)
 css=open(f'{src}/base.css.txt').read()+open(f'{src}/extra.css').read()
 pics=open(f'{src}/pics.txt').read()
-js=open(f'{src}/app.js').read().replace('/*PICS*/',pics).replace('/*ADULT*/',''.join(open(f'{src}/{n}').read() for n in ['adult.js','course.js','science.js','engine.js','vlast.js','angl.js','rewards.js','pet.js','talk.js','games2.js']))
+js=open(f'{src}/app.js').read().replace('/*PICS*/',pics).replace('/*ADULT*/',''.join(open(f'{src}/{n}').read() for n in ['adult.js','course.js','science.js','engine.js','vlast.js','angl.js','leaen.js','rewards.js','pet.js','talk.js','games2.js']))
 def build(config,version,deploy):
     j=js.replace('/*FIREBASE_CONFIG*/null',json.dumps(config) if config else 'null').replace("'/*APP_VERSION*/dev'",repr(version))
     head='''<title>Bodíkov</title>
